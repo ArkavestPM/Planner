@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 پلنر شخصی من</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .hidden { display: none !important; }
+        
+        /* استایل‌های ورود */
+        #auth-section {
+            max-width: 500px;
+            margin: 50px auto;
+        }
+        #auth-section h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .auth-box {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .card h4 { color: #333; margin-bottom: 10px; }
+        .card h5 { color: #555; margin: 10px 0; }
+        .card h6 { color: #666; margin: 8px 0; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .container { padding: 15px; }
+        }
+        
+        /* تب‌ها */
+        .tab-bar {
+            display: flex;
+            gap: 5px;
+            border-bottom: 3px solid #e5e7eb;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            font-size: 15px;
+        }
+        .tab:hover { color: #333; }
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* وضعیت‌ها */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        /* هدر */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info span {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        /* فرم‌های درون خطی */
+        .inline-form {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .inline-form .form-group {
+            margin-bottom: 12px;
+        }
+        .inline-form .form-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* تقویم ساده */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+        .calendar-grid .day {
+            padding: 15px 5px;
+            text-align: center;
+            border-radius: 8px;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .calendar-grid .day:hover {
+            background: #e5e7eb;
+        }
+        .calendar-grid .day.today {
+            background: #667eea;
+            color: white;
+        }
+        .calendar-grid .day.weekend {
+            background: #fee2e2;
+        }
+        .calendar-grid .day.has-event {
+            border: 2px solid #667eea;
+        }
+        
+        /* لیست رویدادها */
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-right: 4px solid #667eea;
+        }
+        .event-item .event-type {
+            font-weight: 600;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        /* مالی */
+        .finance-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .finance-card {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .finance-card.income { background: #d1fae5; }
+        .finance-card.expense { background: #fee2e2; }
+        .finance-card.balance { background: #dbeafe; }
+        .finance-card .amount {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .finance-card .label {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* انیمیشن‌ها */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* اسکرول */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        
+        <!-- ===== بخش ورود ===== -->
+        <div id="auth-section">
+            <h2>📅 پلنر شخصی</h2>
+            <div id="auth-message" style="margin-bottom: 15px;"></div>
+            
+            <div class="auth-box">
+                <h3 style="margin-bottom: 20px;">ورود</h3>
+                <div class="form-group">
+                    <label>ایمیل</label>
+                    <input type="email" id="login-email" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label>رمز عبور</label>
+                    <input type="password" id="login-password" placeholder="رمز عبور">
+                </div>
+                <button class="btn btn-primary" onclick="login()" style="width: 100%;">ورود</button>
+                <p style="text-align: center; margin-top: 15px; color: #6b7280;">
+                    حساب ندارید؟ <a href="#" onclick="document.getElementById('register-form').classList.toggle('hidden')" style="color: #667eea;">ثبت‌نام</a>
+                </p>
+            </div>
+            
+            <div id="register-form" class="auth-box hidden">
+                <h3 style="margin-bottom: 20px;">ثبت‌نام</h3>
+                <div class="form-group">
+                    <label>ایمیل</label>
+                    <input type="email" id="register-email" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label>رمز عبور</label>
+                    <input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر">
+                </div>
+                <button class="btn btn-success" onclick="register()" style="width: 100%;">ثبت‌نام</button>
+            </div>
+        </div>
+
+        <!-- ===== بخش اصلی ===== -->
+        <div id="planner-section" class="hidden">
+            
+            <!-- هدر -->
+            <div class="header">
+                <h1>📅 پلنر شخصی</h1>
+                <div class="user-info">
+                    <span id="user-name">کاربر</span>
+                    <button class="btn btn-danger btn-sm" onclick="logout()">خروج</button>
+                </div>
+            </div>
+
+            <!-- تب‌ها -->
+            <div class="tab-bar">
+                <button class="tab active" data-tab="goals" onclick="switchTab('goals')">🎯 اهداف</button>
+                <button class="tab" data-tab="calendar" onclick="switchTab('calendar')">📆 تقویم</button>
+                <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
+            </div>
+
+            <!-- ===== تب اهداف ===== -->
+            <div id="tab-goals" class="tab-content active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>🎯 اهداف و پروژه‌ها</h3>
+                    <button class="btn btn-primary" onclick="showAddGoal()">+ هدف جدید</button>
+                </div>
+                <div id="goals-container">در حال بارگذاری...</div>
+            </div>
+
+            <!-- ===== تب تقویم ===== -->
+            <div id="tab-calendar" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>📆 تقویم و رویدادها</h3>
+                    <button class="btn btn-primary" onclick="showAddEvent()">+ رویداد جدید</button>
+                </div>
+                <div id="calendar-container">در حال بارگذاری...</div>
+            </div>
+
+            <!-- ===== تب مالی ===== -->
+            <div id="tab-finance" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>💰 وضعیت مالی</h3>
+                    <button class="btn btn-primary" onclick="showAddFinance()">+ ثبت مالی</button>
+                </div>
+                <div id="finance-container">در حال بارگذاری...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // تنظیمات Supabase
+        // ============================================================
+        const SUPABASE_URL = 'https://hcrvxbjwsxmdzamkuwhl.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_-5k5xY6eWyBTrAvNIt-_iQ_8Ax6P9EW';
+
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentUser = null;
+        let currentDate = new Date();
+
+        // ============================================================
+        // توابع احراز هویت
+        // ============================================================
+        function showAuthMessage(message, isError = false) {
+            const msgDiv = document.getElementById('auth-message');
+            msgDiv.innerHTML = `<div style="padding: 12px; border-radius: 8px; background: ${isError ? '#fee2e2' : '#d1fae5'}; color: ${isError ? '#991b1b' : '#065f46'};">${message}</div>`;
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            if (!email || !password) {
+                showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true);
+                return;
+            }
+            
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                showAuthMessage('خطا: ' + error.message, true);
+                return;
+            }
+            currentUser = data.user;
+            showAuthMessage('✅ ورود موفق!', false);
+            loadPlanner();
+        }
+
+        async function register() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (!email || !password) {
+                showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true);
+                return;
+            }
+            if (password.length < 6) {
+                showAuthMessage('رمز عبور باید حداقل ۶ کاراکتر باشد.', true);
+                return;
+            }
+            
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) {
+                showAuthMessage('خطا: ' + error.message, true);
+                return;
+            }
+            currentUser = data.user;
+            showAuthMessage('✅ ثبت‌نام موفق! لطفاً وارد شوید.', false);
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-email').value = email;
+        }
+
+        function logout() {
+            supabaseClient.auth.signOut();
+            currentUser = null;
+            document.getElementById('planner-section').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+        }
+
+        // ============================================================
+        // توابع اصلی
+        // ============================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        async function loadPlanner() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('planner-section').classList.remove('hidden');
+            
+            const user = (await supabaseClient.auth.getUser()).data.user;
+            if (user) {
+                document.getElementById('user-name').textContent = user.email.split('@')[0];
+                await loadGoals();
+                await loadCalendar();
+                await loadFinance();
+            }
+        }
+
+        // ============================================================
+        // توابع اهداف (Goals)
+        // ============================================================
+        async function loadGoals() {
+            const container = document.getElementById('goals-container');
+            
+            const { data: goals, error } = await supabaseClient
+                .from('goals')
+                .select(`
+                    *,
+                    projects:projects(
+                        *,
+                        activities:activities(*)
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = `<div class="card" style="color:red;">خطا: ${error.message}</div>`;
+                return;
+            }
+
+            if (!goals || goals.length === 0) {
+                container.innerHTML = `
+                    <div class="card" style="text-align:center; padding: 40px;">
+                        <p style="color: #6b7280; margin-bottom: 15px;">هنوز هدفی تعریف نشده است.</p>
+                        <button class="btn btn-primary" onclick="showAddGoal()">➕ افزودن اولین هدف</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            goals.forEach(goal => {
+                html += `
+                    <div class="card fade-in">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <h4>🎯 ${goal.title}</h4>
+                                ${goal.description ? `<p style="color: #6b7280; font-size: 14px;">${goal.description}</p>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn btn-secondary btn-sm" onclick="deleteGoal('${goal.id}')">🗑</button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-sm" onclick="showAddProject('${goal.id}')" style="margin: 10px 0;">
+                            + پروژه جدید
+                        </button>
+                        
+                        ${goal.projects && goal.projects.length > 0 ? 
+                            goal.projects.map(project => `
+                                <div class="card" style="margin-right: 20px; background: #f9fafb;">
+                                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                                        <div>
+                                            <h5>📁 ${project.name}</h5>
+                                            <p style="font-size: 13px; color: #6b7280;">
+                                                وضعیت: <span class="badge ${project.status === 'تکمیل شده' ? 'badge-success' : project.status === 'در حال انجام' ? 'badge-warning' : 'badge-info'}">${project.status || 'برنامه‌ریزی'}</span>
+                                                ${project.start_date ? ` | شروع: ${project.start_date}` : ''}
+                                                ${project.end_date ? ` | پایان: ${project.end_date}` : ''}
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; gap: 5px;">
+                                            <button class="btn btn-secondary btn-sm" onclick="deleteProject('${project.id}')">🗑</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="btn btn-success btn-sm" onclick="showAddActivity('${project.id}')" style="margin: 8px 0;">
+                                        + فعالیت جدید
+                                    </button>
+                                    
+                                    ${project.activities && project.activities.length > 0 ?
+                                        project.activities.map(activity => `
+                                            <div class="card" style="margin-right: 20px; background: white;">
+                                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                    <div>
+                                                        <h6>📋 ${activity.title}</h6>
+                                                        ${activity.description ? `<p style="font-size: 13px; color: #6b7280;">${activity.description}</p>` : ''}
+                                                        <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+                                                            ${activity.estimated_hours ? `⏱ ${activity.estimated_hours}h` : ''}
+                                                            ${activity.estimated_cost ? ` | 💰 ${activity.estimated_cost} تومان` : ''}
+                                                            <span class="badge ${activity.is_done ? 'badge-success' : 'badge-warning'}">
+                                                                ${activity.is_done ? '✅ انجام شده' : '⏳ در حال انجام'}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <div style="display: flex; gap: 5px;">
+                                                        <button class="btn btn-${activity.is_done ? 'warning' : 'success'} btn-sm" onclick="toggleActivity('${activity.id}', ${!activity.is_done})">
+                                                            ${activity.is_done ? '↩ بازگشت' : '✓ انجام شد'}
+                                                        </button>
+                                                        <button class="btn btn-secondary btn-sm" onclick="deleteActivity('${activity.id}')">🗑</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')
+                                    : '<p style="color: #9ca3af; font-size: 13px; margin-right: 20px;">هیچ فعالیتی تعریف نشده است.</p>'}
+                                </div>
+                            `).join('')
+                        : '<p style="color: #9ca3af; font-size: 13px; margin-right: 20px;">هیچ پروژه‌ای تعریف نشده است.</p>'}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // توابع مدیریت اهداف
+        // ============================================================
+        function showAddGoal() {
+            const container = document.getElementById('goals-container');
+            container.innerHTML = `
+                <div class="card fade-in" style="background: #f9fafb;">
+                    <h4>➕ هدف جدید</h4>
+                    <div class="form-group">
+                        <label>عنوان هدف *</label>
+                        <input id="goal-title-input" placeholder="مثلاً: رشد کسب‌وکار">
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="goal-desc-input" placeholder="توضیحات بیشتر..." rows="3"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="saveGoal()">💾 ذخیره</button>
+                        <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveGoal() {
+            const title = document.getElementById('goal-title-input').value.trim();
+            const description = document.getElementById('goal-desc-input').value.trim();
+            
+            if (!title) {
+                alert('عنوان هدف الزامی است!');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('goals').insert({
+                title,
+                description,
+                user_id: currentUser.id
+            });
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+
+            await loadGoals();
+        }
+
+        async function deleteGoal(id) {
+            if (!confirm('آیا از حذف این هدف مطمئن هستید؟')) return;
+            
+            const { error } = await supabaseClient.from('goals').delete().eq('id', id);
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadGoals();
+        }
+
+        // ============================================================
+        // توابع مدیریت پروژه‌ها
+        // ============================================================
+        function showAddProject(goalId) {
+            const container = document.getElementById('goals-container');
+            container.innerHTML = `
+                <div class="card fade-in" style="background: #f9fafb;">
+                    <h4>📁 پروژه جدید</h4>
+                    <div class="form-group">
+                        <label>نام پروژه *</label>
+                        <input id="project-name-input" placeholder="مثلاً: توسعه اپلیکیشن">
+                    </div>
+                    <div class="form-group">
+                        <label>وضعیت</label>
+                        <select id="project-status-input">
+                            <option value="برنامه‌ریزی">برنامه‌ریزی</option>
+                            <option value="در حال انجام">در حال انجام</option>
+                            <option value="تکمیل شده">تکمیل شده</option>
+                            <option value="متوقف شده">متوقف شده</option>
+                        </select>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>تاریخ شروع</label>
+                            <input type="date" id="project-start-input">
+                        </div>
+                        <div class="form-group">
+                            <label>تاریخ پایان</label>
+                            <input type="date" id="project-end-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>بودجه (تومان)</label>
+                        <input type="number" id="project-budget-input" placeholder="0">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="saveProject('${goalId}')">💾 ذخیره</button>
+                        <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveProject(goalId) {
+            const name = document.getElementById('project-name-input').value.trim();
+            const status = document.getElementById('project-status-input').value;
+            const start_date = document.getElementById('project-start-input').value;
+            const end_date = document.getElementById('project-end-input').value;
+            const budget = parseFloat(document.getElementById('project-budget-input').value) || 0;
+
+            if (!name) {
+                alert('نام پروژه الزامی است!');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('projects').insert({
+                goal_id: goalId,
+                name,
+                status,
+                start_date: start_date || null,
+                end_date: end_date || null,
+                budget
+            });
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+
+            await loadGoals();
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('آیا از حذف این پروژه مطمئن هستید؟')) return;
+            
+            const { error } = await supabaseClient.from('projects').delete().eq('id', id);
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadGoals();
+        }
+
+        // ============================================================
+        // توابع مدیریت فعالیت‌ها
+        // ============================================================
+        function showAddActivity(projectId) {
+            const container = document.getElementById('goals-container');
+            container.innerHTML = `
+                <div class="card fade-in" style="background: #f9fafb;">
+                    <h4>📋 فعالیت جدید</h4>
+                    <div class="form-group">
+                        <label>عنوان فعالیت *</label>
+                        <input id="activity-title-input" placeholder="مثلاً: طراحی رابط کاربری">
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="activity-desc-input" placeholder="توضیحات..." rows="3"></textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>زمان تخمینی (ساعت)</label>
+                            <input type="number" id="activity-hours-input" placeholder="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>هزینه تخمینی (تومان)</label>
+                            <input type="number" id="activity-cost-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="saveActivity('${projectId}')">💾 ذخیره</button>
+                        <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveActivity(projectId) {
+            const title = document.getElementById('activity-title-input').value.trim();
+            const description = document.getElementById('activity-desc-input').value.trim();
+            const estimated_hours = parseFloat(document.getElementById('activity-hours-input').value) || 0;
+            const estimated_cost = parseFloat(document.getElementById('activity-cost-input').value) || 0;
+
+            if (!title) {
+                alert('عنوان فعالیت الزامی است!');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('activities').insert({
+                project_id: projectId,
+                title,
+                description: description || null,
+                estimated_hours,
+                estimated_cost,
+                is_done: false
+            });
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+
+            await loadGoals();
+        }
+
+        async function toggleActivity(id, isDone) {
+            const { error } = await supabaseClient.from('activities')
+                .update({ is_done: isDone })
+                .eq('id', id);
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadGoals();
+        }
+
+        async function deleteActivity(id) {
+            if (!confirm('آیا از حذف این فعالیت مطمئن هستید؟')) return;
+            
+            const { error } = await supabaseClient.from('activities').delete().eq('id', id);
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadGoals();
+        }
+
+        // ============================================================
+        // توابع تقویم (Calendar)
+        // ============================================================
+        async function loadCalendar() {
+            const container = document.getElementById('calendar-container');
+            
+            // دریافت رویدادها
+            const { data: events, error } = await supabaseClient
+                .from('calendar')
+                .select('*')
+                .order('start_time', { ascending: true });
+
+            if (error) {
+                container.innerHTML = `<div class="card" style="color:red;">خطا: ${error.message}</div>`;
+                return;
+            }
+
+            // نمایش تقویم ساده
+            const month = currentDate.getMonth();
+            const year = currentDate.getFullYear();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
+                    <h4>${new Date(year, month).toLocaleDateString('fa-IR', { month: 'long', year: 'numeric' })}</h4>
+                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">▶</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 15px;">
+                    ${['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map(d => `<div style="text-align:center; font-weight:bold; color:#6b7280; padding:5px;">${d}</div>`).join('')}
+                </div>
+                <div class="calendar-grid">
+            `;
+
+            // روزهای خالی اول ماه
+            for (let i = 0; i < (firstDay === 0 ? 6 : firstDay - 1); i++) {
+                html += `<div class="day" style="background: transparent;"></div>`;
+            }
+
+            // روزهای ماه
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                const dateStr = dateObj.toISOString().split('T')[0];
+                const isToday = dateObj.toDateString() === today.toDateString();
+                const isWeekend = dateObj.getDay() === 5 || dateObj.getDay() === 6;
+                const hasEvent = events && events.some(e => e.start_time.startsWith(dateStr));
+
+                html += `
+                    <div class="day ${isToday ? 'today' : ''} ${isWeekend ? 'weekend' : ''} ${hasEvent ? 'has-event' : ''}" 
+                         onclick="showDayEvents('${dateStr}')">
+                        ${day}
+                        ${hasEvent ? '<div style="font-size:8px;color:#667eea;">●</div>' : ''}
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+
+            // نمایش رویدادهای امروز
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayEvents = (events || []).filter(e => e.start_time.startsWith(todayStr));
+
+            html += `
+                <div style="margin-top: 20px;">
+                    <h5 style="margin-bottom: 10px;">📋 رویدادهای امروز</h5>
+                    ${todayEvents.length > 0 ?
+                        todayEvents.map(e => `
+                            <div class="event-item">
+                                <div>
+                                    <strong>${e.title}</strong>
+                                    <p style="font-size: 12px; color: #6b7280; margin-top: 5px;">
+                                        ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })} 
+                                        - ${new Date(e.end_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                                <div>
+                                    <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')" style="margin-right: 5px;">🗑</button>
+                                </div>
+                            </div>
+                        `).join('')
+                    : '<p style="color: #9ca3af;">هیچ رویدادی برای امروز ندارید.</p>'}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            loadCalendar();
+        }
+
+        function showAddEvent() {
+            const container = document.getElementById('calendar-container');
+            const now = new Date();
+            const nowStr = now.toISOString().slice(0, 16);
+            
+            container.innerHTML = `
+                <div class="card fade-in" style="background: #f9fafb;">
+                    <h4>➕ رویداد جدید</h4>
+                    <div class="form-group">
+                        <label>عنوان *</label>
+                        <input id="event-title-input" placeholder="عنوان رویداد">
+                    </div>
+                    <div class="form-group">
+                        <label>توضیحات</label>
+                        <textarea id="event-desc-input" placeholder="توضیحات..." rows="2"></textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>شروع *</label>
+                            <input type="datetime-local" id="event-start-input" value="${nowStr}">
+                        </div>
+                        <div class="form-group">
+                            <label>پایان *</label>
+                            <input type="datetime-local" id="event-end-input" value="${nowStr}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>نوع</label>
+                        <select id="event-type-input">
+                            <option value="task">کار</option>
+                            <option value="meeting">جلسه</option>
+                            <option value="leisure">تفریح</option>
+                            <option value="appointment">قرار ملاقات</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="saveEvent()">💾 ذخیره</button>
+                        <button class="btn btn-secondary" onclick="loadCalendar()">انصراف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveEvent() {
+            const title = document.getElementById('event-title-input').value.trim();
+            const description = document.getElementById('event-desc-input').value.trim();
+            const start_time = document.getElementById('event-start-input').value;
+            const end_time = document.getElementById('event-end-input').value;
+            const type = document.getElementById('event-type-input').value;
+
+            if (!title || !start_time || !end_time) {
+                alert('عنوان، شروع و پایان الزامی است!');
+                return;
+            }
+
+            if (new Date(start_time) >= new Date(end_time)) {
+                alert('زمان شروع باید قبل از زمان پایان باشد!');
+                return;
+            }
+
+            const { error } = await supabaseClient.from('calendar').insert({
+                user_id: currentUser.id,
+                title,
+                description: description || null,
+                start_time,
+                end_time,
+                type
+            });
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+
+            await loadCalendar();
+        }
+
+        async function deleteEvent(id) {
+            if (!confirm('آیا از حذف این رویداد مطمئن هستید؟')) return;
+            
+            const { error } = await supabaseClient.from('calendar').delete().eq('id', id);
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadCalendar();
+        }
+
+        function showDayEvents(dateStr) {
+            alert(`نمایش رویدادهای تاریخ ${dateStr}\n(این قابلیت در نسخه بعدی تکمیل می‌شود)`);
+        }
+
+        // ============================================================
+        // توابع مالی (Finance)
+        // ============================================================
+        async function loadFinance() {
+            const container = document.getElementById('finance-container');
+            
+            // دریافت داده‌های مالی ماه جاری
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+            const { data: finances, error } = await supabaseClient
+                .from('daily_finance')
+                .select('*')
+                .gte('date', startOfMonth)
+                .lte('date', endOfMonth)
+                .order('date', { ascending: true });
+
+            if (error) {
+                container.innerHTML = `<div class="card" style="color:red;">خطا: ${error.message}</div>`;
+                return;
+            }
+
+            const totalIncome = (finances || []).reduce((sum, f) => sum + (f.income || 0), 0);
+            const totalExpense = (finances || []).reduce((sum, f) => sum + (f.expense || 0), 0);
+            const balance = totalIncome - totalExpense;
+
+            let html = `
+                <div class="finance-summary">
+                    <div class="finance-card income">
+                        <div class="label">💰 درآمد</div>
+                        <div class="amount">${totalIncome.toLocaleString()}</div>
+                    </div>
+                    <div class="finance-card expense">
+                        <div class="label">💸 هزینه</div>
+                        <div class="amount">${totalExpense.toLocaleString()}</div>
+                    </div>
+                    <div class="finance-card balance">
+                        <div class="label">📊 مانده</div>
+                        <div class="amount" style="color: ${balance >= 0 ? '#065f46' : '#991b1b'}">${balance.toLocaleString()}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <h5>📋 گزارش روزانه</h5>
+                    ${finances && finances.length > 0 ?
+                        finances.map(f => `
+                            <div class="card" style="padding: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>${new Date(f.date).toLocaleDateString('fa-IR')}</strong>
+                                        ${f.note ? `<p style="font-size: 12px; color: #6b7280;">${f.note}</p>` : ''}
+                                    </div>
+                                    <div style="display: flex; gap: 15px;">
+                                        <span style="color: #10b981;">+${(f.income || 0).toLocaleString()}</span>
+                                        <span style="color: #ef4444;">-${(f.expense || 0).toLocaleString()}</span>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteFinance('${f.id}')">🗑</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')
+                    : '<p style="color: #9ca3af;">هنوز داده مالی برای این ماه ثبت نشده است.</p>'}
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function showAddFinance() {
+            const container = document.getElementById('finance-container');
+            const today = new Date().toISOString().split('T')[0];
+            
+            container.innerHTML = `
+                <div class="card fade-in" style="background: #f9fafb;">
+                    <h4>💰 ثبت مالی روزانه</h4>
+                    <div class="form-group">
+                        <label>تاریخ</label>
+                        <input type="date" id="finance-date-input" value="${today}">
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>درآمد (تومان)</label>
+                            <input type="number" id="finance-income-input" placeholder="0" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>هزینه (تومان)</label>
+                            <input type="number" id="finance-expense-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>یادداشت</label>
+                        <input id="finance-note-input" placeholder="مثلاً: حقوق، خرید مواد غذایی...">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="saveFinance()">💾 ذخیره</button>
+                        <button class="btn btn-secondary" onclick="loadFinance()">انصراف</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveFinance() {
+            const date = document.getElementById('finance-date-input').value;
+            const income = parseFloat(document.getElementById('finance-income-input').value) || 0;
+            const expense = parseFloat(document.getElementById('finance-expense-input').value) || 0;
+            const note = document.getElementById('finance-note-input').value.trim();
+
+            if (!date) {
+                alert('تاریخ الزامی است!');
+                return;
+            }
+
+            if (income === 0 && expense === 0) {
+                alert('حداقل یکی از فیلدهای درآمد یا هزینه را پر کنید!');
+                return;
+            }
+
+            // بررسی وجود رکورد برای این تاریخ
+            const { data: existing } = await supabaseClient
+                .from('daily_finance')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .eq('date', date)
+                .single();
+
+            let error;
+            if (existing) {
+                // به‌روزرسانی
+                const { error: updateError } = await supabaseClient
+                    .from('daily_finance')
+                    .update({ income, expense, note: note || null })
+                    .eq('id', existing.id);
+                error = updateError;
+            } else {
+                // درج جدید
+                const { error: insertError } = await supabaseClient
+                    .from('daily_finance')
+                    .insert({
+                        user_id: currentUser.id,
+                        date,
+                        income,
+                        expense,
+                        note: note || null
+                    });
+                error = insertError;
+            }
+
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+
+            await loadFinance();
+        }
+
+        async function deleteFinance(id) {
+            if (!confirm('آیا از حذف این رکورد مالی مطمئن هستید؟')) return;
+            
+            const { error } = await supabaseClient.from('daily_finance').delete().eq('id', id);
+            if (error) {
+                alert('خطا: ' + error.message);
+                return;
+            }
+            await loadFinance();
+        }
+
+        // ============================================================
+        // بررسی وضعیت ورود هنگام بارگذاری
+        // ============================================================
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                currentUser = session.user;
+                loadPlanner();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+            }
+        });
+
+        console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
+        console.log('📧 برای ورود از ایمیل و رمز عبور ثبت‌نامی استفاده کنید.');
+    </script>
+</body>
+</html>
