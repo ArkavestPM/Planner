@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 پلنر شخصی</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;direction:rtl}
+        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .hidden{display:none!important}
+        .btn{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:all .3s}
+        .btn:hover{transform:translateY(-2px)}
+        .btn-primary{background:#667eea;color:#fff}
+        .btn-success{background:#10b981;color:#fff}
+        .btn-danger{background:#ef4444;color:#fff}
+        .btn-secondary{background:#6b7280;color:#fff}
+        .btn-sm{padding:5px 12px;font-size:12px}
+        .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:15px}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;margin-bottom:5px;font-weight:600}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}
+        @media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
+        .tab-bar{display:flex;gap:5px;border-bottom:3px solid #e5e7eb;margin-bottom:25px;flex-wrap:wrap}
+        .tab{padding:12px 20px;cursor:pointer;border-bottom:3px solid transparent;font-weight:600;color:#6b7280;background:none;border-top:none;border-left:none;border-right:none;font-size:15px}
+        .tab.active{color:#667eea;border-bottom-color:#667eea}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+        .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+        .badge-success{background:#d1fae5;color:#065f46}
+        .badge-warning{background:#fef3c7;color:#92400e}
+        .badge-info{background:#dbeafe;color:#1e40af}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f3f4f6;flex-wrap:wrap;gap:10px}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
+        .calendar-grid .day{padding:15px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative}
+        .calendar-grid .day:hover{background:#e5e7eb}
+        .calendar-grid .day.today{background:#667eea;color:#fff;font-weight:700}
+        .calendar-grid .day.has-event{border:2px solid #667eea}
+        .calendar-grid .day .event-dot{width:6px;height:6px;background:#667eea;border-radius:50%;position:absolute;bottom:4px;left:50%;transform:translateX(-50%)}
+        .event-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:8px;margin-bottom:8px;border-right:4px solid #667eea}
+        .weekday-names{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+        .weekday-names div{text-align:center;font-weight:700;color:#6b7280;padding:5px;font-size:13px}
+        .empty-state{text-align:center;padding:40px 20px;color:#6b7280}
+        .empty-state .icon{font-size:48px;margin-bottom:15px}
+        .auth-box{background:#f8f9fa;padding:30px;border-radius:15px;max-width:400px;margin:0 auto}
+        #auth-section{max-width:500px;margin:50px auto}
+        #auth-section h2{text-align:center;color:#333;margin-bottom:30px}
+        .finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px}
+        .finance-card{padding:15px;border-radius:12px;text-align:center}
+        .finance-card.income{background:#d1fae5}
+        .finance-card.expense{background:#fee2e2}
+        .finance-card.balance{background:#dbeafe}
+        .finance-card .amount{font-size:24px;font-weight:700}
+        .finance-card .label{font-size:14px;color:#6b7280}
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+
+<div id="auth-section">
+    <h2>📅 پلنر شخصی</h2>
+    <div id="auth-message" style="margin-bottom:15px"></div>
+    <div class="auth-box">
+        <h3 style="margin-bottom:20px">🔐 ورود</h3>
+        <div class="form-group"><label>📧 ایمیل</label><input type="email" id="login-email" placeholder="example@email.com"></div>
+        <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="login-password" placeholder="رمز عبور"></div>
+        <button class="btn btn-primary" onclick="login()" style="width:100%">ورود</button>
+        <p style="text-align:center;margin-top:15px;color:#6b7280">حساب ندارید؟ <a href="#" onclick="document.getElementById('register-form').classList.toggle('hidden')" style="color:#667eea;font-weight:600">ثبت‌نام</a></p>
+    </div>
+    <div id="register-form" class="auth-box hidden">
+        <h3 style="margin-bottom:20px">📝 ثبت‌نام</h3>
+        <div class="form-group"><label>📧 ایمیل</label><input type="email" id="register-email" placeholder="example@email.com"></div>
+        <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر"></div>
+        <button class="btn btn-success" onclick="register()" style="width:100%">ثبت‌نام</button>
+    </div>
+</div>
+
+<div id="planner-section" class="hidden">
+    <div class="header">
+        <h1>📅 پلنر شخصی</h1>
+        <div class="user-info" style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
+            <span>👤 <span id="user-name">کاربر</span></span>
+            <button class="btn btn-danger btn-sm" onclick="logout()">🚪 خروج</button>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 داشبورد</button>
+        <button class="tab" data-tab="goals" onclick="switchTab('goals')">🎯 اهداف</button>
+        <button class="tab" data-tab="calendar" onclick="switchTab('calendar')">📆 تقویم</button>
+        <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
+    </div>
+
+    <div id="tab-dashboard" class="tab-content active">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <h3>📊 داشبورد</h3>
+            <button class="btn btn-primary" onclick="showQuickAddEvent()">➕ رویداد جدید</button>
+        </div>
+        <div class="grid-3" style="margin-bottom:20px">
+            <div class="card" style="text-align:center"><div style="font-size:32px">🎯</div><div style="font-size:24px;font-weight:700;color:#667eea" id="dash-goals-count">0</div><div style="color:#6b7280">هدف</div></div>
+            <div class="card" style="text-align:center"><div style="font-size:32px">📋</div><div style="font-size:24px;font-weight:700;color:#10b981" id="dash-tasks-count">0</div><div style="color:#6b7280">فعالیت</div></div>
+            <div class="card" style="text-align:center"><div style="font-size:32px">📅</div><div style="font-size:24px;font-weight:700;color:#f59e0b" id="dash-events-count">0</div><div style="color:#6b7280">رویداد امروز</div></div>
+        </div>
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
+                <h4>📆 تقویم</h4>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
+                    <span style="font-weight:600;font-size:16px" id="calendar-month-label"></span>
+                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">▶</button>
+                </div>
+            </div>
+            <div id="dashboard-calendar"></div>
+        </div>
+        <div class="card">
+            <h4>📋 رویدادهای امروز</h4>
+            <div id="today-events"></div>
+        </div>
+    </div>
+
+    <div id="tab-goals" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <h3>🎯 اهداف و پروژه‌ها</h3>
+            <button class="btn btn-primary" onclick="showAddGoal()">+ هدف جدید</button>
+        </div>
+        <div id="goals-container">در حال بارگذاری...</div>
+    </div>
+
+    <div id="tab-calendar" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <h3>📆 تقویم و رویدادها</h3>
+            <button class="btn btn-primary" onclick="showAddEvent()">+ رویداد جدید</button>
+        </div>
+        <div id="calendar-container">در حال بارگذاری...</div>
+    </div>
+
+    <div id="tab-finance" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <h3>💰 وضعیت مالی</h3>
+            <button class="btn btn-primary" onclick="showAddFinance()">+ ثبت مالی</button>
+        </div>
+        <div id="finance-container">در حال بارگذاری...</div>
+    </div>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://hcrvxbjwsxmdzamkuwhl.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_-5k5xY6eWyBTrAvNIt-_iQ_8Ax6P9EW';
+const {createClient}=supabase;
+const supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let currentUser=null,currentDate=new Date(),allEvents=[],allGoals=[],allActivities=[];
+
+function showAuthMessage(msg,isError=false){
+    document.getElementById('auth-message').innerHTML=`<div style="padding:12px;border-radius:8px;background:${isError?'#fee2e2':'#d1fae5'};color:${isError?'#991b1b':'#065f46'}">${msg}</div>`;
+}
+
+async function login(){
+    const email=document.getElementById('login-email').value;
+    const pass=document.getElementById('login-password').value;
+    if(!email||!pass){showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.',true);return;}
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password:pass});
+    if(error){showAuthMessage('❌ '+error.message,true);return;}
+    currentUser=data.user;
+    showAuthMessage('✅ ورود موفق!',false);
+    loadPlanner();
+}
+
+async function register(){
+    const email=document.getElementById('register-email').value;
+    const pass=document.getElementById('register-password').value;
+    if(!email||!pass){showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.',true);return;}
+    if(pass.length<6){showAuthMessage('رمز عبور حداقل ۶ کاراکتر باشد.',true);return;}
+    const {data,error}=await supabaseClient.auth.signUp({email,password:pass});
+    if(error){showAuthMessage('❌ '+error.message,true);return;}
+    currentUser=data.user;
+    showAuthMessage('✅ ثبت‌نام موفق! لطفاً وارد شوید.',false);
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('login-email').value=email;
+}
+
+function logout(){supabaseClient.auth.signOut();currentUser=null;document.getElementById('planner-section').classList.add('hidden');document.getElementById('auth-section').classList.remove('hidden');}
+
+function switchTab(tabId){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+    if(tabId==='dashboard')updateDashboard();
+}
+
+async function loadPlanner(){
+    document.getElementById('auth-section').classList.add('hidden');
+    document.getElementById('planner-section').classList.remove('hidden');
+    const user=(await supabaseClient.auth.getUser()).data.user;
+    if(user){document.getElementById('user-name').textContent=user.email.split('@')[0];await loadAllData();updateDashboard();}
+}
+
+async function loadAllData(){await loadGoals();await loadCalendarEvents();await loadFinance();}
+
+function updateDashboard(){
+    document.getElementById('dash-goals-count').textContent=allGoals.length;
+    let total=0;allGoals.forEach(g=>{if(g.projects){g.projects.forEach(p=>{if(p.activities)total+=p.activities.length;})}});
+    document.getElementById('dash-tasks-count').textContent=total;
+    const today=new Date().toISOString().split('T')[0];
+    document.getElementById('dash-events-count').textContent=allEvents.filter(e=>e.start_time.startsWith(today)).length;
+    renderCalendar('dashboard-calendar');
+    renderTodayEvents();
+}
+
+function renderTodayEvents(){
+    const c=document.getElementById('today-events');
+    const today=new Date().toISOString().split('T')[0];
+    const todayEvents=allEvents.filter(e=>e.start_time.startsWith(today));
+    if(!todayEvents.length){c.innerHTML='<div class="empty-state"><div class="icon">📭</div><p>هیچ رویدادی برای امروز ندارید</p><button class="btn btn-primary btn-sm" onclick="showQuickAddEvent()" style="margin-top:10px">➕ افزودن رویداد</button></div>';return;}
+    c.innerHTML=todayEvents.map(e=>`<div class="event-item"><div><div style="font-weight:600">${e.title}</div><div style="font-size:12px;color:#6b7280">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}</div></div><div style="display:flex;gap:5px;align-items:center"><span class="badge badge-info">${e.type}</span><button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">🗑</button></div></div>`).join('');
+}
+
+function renderCalendar(containerId){
+    const c=document.getElementById(containerId);if(!c)return;
+    const month=currentDate.getMonth(),year=currentDate.getFullYear();
+    const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate();
+    const label=document.getElementById('calendar-month-label');if(label)label.textContent=new Date(year,month).toLocaleDateString('fa-IR',{month:'long',year:'numeric'});
+    let html=`<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d=>`<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
+    const startOffset=firstDay===0?6:firstDay-1;
+    for(let i=0;i<startOffset;i++)html+=`<div class="day" style="background:transparent;cursor:default"></div>`;
+    const todayStr=new Date().toISOString().split('T')[0];
+    for(let d=1;d<=daysInMonth;d++){
+        const dateObj=new Date(year,month,d),dateStr=dateObj.toISOString().split('T')[0];
+        const isToday=dateStr===todayStr,hasEvent=allEvents.some(e=>e.start_time.startsWith(dateStr));
+        html+=`<div class="day ${isToday?'today':''} ${hasEvent?'has-event':''}" onclick="selectDate('${dateStr}')">${d}${hasEvent?'<div class="event-dot"></div>':''}</div>`;
+    }
+    html+='</div>';c.innerHTML=html;
+}
+
+function changeMonth(delta){currentDate.setMonth(currentDate.getMonth()+delta);renderCalendar('dashboard-calendar');renderCalendar('calendar-container');}
+
+function selectDate(dateStr){
+    const events=allEvents.filter(e=>e.start_time.startsWith(dateStr));
+    const persianDate=new Date(dateStr).toLocaleDateString('fa-IR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if(!events.length){if(confirm(`📅 ${persianDate}\n\nهیچ رویدادی برای این تاریخ وجود ندارد.\nآیا می‌خواهید یک رویداد جدید اضافه کنید؟`))showQuickAddEvent(dateStr);}
+    else{let msg=`📅 ${persianDate}\n\nرویدادها:\n`;events.forEach((e,i)=>{msg+=`\n${i+1}. ${e.title}\n   ⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}\n`;});alert(msg);}
+}
+
+async function loadCalendarEvents(){
+    const {data,error}=await supabaseClient.from('calendar').select('*').order('start_time',{ascending:true});
+    if(error){allEvents=[];return;}
+    allEvents=data||[];renderCalendar('dashboard-calendar');renderCalendar('calendar-container');
+}
+
+function showQuickAddEvent(prefillDate=null){
+    const c=document.getElementById('today-events');
+    const now=new Date(),dateStr=prefillDate||now.toISOString().split('T')[0],timeStr=now.toTimeString().slice(0,5);
+    c.innerHTML=`<div style="background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px"><h5 style="margin-bottom:10px">➕ رویداد جدید</h5>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+    <div><label style="display:block;font-size:12px;font-weight:600">عنوان</label><input id="quick-event-title" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px"></div>
+    <div><label style="display:block;font-size:12px;font-weight:600">تاریخ</label><input type="date" id="quick-event-date" value="${dateStr}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px"></div>
+    <div><label style="display:block;font-size:12px;font-weight:600">ساعت</label><input type="time" id="quick-event-time" value="${timeStr}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px"></div>
+    <div style="display:flex;gap:5px"><button class="btn btn-success btn-sm" onclick="saveQuickEvent()">💾</button><button class="btn btn-secondary btn-sm" onclick="updateDashboard()">✖</button></div>
+    </div>
+    <div style="margin-top:10px"><label style="display:block;font-size:12px;font-weight:600">نوع</label>
+    <select id="quick-event-type" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px"><option value="task">کار</option><option value="meeting">جلسه</option><option value="leisure">تفریح</option><option value="appointment">قرار</option></select></div></div>`;
+}
+
+async function saveQuickEvent(){
+    const title=document.getElementById('quick-event-title').value.trim();
+    const date=document.getElementById('quick-event-date').value;
+    const time=document.getElementById('quick-event-time').value;
+    const type=document.getElementById('quick-event-type').value;
+    if(!title||!date||!time){alert('لطفاً عنوان، تاریخ و ساعت را وارد کنید!');return;}
+    const start_time=new Date(`${date}T${time}`).toISOString();
+    const end_time=new Date(new Date(start_time).getTime()+3600000).toISOString();
+    const {error}=await supabaseClient.from('calendar').insert({user_id:currentUser.id,title,start_time,end_time,type});
+    if(error){alert('❌ '+error.message);return;}
+    await loadCalendarEvents();updateDashboard();
+}
+
+async function deleteEvent(id){if(!confirm('حذف شود؟'))return;await supabaseClient.from('calendar').delete().eq('id',id);await loadCalendarEvents();updateDashboard();}
+
+function showAddEvent(){
+    const c=document.getElementById('calendar-container');
+    const now=new Date().toISOString().slice(0,16);
+    c.innerHTML=`<div class="card" style="background:#f9fafb"><h4>➕ رویداد جدید</h4>
+    <div class="form-group"><label>عنوان *</label><input id="event-title-input"></div>
+    <div class="form-group"><label>توضیحات</label><textarea id="event-desc-input" rows="2"></textarea></div>
+    <div class="grid-2"><div class="form-group"><label>شروع *</label><input type="datetime-local" id="event-start-input" value="${now}"></div>
+    <div class="form-group"><label>پایان *</label><input type="datetime-local" id="event-end-input" value="${now}"></div></div>
+    <div class="form-group"><label>نوع</label><select id="event-type-input"><option value="task">کار</option><option value="meeting">جلسه</option><option value="leisure">تفریح</option><option value="appointment">قرار</option></select></div>
+    <div style="display:flex;gap:10px"><button class="btn btn-success" onclick="saveEvent()">💾 ذخیره</button><button class="btn btn-secondary" onclick="loadCalendarEvents();renderCalendar('calendar-container')">انصراف</button></div></div>`;
+}
+
+async function saveEvent(){
+    const title=document.getElementById('event-title-input').value.trim();
+    const desc=document.getElementById('event-desc-input').value.trim();
+    const start=document.getElementById('event-start-input').value;
+    const end=document.getElementById('event-end-input').value;
+    const type=document.getElementById('event-type-input').value;
+    if(!title||!start||!end){alert('عنوان، شروع و پایان الزامی است!');return;}
+    if(new Date(start)>=new Date(end)){alert('زمان شروع باید قبل از پایان باشد!');return;}
+    const {error}=await supabaseClient.from('calendar').insert({user_id:currentUser.id,title,description:desc||null,start_time:start,end_time:end,type});
+    if(error){alert('❌ '+error.message);return;}
+    await loadCalendarEvents();renderCalendar('calendar-container');updateDashboard();
+}
+
+async function loadGoals(){
+    const {data,error}=await supabaseClient.from('goals').select('*,projects(*,activities(*))').order('created_at',{ascending:false});
+    if(error){allGoals=[];return;}
+    allGoals=data||[];renderGoals();
+}
+
+function renderGoals(){
+    const c=document.getElementById('goals-container');
+    if(!allGoals.length){c.innerHTML='<div class="empty-state"><div class="icon">🎯</div><h3>هنوز هدفی تعریف نشده</h3><button class="btn btn-primary" onclick="showAddGoal()" style="margin-top:15px">➕ افزودن هدف</button></div>';return;}
+    let html='';
+    allGoals.forEach(g=>{
+        const projects=g.projects||[];
+        let totalAct=0,doneAct=0;
+        projects.forEach(p=>{if(p.activities){totalAct+=p.activities.length;doneAct+=p.activities.filter(a=>a.is_done).length;}});
+        const progress=totalAct>0?Math.round(doneAct/totalAct*100):0;
+        html+=`<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h4>🎯 ${g.title}</h4>${g.description?`<p style="color:#6b7280;font-size:14px">${g.description}</p>`:''}<div style="display:flex;gap:10px;font-size:13px;color:#6b7280"><span>📁 ${projects.length} پروژه</span><span>📋 ${totalAct} فعالیت</span><span>📊 ${progress}%</span></div></div><div style="display:flex;gap:5px"><button class="btn btn-primary btn-sm" onclick="showAddProject('${g.id}')">➕ پروژه</button><button class="btn btn-danger btn-sm" onclick="deleteGoal('${g.id}')">🗑</button></div></div>`;
+        if(projects.length){
+            projects.forEach(p=>{
+                const acts=p.activities||[];
+                const done=acts.filter(a=>a.is_done).length;
+                const prog=acts.length?Math.round(done/acts.length*100):0;
+                html+=`<div class="card" style="margin-right:20px;background:#f9fafb"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h5>📁 ${p.name}</h5><p style="font-size:13px;color:#6b7280">وضعیت: <span class="badge ${p.status==='تکمیل شده'?'badge-success':p.status==='در حال انجام'?'badge-warning':'badge-info'}">${p.status||'برنامه‌ریزی'}</span>${p.budget?` | 💰 ${p.budget.toLocaleString()} تومان`:''}<span style="margin-right:10px">📊 ${prog}%</span></p></div><div style="display:flex;gap:5px"><button class="btn btn-success btn-sm" onclick="showAddActivity('${p.id}')">➕ فعالیت</button><button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">🗑</button></div></div>`;
+                if(acts.length){
+                    acts.forEach(a=>{
+                        html+=`<div class="card" style="margin-right:20px;background:#fff"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><h6>📋 ${a.title}</h6>${a.description?`<p style="font-size:13px;color:#6b7280">${a.description}</p>`:''}<p style="font-size:12px;color:#6b7280">${a.estimated_hours?`⏱ ${a.estimated_hours} ساعت`:''}${a.estimated_cost?` | 💰 ${a.estimated_cost.toLocaleString()} تومان`:''}<span class="badge ${a.is_done?'badge-success':'badge-warning'}">${a.is_done?'✅ انجام شده':'⏳ در حال انجام'}</span></p></div><div style="display:flex;gap:5px"><button class="btn btn-${a.is_done?'warning':'success'} btn-sm" onclick="toggleActivity('${a.id}',${!a.is_done})">${a.is_done?'↩ بازگشت':'✓ انجام شد'}</button><button class="btn btn-danger btn-sm" onclick="deleteActivity('${a.id}')">🗑</button></div></div></div>`;
+                    });
+                }else html+=`<p style="color:#9ca3af;font-size:13px;margin-right:20px">هیچ فعالیتی تعریف نشده</p>`;
+                html+=`</div>`;
+            });
+        }else html+=`<p style="color:#9ca3af;font-size:13px;margin-right:20px">هیچ پروژه‌ای تعریف نشده</p>`;
+        html+=`</div>`;
+    });
+    c.innerHTML=html;
+}
+
+function showAddGoal(){
+    const c=document.getElementById('goals-container');
+    c.innerHTML=`<div class="card" style="background:#f9fafb"><h4>➕ هدف جدید</h4><div class="form-group"><label>عنوان *</label><input id="goal-title-input"></div><div class="form-group"><label>توضیحات</label><textarea id="goal-desc-input" rows="3"></textarea></div><div style="display:flex;gap:10px"><button class="btn btn-success" onclick="saveGoal()">💾 ذخیره</button><button class="btn btn-secondary" onclick="loadGoals()">انصراف</button></div></div>`;
+}
+
+async function saveGoal(){
+    const title=document.getElementById('goal-title-input').value.trim();
+    const desc=document.getElementById('goal-desc-input').value.trim();
+    if(!title){alert('عنوان الزامی است!');return;}
+    const {error}=await supabaseClient.from('goals').insert({title,description:desc||null,user_id:currentUser.id});
+    if(error){alert('❌ '+error.message);return;}
+    await loadGoals();
+}
+
+async function deleteGoal(id){if(!confirm('حذف شود؟'))return;await supabaseClient.from('goals').delete().eq('id',id);await loadGoals();}
+
+function showAddProject(goalId){
+    const c=document.getElementById('goals-container');
+    c.innerHTML=`<div class="card" style="background:#f9fafb"><h4>📁 پروژه جدید</h4><div class="form-group"><label>نام *</label><input id="project-name-input"></div><div class="form-group"><label>وضعیت</label><select id="project-status-input"><option>برنامه‌ریزی</option><option>در حال انجام</option><option>تکمیل شده</option><option>متوقف شده</option></select></div><div class="grid-2"><div class="form-group"><label>شروع</label><input type="date" id="project-start-input"></div><div class="form-group"><label>پایان</label><input type="date" id="project-end-input"></div></div><div class="form-group"><label>بودجه</label><input type="number" id="project-budget-input" placeholder="0"></div><div style="display:flex;gap:10px"><button class="btn btn-success" onclick="saveProject('${goalId}')">💾 ذخیره</button><button class="btn btn-secondary" onclick="loadGoals()">انصراف</button></div></div>`;
+}
+
+async function saveProject(goalId){
+    const name=document.getElementById('project-name-input').value.trim();
+    const status=document.getElementById('project-status-input').value;
+    const start=document.getElementById('project-start-input').value;
+    const end=document.getElementById('project-end-input').value;
+    const budget=parseFloat(document.getElementById('project-budget-input').value)||0;
+    if(!name){alert('نام پروژه الزامی است!');return;}
+    const {error}=await supabaseClient.from('projects').insert({goal_id:goalId,name,status,start_date:start||null,end_date:end||null,budget});
+    if(error){alert('❌ '+error.message);return;}
+    await loadGoals();
+}
+
+async function deleteProject(id){if(!confirm('حذف شود؟'))return;await supabaseClient.from('projects').delete().eq('id',id);await loadGoals();}
+
+function showAddActivity(projectId){
+    const c=document.getElementById('goals-container');
+    c.innerHTML=`<div class="card" style="background:#f9fafb"><h4>📋 فعالیت جدید</h4><div class="form-group"><label>عنوان *</label><input id="activity-title-input"></div><div class="form-group"><label>توضیحات</label><textarea id="activity-desc-input" rows="3"></textarea></div><div class="grid-2"><div class="form-group"><label>زمان تخمینی (ساعت)</label><input type="number" id="activity-hours-input" placeholder="0"></div><div class="form-group"><label>هزینه تخمینی (تومان)</label><input type="number" id="activity-cost-input" placeholder="0"></div></div><div style="display:flex;gap:10px"><button class="btn btn-success" onclick="saveActivity('${projectId}')">💾 ذخیره</button><button class="btn btn-secondary" onclick="loadGoals()">انصراف</button></div></div>`;
+}
+
+async function saveActivity(projectId){
+    const title=document.getElementById('activity-title-input').value.trim();
+    const desc=document.getElementById('activity-desc-input').value.trim();
+    const hours=parseFloat(document.getElementById('activity-hours-input').value)||0;
+    const cost=parseFloat(document.getElementById('activity-cost-input').value)||0;
+    if(!title){alert('عنوان فعالیت الزامی است!');return;}
+    const {error}=await supabaseClient.from('activities').insert({project_id:projectId,title,description:desc||null,estimated_hours:hours,estimated_cost:cost,is_done:false});
+    if(error){alert('❌ '+error.message);return;}
+    await loadGoals();
+}
+
+async function toggleActivity(id,isDone){await supabaseClient.from('activities').update({is_done:isDone}).eq('id',id);await loadGoals();}
+
+async function deleteActivity(id){if(!confirm('حذف شود؟'))return;await supabaseClient.from('activities').delete().eq('id',id);await loadGoals();}
+
+async function loadFinance(){
+    const c=document.getElementById('finance-container');
+    const now=new Date();
+    const start=new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0];
+    const end=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().split('T')[0];
+    const {data,error}=await supabaseClient.from('daily_finance').select('*').gte('date',start).lte('date',end).order('date',{ascending:true});
+    if(error){c.innerHTML=`<div class="card" style="color:red">❌ ${error.message}</div>`;return;}
+    const totalIncome=(data||[]).reduce((s,f)=>s+(f.income||0),0);
+    const totalExpense=(data||[]).reduce((s,f)=>s+(f.expense||0),0);
+    const balance=totalIncome-totalExpense;
+    let html=`<div class="finance-summary"><div class="finance-card income"><div class="label">💰 درآمد</div><div class="amount">${totalIncome.toLocaleString()}</div></div><div class="finance-card expense"><div class="label">💸 هزینه</div><div class="amount">${totalExpense.toLocaleString()}</div></div><div class="finance-card balance"><div class="label">📊 مانده</div><div class="amount" style="color:${balance>=0?'#065f46':'#991b1b'}">${balance.toLocaleString()}</div></div></div>`;
+    html+=`<h5>📋 گزارش روزانه</h5>`;
+    if(data&&data.length){data.forEach(f=>{html+=`<div class="card" style="padding:12px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><div><strong>${new Date(f.date).toLocaleDateString('fa-IR')}</strong>${f.note?`<p style="font-size:12px;color:#6b7280">${f.note}</p>`:''}</div><div style="display:flex;gap:15px;align-items:center"><span style="color:#10b981;font-weight:600">+${(f.income||0).toLocaleString()}</span><span style="color:#ef4444;font-weight:600">-${(f.expense||0).toLocaleString()}</span><button class="btn btn-danger btn-sm" onclick="deleteFinance('${f.id}')">🗑</button></div></div></div>`;});}
+    else html+=`<p style="color:#9ca3af;padding:20px;text-align:center">هنوز داده مالی ثبت نشده</p>`;
+    c.innerHTML=html;
+}
+
+function showAddFinance(){
+    const c=document.getElementById('finance-container');
+    const today=new Date().toISOString().split('T')[0];
+    c.innerHTML=`<div class="card" style="background:#f9fafb"><h4>💰 ثبت مالی</h4><div class="form-group"><label>تاریخ</label><input type="date" id="finance-date-input" value="${today}"></div><div class="grid-2"><div class="form-group"><label>درآمد</label><input type="number" id="finance-income-input" placeholder="0"></div><div class="form-group"><label>هزینه</label><input type="number" id="finance-expense-input" placeholder="0"></div></div><div class="form-group"><label>یادداشت</label><input id="finance-note-input"></div><div style="display:flex;gap:10px"><button class="btn btn-success" onclick="saveFinance()">💾 ذخیره</button><button class="btn btn-secondary" onclick="loadFinance()">انصراف</button></div></div>`;
+}
+
+async function saveFinance(){
+    const date=document.getElementById('finance-date-input').value;
+    const income=parseFloat(document.getElementById('finance-income-input').value)||0;
+    const expense=parseFloat(document.getElementById('finance-expense-input').value)||0;
+    const note=document.getElementById('finance-note-input').value.trim();
+    if(!date){alert('تاریخ الزامی است!');return;}
+    if(!income&&!expense){alert('حداقل یکی از فیلدها را پر کنید!');return;}
+    const {data:existing}=await supabaseClient.from('daily_finance').select('id').eq('user_id',currentUser.id).eq('date',date).maybeSingle();
+    let error;
+    if(existing){const {error:e}=await supabaseClient.from('daily_finance').update({income,expense,note:note||null}).eq('id',existing.id);error=e;}
+    else{const {error:e}=await supabaseClient.from('daily_finance').insert({user_id:currentUser.id,date,income,expense,note:note||null});error=e;}
+    if(error){alert('❌ '+error.message);return;}
+    await loadFinance();
+}
+
+async function deleteFinance(id){if(!confirm('حذف شود؟'))return;await supabaseClient.from('daily_finance').delete().eq('id',id);await loadFinance();}
+
+supabaseClient.auth.getSession().then(({data:{session}})=>{if(session){currentUser=session.user;loadPlanner();}else{document.getElementById('auth-section').classList.remove('hidden');}});
+console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
+</script>
+</body>
+</html>
