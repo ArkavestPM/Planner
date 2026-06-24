@@ -65,12 +65,21 @@
         .finance-card .amount{font-size:24px;font-weight:700}
         .finance-card .label{font-size:14px;color:#6b7280}
         .date-display{font-size:14px;color:#6b7280;padding:8px 15px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
+        .user-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:8px;margin-bottom:8px;flex-wrap:wrap;gap:10px}
+        .user-item .user-info{flex:1}
+        .user-item .user-info .name{font-weight:600;color:#333}
+        .user-item .user-info .email{font-size:12px;color:#6b7280}
+        .user-item .user-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+        .user-item .user-status.pending{background:#fef3c7;color:#92400e}
+        .user-item .user-status.approved{background:#d1fae5;color:#065f46}
+        .user-item .user-status.rejected{background:#fee2e2;color:#991b1b}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
             .calendar-grid .day{padding:10px 3px;font-size:12px}
             .header h1{font-size:18px}
             .event-item{flex-direction:column;align-items:flex-start}
+            .user-item{flex-direction:column;align-items:stretch}
         }
     </style>
 </head>
@@ -101,6 +110,7 @@
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
             <span class="date-display" id="today-display"></span>
             <span>👤 <span id="user-name">کاربر</span></span>
+            <span id="user-role-badge"></span>
             <button class="btn btn-danger btn-sm" onclick="logout()">🚪 خروج</button>
         </div>
     </div>
@@ -111,6 +121,7 @@
         <button class="tab" data-tab="calendar" onclick="switchTab('calendar')">📆 تقویم</button>
         <button class="tab" data-tab="holidays" onclick="switchTab('holidays')">🏖 تعطیلات</button>
         <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
+        <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')" style="display:none">👑 مدیریت</button>
     </div>
 
     <div id="tab-dashboard" class="tab-content active">
@@ -178,6 +189,21 @@
         </div>
         <div id="finance-container">در حال بارگذاری...</div>
     </div>
+
+    <div id="tab-admin" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+            <h3>👑 مدیریت کاربران</h3>
+            <button class="btn btn-secondary btn-sm" onclick="loadUsers()">🔄 بروزرسانی</button>
+        </div>
+        <div class="card">
+            <h4>⏳ درخواست‌های جدید</h4>
+            <div id="pending-users">در حال بارگذاری...</div>
+        </div>
+        <div class="card">
+            <h4>✅ کاربران فعال</h4>
+            <div id="approved-users">در حال بارگذاری...</div>
+        </div>
+    </div>
 </div>
 </div>
 
@@ -192,10 +218,12 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
+let currentUserData = null;
 let allEvents = [];
 let allGoals = [];
 let allHolidays = [];
 let allFinances = [];
+let allUsers = [];
 
 // ============================================================
 // ====== تاریخ و زمان با منطقه زمانی تهران ======
@@ -249,11 +277,12 @@ function isToday(date) {
 function isWeekend(date) {
     const tehranDate = getTehranDate(date);
     const day = tehranDate.getDay();
+    // در تقویم شمسی: 5 = پنجشنبه، 6 = جمعه
     return day === 5 || day === 6;
 }
 
 // ============================================================
-// ====== متغیرهای اصلی با تاریخ درست ======
+// ====== متغیرهای اصلی ======
 // ============================================================
 let currentDate = getTodayTehran();
 
@@ -268,9 +297,20 @@ async function login() {
     const email = document.getElementById('login-email').value;
     const pass = document.getElementById('login-password').value;
     if (!email || !pass) { showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true); return; }
+    
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
     if (error) { showAuthMessage('❌ ' + error.message, true); return; }
+    
     currentUser = data.user;
+    
+    // دریافت اطلاعات کاربر از جدول users
+    const { data: userData } = await supabaseClient
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+    
+    currentUserData = userData;
     showAuthMessage('✅ ورود موفق!', false);
     loadPlanner();
 }
@@ -280,10 +320,21 @@ async function register() {
     const pass = document.getElementById('register-password').value;
     if (!email || !pass) { showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true); return; }
     if (pass.length < 6) { showAuthMessage('رمز عبور حداقل ۶ کاراکتر باشد.', true); return; }
+    
     const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
     if (error) { showAuthMessage('❌ ' + error.message, true); return; }
+    
     currentUser = data.user;
-    showAuthMessage('✅ ثبت‌نام موفق! لطفاً وارد شوید.', false);
+    
+    // ایجاد کاربر در جدول users با وضعیت pending
+    await supabaseClient.from('users').insert({
+        id: currentUser.id,
+        email: email,
+        role: 'user',
+        status: 'pending'
+    });
+    
+    showAuthMessage('✅ ثبت‌نام موفق! منتظر تایید ادمین باشید.', false);
     document.getElementById('register-form').classList.add('hidden');
     document.getElementById('login-email').value = email;
 }
@@ -291,8 +342,13 @@ async function register() {
 function logout() {
     supabaseClient.auth.signOut();
     currentUser = null;
+    currentUserData = null;
     document.getElementById('planner-section').classList.add('hidden');
     document.getElementById('auth-section').classList.remove('hidden');
+}
+
+function isAdmin() {
+    return currentUserData && currentUserData.role === 'admin';
 }
 
 // ============================================================
@@ -307,14 +363,34 @@ function switchTab(tabId) {
     if (content) content.classList.add('active');
     if (tabId === 'dashboard') updateDashboard();
     if (tabId === 'holidays') loadHolidays();
+    if (tabId === 'admin') loadUsers();
 }
 
 async function loadPlanner() {
     document.getElementById('auth-section').classList.add('hidden');
     document.getElementById('planner-section').classList.remove('hidden');
+    
     const user = (await supabaseClient.auth.getUser()).data.user;
     if (user) {
+        // دریافت اطلاعات کاربر
+        const { data: userData } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        
+        currentUserData = userData;
+        
         document.getElementById('user-name').textContent = user.email.split('@')[0];
+        
+        // نمایش نقش کاربر
+        if (userData && userData.role === 'admin') {
+            document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
+            document.getElementById('tab-admin').style.display = 'block';
+        } else {
+            document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
+        }
+        
         await loadAllData();
         updateDashboard();
         updateTodayDisplay();
@@ -336,26 +412,152 @@ async function loadAllData() {
 }
 
 // ============================================================
+// ====== توابع مدیریت کاربران ======
+// ============================================================
+async function loadUsers() {
+    const { data, error } = await supabaseClient
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        document.getElementById('pending-users').innerHTML = `<p style="color:red">❌ ${error.message}</p>`;
+        return;
+    }
+    
+    allUsers = data || [];
+    
+    const pending = allUsers.filter(u => u.status === 'pending');
+    const approved = allUsers.filter(u => u.status === 'approved');
+    
+    // درخواست‌های جدید
+    const pendingContainer = document.getElementById('pending-users');
+    if (pending.length === 0) {
+        pendingContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ درخواست جدیدی وجود ندارد.</p>';
+    } else {
+        pendingContainer.innerHTML = pending.map(u => `
+            <div class="user-item">
+                <div class="user-info">
+                    <div class="name">${u.email}</div>
+                    <div class="email">${u.id}</div>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <span class="user-status pending">⏳ در انتظار</span>
+                    <button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ تایید</button>
+                    <button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">❌ رد</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // کاربران فعال
+    const approvedContainer = document.getElementById('approved-users');
+    if (approved.length === 0) {
+        approvedContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ کاربر فعالی وجود ندارد.</p>';
+    } else {
+        approvedContainer.innerHTML = approved.map(u => `
+            <div class="user-item">
+                <div class="user-info">
+                    <div class="name">${u.email}</div>
+                    <div class="email">نقش: ${u.role || 'user'}</div>
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <span class="user-status approved">✅ فعال</span>
+                    ${isAdmin() && u.id !== currentUser.id ? `
+                        <button class="btn btn-warning btn-sm" onclick="makeAdmin('${u.id}')">👑 ادمین</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑 حذف</button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+async function approveUser(userId) {
+    if (!confirm('آیا از تایید این کاربر مطمئن هستید؟')) return;
+    
+    const { error } = await supabaseClient
+        .from('users')
+        .update({ status: 'approved', role: 'user' })
+        .eq('id', userId);
+    
+    if (error) {
+        alert('❌ ' + error.message);
+        return;
+    }
+    
+    showAuthMessage('✅ کاربر با موفقیت تایید شد!', false);
+    loadUsers();
+}
+
+async function rejectUser(userId) {
+    if (!confirm('آیا از رد این کاربر مطمئن هستید؟')) return;
+    
+    const { error } = await supabaseClient
+        .from('users')
+        .update({ status: 'rejected' })
+        .eq('id', userId);
+    
+    if (error) {
+        alert('❌ ' + error.message);
+        return;
+    }
+    
+    showAuthMessage('✅ کاربر رد شد.', false);
+    loadUsers();
+}
+
+async function makeAdmin(userId) {
+    if (!confirm('آیا از تبدیل این کاربر به ادمین مطمئن هستید؟')) return;
+    
+    const { error } = await supabaseClient
+        .from('users')
+        .update({ role: 'admin' })
+        .eq('id', userId);
+    
+    if (error) {
+        alert('❌ ' + error.message);
+        return;
+    }
+    
+    showAuthMessage('✅ کاربر به ادمین تبدیل شد!', false);
+    loadUsers();
+}
+
+async function deleteUser(userId) {
+    if (!confirm('آیا از حذف این کاربر مطمئن هستید؟')) return;
+    
+    const { error } = await supabaseClient
+        .from('users')
+        .delete()
+        .eq('id', userId);
+    
+    if (error) {
+        alert('❌ ' + error.message);
+        return;
+    }
+    
+    showAuthMessage('✅ کاربر حذف شد.', false);
+    loadUsers();
+}
+
+// ============================================================
 // ====== توابع تقویم ======
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // گرفتن اطلاعات ماه و سال از currentDate (که همیشه تهران هست)
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     
-    // روز اول ماه و تعداد روزهای ماه
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // نمایش نام ماه به فارسی
     const persianMonth = getPersianMonthYear(currentDate);
     const label = document.getElementById('calendar-month-label');
     if (label) label.textContent = persianMonth;
 
-    // نمایش تاریخ امروز
     const subtitle = document.getElementById('calendar-subtitle');
     if (subtitle) {
         const today = getTodayTehran();
@@ -365,8 +567,6 @@ function renderCalendar(containerId) {
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    // روزهای خالی اول ماه (تغییر offset برای تقویم شمسی)
-    // در تقویم شمسی، شنبه روز اول هفته است (0 = شنبه)
     const startOffset = firstDay === 0 ? 0 : 7 - firstDay;
     for (let i = 0; i < startOffset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
@@ -400,7 +600,6 @@ function renderCalendar(containerId) {
 }
 
 function changeMonth(delta) {
-    // تغییر ماه روی currentDate
     currentDate.setMonth(currentDate.getMonth() + delta);
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
@@ -437,7 +636,7 @@ function selectDate(dateStr) {
 }
 
 // ============================================================
-// ====== توابع رویدادها ======
+// ====== توابع رویدادها (خلاصه) ======
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -548,50 +747,6 @@ function showAddEvent() {
             </div>
         </div>
         <div id="day-events-display"></div>
-    `;
-    renderDayEvents(getDateString(getTodayTehran()));
-}
-
-function renderDayEvents(dateStr) {
-    const container = document.getElementById('day-events-display');
-    if (!container) return;
-
-    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
-    const persianDate = new Date(dateStr).toLocaleDateString('fa-IR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Asia/Tehran'
-    });
-
-    if (events.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="padding:20px">
-                <div class="icon">📭</div>
-                <p>هیچ رویدادی برای ${persianDate} ندارید</p>
-                <button class="btn btn-primary btn-sm" onclick="showQuickAddEvent('${dateStr}')" style="margin-top:10px">➕ افزودن رویداد</button>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = `
-        <h5 style="margin:15px 0 10px">📋 رویدادهای ${persianDate}</h5>
-        ${events.map(e => `
-            <div class="event-item">
-                <div>
-                    <div class="event-title">${e.title}</div>
-                    <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })} 
-                        - ${new Date(e.end_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}
-                    </div>
-                </div>
-                <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-                    <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
-                    <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">🗑</button>
-                </div>
-            </div>
-        `).join('')}
     `;
 }
 
