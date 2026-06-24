@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📅 پلنر شخصی شمسی</title>
-    
-    <!-- کتابخانه‌های مورد نیاز -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.6/dist/jalaali.min.js"></script>
-    
-    <!-- کتابخانه persian-datepicker برای تقویم شمسی -->
     <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.0.0/dist/css/persian-datepicker.css">
     <script src="https://unpkg.com/persian-datepicker@1.0.0/dist/js/persian-datepicker.js"></script>
-    
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;direction:rtl}
@@ -87,31 +82,12 @@
         .calendar-toggle button.active{background:#667eea;color:#fff}
         .calendar-toggle button:hover{background:#e5e7eb}
         .calendar-toggle button.active:hover{background:#5a67d8}
-        
-        /* استایل تقویم شمسی */
-        .persian-datepicker-rtl {
-            direction: rtl;
-        }
-        .persian-datepicker .dp-header {
-            background: #667eea !important;
-            color: white !important;
-        }
-        .persian-datepicker .dp-today {
-            background: #667eea !important;
-            color: white !important;
-        }
-        .persian-datepicker .dp-selected {
-            background: #667eea !important;
-            color: white !important;
-        }
-        .persian-datepicker .dp-cell {
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .persian-datepicker .dp-cell:hover {
-            background: #e5e7eb !important;
-        }
-        
+        .persian-datepicker-rtl{direction:rtl}
+        .persian-datepicker .dp-header{background:#667eea!important;color:white!important}
+        .persian-datepicker .dp-today{background:#667eea!important;color:white!important}
+        .persian-datepicker .dp-selected{background:#667eea!important;color:white!important}
+        .persian-datepicker .dp-cell{cursor:pointer;border-radius:4px}
+        .persian-datepicker .dp-cell:hover{background:#e5e7eb!important}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -122,11 +98,7 @@
             .header{flex-direction:column;align-items:stretch}
             .calendar-toggle{justify-content:center}
         }
-        .jalali-date-input {
-            direction: ltr;
-            text-align: right;
-            cursor: pointer;
-        }
+        .jalali-date-input{direction:ltr;text-align:right;cursor:pointer}
     </style>
 </head>
 <body>
@@ -137,16 +109,20 @@
     <div id="auth-message" style="margin-bottom:15px"></div>
     <div class="auth-box">
         <h3 style="margin-bottom:20px">🔐 ورود</h3>
-        <div class="form-group"><label>📧 ایمیل</label><input type="email" id="login-email" placeholder="example@email.com"></div>
-        <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="login-password" placeholder="رمز عبور"></div>
-        <button class="btn btn-primary" onclick="login()" style="width:100%">ورود</button>
+        <form onsubmit="login(); return false;">
+            <div class="form-group"><label>📧 ایمیل</label><input type="email" id="login-email" placeholder="example@email.com"></div>
+            <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="login-password" placeholder="رمز عبور"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%">ورود</button>
+        </form>
         <p style="text-align:center;margin-top:15px;color:#6b7280">حساب ندارید؟ <a href="#" onclick="document.getElementById('register-form').classList.toggle('hidden')" style="color:#667eea;font-weight:600">ثبت‌نام</a></p>
     </div>
     <div id="register-form" class="auth-box hidden">
         <h3 style="margin-bottom:20px">📝 ثبت‌نام</h3>
-        <div class="form-group"><label>📧 ایمیل</label><input type="email" id="register-email" placeholder="example@email.com"></div>
-        <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر"></div>
-        <button class="btn btn-success" onclick="register()" style="width:100%">ثبت‌نام</button>
+        <form onsubmit="register(); return false;">
+            <div class="form-group"><label>📧 ایمیل</label><input type="email" id="register-email" placeholder="example@email.com"></div>
+            <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر"></div>
+            <button type="submit" class="btn btn-success" style="width:100%">ثبت‌نام</button>
+        </form>
     </div>
 </div>
 
@@ -154,7 +130,7 @@
     <div class="header">
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
             <h1>📅 پلنر شخصی شمسی</h1>
-            <div class="calendar-toggle" id="calendar-toggle">
+            <div class="calendar-toggle">
                 <button class="active" onclick="setCalendarMode('jalali')" id="btn-jalali">🇮🇷 شمسی</button>
                 <button onclick="setCalendarMode('gregorian')" id="btn-gregorian">🇺🇸 میلادی</button>
             </div>
@@ -277,9 +253,6 @@ let allHolidays = [];
 let allFinances = [];
 let allUsers = [];
 
-// ============================================================
-// ====== حالت تقویم (شمسی/میلادی) ======
-// ============================================================
 let calendarMode = 'jalali';
 
 function setCalendarMode(mode) {
@@ -292,9 +265,8 @@ function setCalendarMode(mode) {
 }
 
 // ============================================================
-// ====== توابع تاریخ شمسی با jalaali-js ======
+// توابع تاریخ شمسی
 // ============================================================
-
 function toJalaali(date) {
     const g = new Date(date);
     const j = jalaali.toJalaali(g.getFullYear(), g.getMonth() + 1, g.getDate());
@@ -327,7 +299,6 @@ function getFullJalaaliDate(date) {
     return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
-// ✅ اصلاح شده: پنجشنبه (day 4) و جمعه (day 5)
 function isWeekendJalaali(date) {
     const day = date.getDay();
     return day === 4 || day === 5;
@@ -357,7 +328,7 @@ function parseJalaliDate(str) {
 }
 
 // ============================================================
-// ====== توابع تاریخ میلادی ======
+// توابع میلادی
 // ============================================================
 function getGregorianMonthName(gm) {
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -376,7 +347,7 @@ function isWeekendGregorian(date) {
 }
 
 // ============================================================
-// ====== متغیرهای اصلی ======
+// متغیرهای اصلی
 // ============================================================
 let currentJalaaliYear = 0;
 let currentJalaaliMonth = 0;
@@ -390,11 +361,10 @@ function setCurrentDateToToday() {
     currentJalaaliDay = today.jd;
     currentGregorianDate = new Date();
 }
-
 setCurrentDateToToday();
 
 // ============================================================
-// ====== توابع احراز هویت ======
+// توابع احراز هویت
 // ============================================================
 function showAuthMessage(msg, isError = false) {
     document.getElementById('auth-message').innerHTML = `<div style="padding:12px;border-radius:8px;background:${isError?'#fee2e2':'#d1fae5'};color:${isError?'#991b1b':'#065f46'}">${msg}</div>`;
@@ -457,7 +427,7 @@ function isAdmin() {
 }
 
 // ============================================================
-// ====== توابع اصلی ======
+// توابع اصلی
 // ============================================================
 function switchTab(tabId) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -487,11 +457,15 @@ async function loadPlanner() {
         
         document.getElementById('user-name').textContent = user.email.split('@')[0];
         
+        // ============================================================
+        // ✅ بخش مدیریت - نمایش تب ادمین
+        // ============================================================
         if (userData && userData.role === 'admin') {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
             document.getElementById('tab-admin').style.display = 'block';
         } else {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
+            document.getElementById('tab-admin').style.display = 'none';
         }
         
         await loadAllData();
@@ -517,7 +491,7 @@ async function loadAllData() {
 }
 
 // ============================================================
-// ====== توابع مدیریت کاربران ======
+// توابع مدیریت کاربران
 // ============================================================
 async function loadUsers() {
     const { data, error } = await supabaseClient
@@ -578,74 +552,50 @@ async function loadUsers() {
 
 async function approveUser(userId) {
     if (!confirm('آیا از تایید این کاربر مطمئن هستید؟')) return;
-    
     const { error } = await supabaseClient
         .from('users')
         .update({ status: 'approved', role: 'user' })
         .eq('id', userId);
-    
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    
+    if (error) { alert('❌ ' + error.message); return; }
     showAuthMessage('✅ کاربر با موفقیت تایید شد!', false);
     loadUsers();
 }
 
 async function rejectUser(userId) {
     if (!confirm('آیا از رد این کاربر مطمئن هستید؟')) return;
-    
     const { error } = await supabaseClient
         .from('users')
         .update({ status: 'rejected' })
         .eq('id', userId);
-    
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    
+    if (error) { alert('❌ ' + error.message); return; }
     showAuthMessage('✅ کاربر رد شد.', false);
     loadUsers();
 }
 
 async function makeAdmin(userId) {
     if (!confirm('آیا از تبدیل این کاربر به ادمین مطمئن هستید؟')) return;
-    
     const { error } = await supabaseClient
         .from('users')
         .update({ role: 'admin' })
         .eq('id', userId);
-    
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    
+    if (error) { alert('❌ ' + error.message); return; }
     showAuthMessage('✅ کاربر به ادمین تبدیل شد!', false);
     loadUsers();
 }
 
 async function deleteUser(userId) {
     if (!confirm('آیا از حذف این کاربر مطمئن هستید؟')) return;
-    
     const { error } = await supabaseClient
         .from('users')
         .delete()
         .eq('id', userId);
-    
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    
+    if (error) { alert('❌ ' + error.message); return; }
     showAuthMessage('✅ کاربر حذف شد.', false);
     loadUsers();
 }
 
 // ============================================================
-// ====== توابع تقویم ======
+// توابع تقویم
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
@@ -840,7 +790,7 @@ function selectDateGregorian(dateStr) {
 }
 
 // ============================================================
-// ====== توابع رویدادها با تقویم شمسی ======
+// توابع رویدادها
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -900,12 +850,11 @@ function showQuickAddEvent(prefillDate = null) {
         </div>
     `;
     
-    // راه‌اندازی تقویم شمسی
     setTimeout(() => {
         const input = document.getElementById('quick-event-date-jalali');
         if (input) {
             try {
-                const picker = new persianDatepicker(input, {
+                new persianDatepicker(input, {
                     format: 'YYYY/MM/DD',
                     autoClose: true,
                     initialValue: true,
@@ -920,7 +869,7 @@ function showQuickAddEvent(prefillDate = null) {
                     }
                 });
             } catch(e) {
-                console.log('تقویم شمسی در دسترس نیست، از ورودی دستی استفاده کنید');
+                console.log('تقویم شمسی در دسترس نیست');
             }
         }
     }, 100);
@@ -940,7 +889,6 @@ function getJalaliDateFromInput(inputId) {
             return { jy, jm, jd };
         }
     }
-    // اگر فرمت اشتباه بود، از مقدار data استفاده کن
     if (input.dataset.jalali) {
         const parts2 = input.dataset.jalali.split('/');
         if (parts2.length === 3) {
@@ -955,11 +903,8 @@ async function saveQuickEvent() {
     const type = document.getElementById('quick-event-type').value;
     const time = document.getElementById('quick-event-time').value;
     
-    // گرفتن تاریخ شمسی از فیلد
     let jalaliDate = getJalaliDateFromInput('quick-event-date-jalali');
-    
     if (!jalaliDate) {
-        // اگر تاریخ شمسی وارد نشده، از امروز استفاده کن
         const today = getTodayJalaali();
         jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
     }
@@ -1026,12 +971,11 @@ function showAddEvent() {
         <div id="day-events-display"></div>
     `;
     
-    // راه‌اندازی تقویم شمسی
     setTimeout(() => {
         const input = document.getElementById('event-date-jalali');
         if (input) {
             try {
-                const picker = new persianDatepicker(input, {
+                new persianDatepicker(input, {
                     format: 'YYYY/MM/DD',
                     autoClose: true,
                     initialValue: true,
@@ -1058,10 +1002,7 @@ async function saveEventJalali() {
     const type = document.getElementById('event-type-input').value;
     const time = document.getElementById('event-start-time').value;
     
-    // گرفتن تاریخ شمسی
-    const input = document.getElementById('event-date-jalali');
     let jalaliDate = getJalaliDateFromInput('event-date-jalali');
-    
     if (!jalaliDate) {
         const today = getTodayJalaali();
         jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
@@ -1110,7 +1051,7 @@ async function deleteEvent(id) {
 }
 
 // ============================================================
-// ====== توابع تعطیلات ======
+// توابع تعطیلات
 // ============================================================
 async function loadHolidays() {
     const { data, error } = await supabaseClient
@@ -1219,7 +1160,7 @@ async function removeHoliday(id) {
 }
 
 // ============================================================
-// ====== توابع اهداف (خلاصه) ======
+// توابع اهداف (خلاصه)
 // ============================================================
 async function loadGoals() {
     const { data, error } = await supabaseClient
@@ -1469,7 +1410,7 @@ async function deleteActivity(id) {
 }
 
 // ============================================================
-// ====== توابع مالی ======
+// توابع مالی
 // ============================================================
 async function loadFinance() {
     const container = document.getElementById('finance-container');
@@ -1601,7 +1542,7 @@ async function deleteFinance(id) {
 }
 
 // ============================================================
-// ====== توابع داشبورد ======
+// توابع داشبورد
 // ============================================================
 function updateDashboard() {
     document.getElementById('dash-goals-count').textContent = allGoals.length;
@@ -1667,7 +1608,7 @@ function renderTodayEvents() {
 }
 
 // ============================================================
-// ====== شروع برنامه ======
+// شروع برنامه
 // ============================================================
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
     if (session) {
