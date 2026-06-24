@@ -88,9 +88,6 @@
         .persian-datepicker .dp-selected{background:#667eea!important;color:white!important}
         .persian-datepicker .dp-cell{cursor:pointer;border-radius:4px}
         .persian-datepicker .dp-cell:hover{background:#e5e7eb!important}
-        .persian-datepicker .dp-monthpicker,.persian-datepicker .dp-yearpicker{background:white!important}
-        .persian-datepicker .dp-monthpicker td,.persian-datepicker .dp-yearpicker td{cursor:pointer;padding:5px}
-        .persian-datepicker .dp-monthpicker td:hover,.persian-datepicker .dp-yearpicker td:hover{background:#e5e7eb!important}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -102,9 +99,8 @@
             .calendar-toggle{justify-content:center}
         }
         .jalali-date-input{direction:ltr;text-align:right;cursor:pointer}
-        /* نمایش همیشه تب مدیریت برای ادمین */
-        #tab-admin{display:none!important}
-        #tab-admin.show{display:block!important}
+        /* تب مدیریت برای همه نمایش داده میشه */
+        #tab-admin{display:block!important}
     </style>
 </head>
 <body>
@@ -157,6 +153,7 @@
         <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')">👑 مدیریت</button>
     </div>
 
+    <!-- تب داشبورد -->
     <div id="tab-dashboard" class="tab-content active">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>📊 داشبورد</h3>
@@ -185,6 +182,7 @@
         </div>
     </div>
 
+    <!-- تب اهداف -->
     <div id="tab-goals" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>🎯 اهداف و پروژه‌ها</h3>
@@ -193,6 +191,7 @@
         <div id="goals-container">در حال بارگذاری...</div>
     </div>
 
+    <!-- تب تقویم -->
     <div id="tab-calendar" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>📆 تقویم و رویدادها</h3>
@@ -201,6 +200,7 @@
         <div id="calendar-container">در حال بارگذاری...</div>
     </div>
 
+    <!-- تب تعطیلات -->
     <div id="tab-holidays" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>🏖 مدیریت تعطیلات</h3>
@@ -215,6 +215,7 @@
         </div>
     </div>
 
+    <!-- تب مالی -->
     <div id="tab-finance" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>💰 وضعیت مالی</h3>
@@ -223,6 +224,7 @@
         <div id="finance-container">در حال بارگذاری...</div>
     </div>
 
+    <!-- تب مدیریت -->
     <div id="tab-admin" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>👑 مدیریت کاربران</h3>
@@ -304,6 +306,7 @@ function getFullJalaaliDate(date) {
     return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
+// ✅ پنجشنبه و جمعه (day 4 و 5)
 function isWeekendJalaali(date) {
     const day = date.getDay();
     return day === 4 || day === 5;
@@ -462,19 +465,11 @@ async function loadPlanner() {
         
         document.getElementById('user-name').textContent = user.email.split('@')[0];
         
-        // ============================================================
-        // ✅ نمایش تب مدیریت - راه حل مستقیم
-        // ============================================================
-        const adminTab = document.getElementById('tab-admin');
+        // نمایش نقش کاربر
         if (userData && userData.role === 'admin') {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
-            adminTab.style.display = 'block';
-            adminTab.classList.add('show');
-            console.log('✅ تب مدیریت نمایش داده شد');
         } else {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
-            adminTab.style.display = 'none';
-            adminTab.classList.remove('show');
         }
         
         await loadAllData();
@@ -530,8 +525,10 @@ async function loadUsers() {
                 </div>
                 <div style="display:flex;gap:5px;flex-wrap:wrap">
                     <span class="user-status pending">⏳ در انتظار</span>
-                    <button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ تایید</button>
-                    <button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">❌ رد</button>
+                    ${isAdmin() ? `
+                        <button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ تایید</button>
+                        <button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">❌ رد</button>
+                    ` : '<span style="color:#9ca3af;">منتظر تایید ادمین</span>'}
                 </div>
             </div>
         `).join('');
@@ -604,7 +601,7 @@ async function deleteUser(userId) {
 }
 
 // ============================================================
-// توابع تقویم
+// توابع تقویم (به حالت قبل برگشت)
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
@@ -799,7 +796,7 @@ function selectDateGregorian(dateStr) {
 }
 
 // ============================================================
-// توابع رویدادها با تقویم شمسی فارسی
+// توابع رویدادها
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -859,7 +856,6 @@ function showQuickAddEvent(prefillDate = null) {
         </div>
     `;
     
-    // راه‌اندازی تقویم شمسی با فرمت فارسی
     setTimeout(() => {
         const input = document.getElementById('quick-event-date-jalali');
         if (input) {
@@ -870,7 +866,7 @@ function showQuickAddEvent(prefillDate = null) {
                     initialValue: true,
                     initialValueType: 'persian',
                     observer: true,
-                    persianDigit: true, // نمایش اعداد به فارسی
+                    persianDigit: true,
                     onSelect: function(unix) {
                         const date = new Date(unix);
                         const j = toJalaali(date);
@@ -1634,26 +1630,6 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
 console.log('📌 حالت فعلی:', calendarMode);
 console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
-
-// ============================================================
-// ✅ نمایش تب مدیریت برای ادمین (راه حل دوم)
-// ============================================================
-// این کد رو برای اطمینان بیشتر اضافه میکنیم
-setTimeout(async function() {
-    const user = (await supabaseClient.auth.getUser()).data.user;
-    if (user) {
-        const { data: userData } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        if (userData && userData.role === 'admin') {
-            document.getElementById('tab-admin').style.display = 'block';
-            document.getElementById('tab-admin').classList.add('show');
-            console.log('✅ تب مدیریت با تاخیر نمایش داده شد');
-        }
-    }
-}, 2000);
 </script>
 </body>
 </html>
