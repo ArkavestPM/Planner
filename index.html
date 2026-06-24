@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 پلنر شخصی</title>
+    <title>📅 پلنر شخصی شمسی</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.6/dist/jalaali.min.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;direction:rtl}
@@ -69,10 +70,10 @@
         .user-item .user-info{flex:1}
         .user-item .user-info .name{font-weight:600;color:#333}
         .user-item .user-info .email{font-size:12px;color:#6b7280}
-        .user-item .user-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-        .user-item .user-status.pending{background:#fef3c7;color:#92400e}
-        .user-item .user-status.approved{background:#d1fae5;color:#065f46}
-        .user-item .user-status.rejected{background:#fee2e2;color:#991b1b}
+        .user-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+        .user-status.pending{background:#fef3c7;color:#92400e}
+        .user-status.approved{background:#d1fae5;color:#065f46}
+        .user-status.rejected{background:#fee2e2;color:#991b1b}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -87,7 +88,7 @@
 <div class="container" id="app">
 
 <div id="auth-section">
-    <h2>📅 پلنر شخصی</h2>
+    <h2>📅 پلنر شخصی شمسی</h2>
     <div id="auth-message" style="margin-bottom:15px"></div>
     <div class="auth-box">
         <h3 style="margin-bottom:20px">🔐 ورود</h3>
@@ -106,7 +107,7 @@
 
 <div id="planner-section" class="hidden">
     <div class="header">
-        <h1>📅 پلنر شخصی</h1>
+        <h1>📅 پلنر شخصی شمسی</h1>
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
             <span class="date-display" id="today-display"></span>
             <span>👤 <span id="user-name">کاربر</span></span>
@@ -136,7 +137,7 @@
         </div>
         <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
-                <h4>📆 تقویم <span style="font-size:13px;font-weight:400;color:#6b7280" id="calendar-subtitle"></span></h4>
+                <h4>📆 تقویم شمسی</h4>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                     <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
                     <span style="font-weight:600;font-size:16px" id="calendar-month-label"></span>
@@ -226,65 +227,80 @@ let allFinances = [];
 let allUsers = [];
 
 // ============================================================
-// ====== تاریخ و زمان با منطقه زمانی تهران ======
+// ====== توابع تاریخ شمسی با jalaali-js ======
 // ============================================================
-function getTehranDate(date) {
-    return new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+
+// تبدیل تاریخ میلادی به شمسی
+function toJalaali(date) {
+    const g = new Date(date);
+    const j = jalaali.toJalaali(g.getFullYear(), g.getMonth() + 1, g.getDate());
+    return j;
 }
 
-function getTodayTehran() {
+// تبدیل تاریخ شمسی به میلادی
+function toGregorian(jy, jm, jd) {
+    const g = jalaali.toGregorian(jy, jm, jd);
+    return new Date(g.gy, g.gm - 1, g.gd);
+}
+
+// گرفتن تاریخ امروز شمسی
+function getTodayJalaali() {
     const now = new Date();
-    return getTehranDate(now);
+    return toJalaali(now);
 }
 
-function getPersianDate(date) {
-    return date.toLocaleDateString('fa-IR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Asia/Tehran'
-    });
+// گرفتن تاریخ شمسی به صورت رشته
+function getJalaaliDateString(jy, jm, jd) {
+    return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
 }
 
-function getPersianMonthYear(date) {
-    return date.toLocaleDateString('fa-IR', {
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'Asia/Tehran'
-    });
+// گرفتن نام ماه شمسی
+function getJalaaliMonthName(jm) {
+    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    return months[jm - 1];
 }
 
-function getPersianWeekday(date) {
-    return date.toLocaleDateString('fa-IR', {
-        weekday: 'long',
-        timeZone: 'Asia/Tehran'
-    });
+// گرفتن نام روز هفته شمسی
+function getJalaaliWeekday(date) {
+    const weekdays = ['جمعه', 'شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه'];
+    return weekdays[date.getDay()];
 }
 
-function getDateString(date) {
-    const tehranDate = getTehranDate(date);
-    return tehranDate.toISOString().split('T')[0];
+// نمایش کامل تاریخ شمسی
+function getFullJalaaliDate(date) {
+    const j = toJalaali(date);
+    const weekday = getJalaaliWeekday(date);
+    return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
-function isToday(date) {
-    const today = getTodayTehran();
-    const d = getTehranDate(date);
-    return d.getFullYear() === today.getFullYear() &&
-           d.getMonth() === today.getMonth() &&
-           d.getDate() === today.getDate();
+// بررسی اینکه روز پنجشنبه یا جمعه است
+function isWeekendJalaali(date) {
+    const day = date.getDay();
+    return day === 5 || day === 6; // پنجشنبه=5، جمعه=6
 }
 
-function isWeekend(date) {
-    const tehranDate = getTehranDate(date);
-    const day = tehranDate.getDay();
-    // در تقویم شمسی: 5 = پنجشنبه، 6 = جمعه
-    return day === 5 || day === 6;
+// گرفتن تعداد روزهای ماه شمسی
+function getJalaaliDaysInMonth(jy, jm) {
+    if (jm <= 6) return 31;
+    if (jm <= 11) return 30;
+    return jalaali.isLeapJalaali(jy) ? 30 : 29;
 }
 
 // ============================================================
 // ====== متغیرهای اصلی ======
 // ============================================================
-let currentDate = getTodayTehran();
+let currentJalaaliYear = 0;
+let currentJalaaliMonth = 0;
+let currentJalaaliDay = 0;
+
+function setCurrentDateToToday() {
+    const today = getTodayJalaali();
+    currentJalaaliYear = today.jy;
+    currentJalaaliMonth = today.jm;
+    currentJalaaliDay = today.jd;
+}
+
+setCurrentDateToToday();
 
 // ============================================================
 // ====== توابع احراز هویت ======
@@ -303,7 +319,6 @@ async function login() {
     
     currentUser = data.user;
     
-    // دریافت اطلاعات کاربر از جدول users
     const { data: userData } = await supabaseClient
         .from('users')
         .select('*')
@@ -326,7 +341,6 @@ async function register() {
     
     currentUser = data.user;
     
-    // ایجاد کاربر در جدول users با وضعیت pending
     await supabaseClient.from('users').insert({
         id: currentUser.id,
         email: email,
@@ -372,7 +386,6 @@ async function loadPlanner() {
     
     const user = (await supabaseClient.auth.getUser()).data.user;
     if (user) {
-        // دریافت اطلاعات کاربر
         const { data: userData } = await supabaseClient
             .from('users')
             .select('*')
@@ -383,7 +396,6 @@ async function loadPlanner() {
         
         document.getElementById('user-name').textContent = user.email.split('@')[0];
         
-        // نمایش نقش کاربر
         if (userData && userData.role === 'admin') {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
             document.getElementById('tab-admin').style.display = 'block';
@@ -398,10 +410,8 @@ async function loadPlanner() {
 }
 
 function updateTodayDisplay() {
-    const today = getTodayTehran();
-    const persianDate = getPersianDate(today);
-    const weekday = getPersianWeekday(today);
-    document.getElementById('today-display').textContent = `${weekday} ${persianDate}`;
+    const today = new Date();
+    document.getElementById('today-display').textContent = getFullJalaaliDate(today);
 }
 
 async function loadAllData() {
@@ -430,7 +440,6 @@ async function loadUsers() {
     const pending = allUsers.filter(u => u.status === 'pending');
     const approved = allUsers.filter(u => u.status === 'approved');
     
-    // درخواست‌های جدید
     const pendingContainer = document.getElementById('pending-users');
     if (pending.length === 0) {
         pendingContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ درخواست جدیدی وجود ندارد.</p>';
@@ -450,7 +459,6 @@ async function loadUsers() {
         `).join('');
     }
     
-    // کاربران فعال
     const approvedContainer = document.getElementById('approved-users');
     if (approved.length === 0) {
         approvedContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ کاربر فعالی وجود ندارد.</p>';
@@ -542,46 +550,46 @@ async function deleteUser(userId) {
 }
 
 // ============================================================
-// ====== توابع تقویم ======
+// ====== توابع تقویم شمسی ======
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const jy = currentJalaaliYear;
+    const jm = currentJalaaliMonth;
+    const daysInMonth = getJalaaliDaysInMonth(jy, jm);
 
-    const persianMonth = getPersianMonthYear(currentDate);
-    const label = document.getElementById('calendar-month-label');
-    if (label) label.textContent = persianMonth;
+    // روز اول ماه شمسی به میلادی
+    const firstDayGreg = toGregorian(jy, jm, 1);
+    const firstDayOfWeek = firstDayGreg.getDay(); // 0=یکشنبه در جاوااسکریپت
 
-    const subtitle = document.getElementById('calendar-subtitle');
-    if (subtitle) {
-        const today = getTodayTehran();
-        const persianToday = getPersianDate(today);
-        subtitle.textContent = `امروز: ${persianToday}`;
-    }
+    // تنظیم نام ماه
+    document.getElementById('calendar-month-label').textContent = `${getJalaaliMonthName(jm)} ${jy}`;
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    const startOffset = firstDay === 0 ? 0 : 7 - firstDay;
-    for (let i = 0; i < startOffset; i++) {
+    // محاسبه offset: در تقویم شمسی شنبه=0
+    const offset = (firstDayOfWeek + 1) % 7;
+    for (let i = 0; i < offset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
     }
 
-    const today = getTodayTehran();
-    const todayStr = getDateString(today);
+    const today = getTodayJalaali();
+    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
 
     for (let d = 1; d <= daysInMonth; d++) {
-        const dateObj = new Date(year, month, d);
-        const dateStr = getDateString(dateObj);
+        const dateObj = toGregorian(jy, jm, d);
+        const dateStr = `${jy}/${jm}/${d}`;
         const isTodayDate = dateStr === todayStr;
-        const isWeekendDay = isWeekend(dateObj);
+        const isWeekendDay = isWeekendJalaali(dateObj);
         const isHoliday = allHolidays.some(h => h.date === dateStr);
-        const hasEvent = allEvents.some(e => e.start_time && e.start_time.startsWith(dateStr));
+        const hasEvent = allEvents.some(e => {
+            if (!e.start_time) return false;
+            const eventDate = new Date(e.start_time);
+            const ej = toJalaali(eventDate);
+            return `${ej.jy}/${ej.jm}/${ej.jd}` === dateStr;
+        });
 
         let classes = 'day';
         if (isTodayDate) classes += ' today';
@@ -600,35 +608,51 @@ function renderCalendar(containerId) {
 }
 
 function changeMonth(delta) {
-    currentDate.setMonth(currentDate.getMonth() + delta);
+    currentJalaaliMonth += delta;
+    if (currentJalaaliMonth > 12) {
+        currentJalaaliMonth = 1;
+        currentJalaaliYear++;
+    } else if (currentJalaaliMonth < 1) {
+        currentJalaaliMonth = 12;
+        currentJalaaliYear--;
+    }
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
 }
 
 function goToToday() {
-    currentDate = getTodayTehran();
+    const today = getTodayJalaali();
+    currentJalaaliYear = today.jy;
+    currentJalaaliMonth = today.jm;
+    currentJalaaliDay = today.jd;
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
 }
 
 function selectDate(dateStr) {
-    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
-    const persianDate = new Date(dateStr).toLocaleDateString('fa-IR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Asia/Tehran'
+    const parts = dateStr.split('/');
+    const jy = parseInt(parts[0]);
+    const jm = parseInt(parts[1]);
+    const jd = parseInt(parts[2]);
+    const gregDate = toGregorian(jy, jm, jd);
+    
+    const events = allEvents.filter(e => {
+        if (!e.start_time) return false;
+        const eventDate = new Date(e.start_time);
+        const ej = toJalaali(eventDate);
+        return `${ej.jy}/${ej.jm}/${ej.jd}` === dateStr;
     });
+    
+    const fullDate = `${jd} ${getJalaaliMonthName(jm)} ${jy}`;
 
     if (events.length === 0) {
-        if (confirm(`📅 ${persianDate}\n\nهیچ رویدادی برای این تاریخ وجود ندارد.\nآیا می‌خواهید یک رویداد جدید اضافه کنید؟`)) {
+        if (confirm(`📅 ${fullDate}\n\nهیچ رویدادی برای این تاریخ وجود ندارد.\nآیا می‌خواهید یک رویداد جدید اضافه کنید؟`)) {
             showQuickAddEvent(dateStr);
         }
     } else {
-        let msg = `📅 ${persianDate}\n\nرویدادها:\n`;
+        let msg = `📅 ${fullDate}\n\nرویدادها:\n`;
         events.forEach((e, i) => {
-            const start = new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' });
+            const start = new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
             msg += `\n${i+1}. ${e.title}\n   ⏰ ${start}\n`;
         });
         alert(msg);
@@ -636,7 +660,7 @@ function selectDate(dateStr) {
 }
 
 // ============================================================
-// ====== توابع رویدادها (خلاصه) ======
+// ====== توابع رویدادها ======
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -655,9 +679,11 @@ async function loadCalendarEvents() {
 
 function showQuickAddEvent(prefillDate = null) {
     const container = document.getElementById('today-events');
-    const today = getTodayTehran();
-    const dateStr = prefillDate || getDateString(today);
-    const timeStr = today.toTimeString().slice(0, 5);
+    const today = getTodayJalaali();
+    const dateStr = prefillDate || `${today.jy}/${today.jm}/${today.jd}`;
+    const parts = dateStr.split('/');
+    const gregDate = toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+    const dateInputVal = gregDate.toISOString().split('T')[0];
 
     container.innerHTML = `
         <div style="background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px">
@@ -666,9 +692,9 @@ function showQuickAddEvent(prefillDate = null) {
                 <div><label style="display:block;font-size:12px;font-weight:600">عنوان</label>
                     <input id="quick-event-title" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
                 <div><label style="display:block;font-size:12px;font-weight:600">تاریخ</label>
-                    <input type="date" id="quick-event-date" value="${dateStr}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
+                    <input type="date" id="quick-event-date" value="${dateInputVal}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
                 <div><label style="display:block;font-size:12px;font-weight:600">ساعت</label>
-                    <input type="time" id="quick-event-time" value="${timeStr}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
+                    <input type="time" id="quick-event-time" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
                 <div style="display:flex;gap:5px">
                     <button class="btn btn-success btn-sm" onclick="saveQuickEvent()">💾</button>
                     <button class="btn btn-secondary btn-sm" onclick="updateDashboard()">✖</button>
@@ -721,7 +747,7 @@ async function saveQuickEvent() {
 
 function showAddEvent() {
     const container = document.getElementById('calendar-container');
-    const now = getTodayTehran();
+    const now = new Date();
     const nowStr = now.toISOString().slice(0, 16);
 
     container.innerHTML = `
@@ -835,24 +861,25 @@ function renderHolidays() {
 
     const grouped = {};
     allHolidays.forEach(h => {
-        const month = h.date.substring(0, 7);
-        if (!grouped[month]) grouped[month] = [];
-        grouped[month].push(h);
+        const parts = h.date.split('/');
+        const monthKey = `${parts[0]}/${parts[1]}`;
+        if (!grouped[monthKey]) grouped[monthKey] = [];
+        grouped[monthKey].push(h);
     });
 
     let html = '';
-    Object.keys(grouped).sort().forEach(month => {
-        const monthName = new Date(month + '-01').toLocaleDateString('fa-IR', { month: 'long', year: 'numeric', timeZone: 'Asia/Tehran' });
-        html += `<h5 style="margin:15px 0 10px">${monthName}</h5>`;
+    Object.keys(grouped).sort().forEach(monthKey => {
+        const parts = monthKey.split('/');
+        const jy = parseInt(parts[0]);
+        const jm = parseInt(parts[1]);
+        const monthName = getJalaaliMonthName(jm);
+        html += `<h5 style="margin:15px 0 10px">${monthName} ${jy}</h5>`;
         html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
-        grouped[month].forEach(h => {
-            const persianDate = new Date(h.date).toLocaleDateString('fa-IR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: 'Asia/Tehran'
-            });
+        grouped[monthKey].forEach(h => {
+            const dateParts = h.date.split('/');
+            const jd = parseInt(dateParts[2]);
+            const gregDate = toGregorian(parseInt(dateParts[0]), parseInt(dateParts[1]), jd);
+            const persianDate = getFullJalaaliDate(gregDate);
             html += `
                 <div class="card" style="padding:12px;display:flex;justify-content:space-between;align-items:center;background:#fef2f2;border-color:#fca5a5">
                     <span>${persianDate}</span>
@@ -867,11 +894,13 @@ function renderHolidays() {
 }
 
 function addHoliday() {
-    const date = prompt('تاریخ تعطیل را وارد کنید (به فرمت YYYY-MM-DD):', getDateString(getTodayTehran()));
+    const today = getTodayJalaali();
+    const defaultDate = `${today.jy}/${today.jm}/${today.jd}`;
+    const date = prompt('تاریخ تعطیل را وارد کنید (به فرمت سال/ماه/روز):', defaultDate);
     if (!date) return;
 
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        alert('فرمت تاریخ اشتباه است. لطفاً به فرمت YYYY-MM-DD وارد کنید.');
+    if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(date)) {
+        alert('فرمت تاریخ اشتباه است. لطفاً به فرمت سال/ماه/روز وارد کنید.');
         return;
     }
 
@@ -1161,7 +1190,7 @@ async function loadFinance() {
     const container = document.getElementById('finance-container');
     if (!container) return;
 
-    const now = getTodayTehran();
+    const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     const startStr = start.toISOString().split('T')[0];
@@ -1195,12 +1224,8 @@ async function loadFinance() {
 
     if (allFinances.length) {
         allFinances.forEach(f => {
-            const persianDate = new Date(f.date).toLocaleDateString('fa-IR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: 'Asia/Tehran'
-            });
+            const dateObj = new Date(f.date);
+            const persianDate = getFullJalaaliDate(dateObj);
             html += `
                 <div class="card" style="padding:12px">
                     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -1226,7 +1251,7 @@ async function loadFinance() {
 
 function showAddFinance() {
     const container = document.getElementById('finance-container');
-    const today = getDateString(getTodayTehran());
+    const today = new Date().toISOString().split('T')[0];
     container.innerHTML = `
         <div class="card" style="background:#f9fafb">
             <h4>💰 ثبت مالی</h4>
@@ -1301,8 +1326,14 @@ function updateDashboard() {
     });
     document.getElementById('dash-tasks-count').textContent = total;
 
-    const today = getDateString(getTodayTehran());
-    const todayEvents = allEvents.filter(e => e.start_time && e.start_time.startsWith(today));
+    const today = getTodayJalaali();
+    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
+    const todayEvents = allEvents.filter(e => {
+        if (!e.start_time) return false;
+        const eventDate = new Date(e.start_time);
+        const ej = toJalaali(eventDate);
+        return `${ej.jy}/${ej.jm}/${ej.jd}` === todayStr;
+    });
     document.getElementById('dash-events-count').textContent = todayEvents.length;
 
     renderCalendar('dashboard-calendar');
@@ -1311,8 +1342,14 @@ function updateDashboard() {
 
 function renderTodayEvents() {
     const container = document.getElementById('today-events');
-    const today = getDateString(getTodayTehran());
-    const todayEvents = allEvents.filter(e => e.start_time && e.start_time.startsWith(today));
+    const today = getTodayJalaali();
+    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
+    const todayEvents = allEvents.filter(e => {
+        if (!e.start_time) return false;
+        const eventDate = new Date(e.start_time);
+        const ej = toJalaali(eventDate);
+        return `${ej.jy}/${ej.jm}/${ej.jd}` === todayStr;
+    });
 
     if (todayEvents.length === 0) {
         container.innerHTML = `
@@ -1329,7 +1366,7 @@ function renderTodayEvents() {
         <div class="event-item">
             <div>
                 <div class="event-title">${e.title}</div>
-                <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}</div>
+                <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
             <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
                 <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
@@ -1351,8 +1388,8 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
     }
 });
 
-console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
-console.log('📌 تاریخ امروز تهران:', getPersianDate(getTodayTehran()));
+console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
+console.log('📌 تاریخ امروز:', getFullJalaaliDate(new Date()));
 </script>
 </body>
 </html>
