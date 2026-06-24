@@ -88,6 +88,9 @@
         .persian-datepicker .dp-selected{background:#667eea!important;color:white!important}
         .persian-datepicker .dp-cell{cursor:pointer;border-radius:4px}
         .persian-datepicker .dp-cell:hover{background:#e5e7eb!important}
+        .persian-datepicker .dp-monthpicker,.persian-datepicker .dp-yearpicker{background:white!important}
+        .persian-datepicker .dp-monthpicker td,.persian-datepicker .dp-yearpicker td{cursor:pointer;padding:5px}
+        .persian-datepicker .dp-monthpicker td:hover,.persian-datepicker .dp-yearpicker td:hover{background:#e5e7eb!important}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -99,6 +102,9 @@
             .calendar-toggle{justify-content:center}
         }
         .jalali-date-input{direction:ltr;text-align:right;cursor:pointer}
+        /* نمایش همیشه تب مدیریت برای ادمین */
+        #tab-admin{display:none!important}
+        #tab-admin.show{display:block!important}
     </style>
 </head>
 <body>
@@ -117,7 +123,6 @@
         <p style="text-align:center;margin-top:15px;color:#6b7280">حساب ندارید؟ <a href="#" onclick="document.getElementById('register-form').classList.toggle('hidden')" style="color:#667eea;font-weight:600">ثبت‌نام</a></p>
     </div>
     <div id="register-form" class="auth-box hidden">
-        <h3 style="margin-bottom:20px">📝 ثبت‌نام</h3>
         <form onsubmit="register(); return false;">
             <div class="form-group"><label>📧 ایمیل</label><input type="email" id="register-email" placeholder="example@email.com"></div>
             <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر"></div>
@@ -149,7 +154,7 @@
         <button class="tab" data-tab="calendar" onclick="switchTab('calendar')">📆 تقویم</button>
         <button class="tab" data-tab="holidays" onclick="switchTab('holidays')">🏖 تعطیلات</button>
         <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
-        <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')" style="display:none">👑 مدیریت</button>
+        <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')">👑 مدیریت</button>
     </div>
 
     <div id="tab-dashboard" class="tab-content active">
@@ -458,14 +463,18 @@ async function loadPlanner() {
         document.getElementById('user-name').textContent = user.email.split('@')[0];
         
         // ============================================================
-        // ✅ بخش مدیریت - نمایش تب ادمین
+        // ✅ نمایش تب مدیریت - راه حل مستقیم
         // ============================================================
+        const adminTab = document.getElementById('tab-admin');
         if (userData && userData.role === 'admin') {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
-            document.getElementById('tab-admin').style.display = 'block';
+            adminTab.style.display = 'block';
+            adminTab.classList.add('show');
+            console.log('✅ تب مدیریت نمایش داده شد');
         } else {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
-            document.getElementById('tab-admin').style.display = 'none';
+            adminTab.style.display = 'none';
+            adminTab.classList.remove('show');
         }
         
         await loadAllData();
@@ -790,7 +799,7 @@ function selectDateGregorian(dateStr) {
 }
 
 // ============================================================
-// توابع رویدادها
+// توابع رویدادها با تقویم شمسی فارسی
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -845,11 +854,12 @@ function showQuickAddEvent(prefillDate = null) {
                 </select>
             </div>
             <div style="margin-top:10px;font-size:12px;color:#6b7280">
-                💡 برای تغییر تاریخ روی فیلد کلیک کنید و تاریخ را وارد کنید
+                💡 برای انتخاب تاریخ روی فیلد کلیک کنید
             </div>
         </div>
     `;
     
+    // راه‌اندازی تقویم شمسی با فرمت فارسی
     setTimeout(() => {
         const input = document.getElementById('quick-event-date-jalali');
         if (input) {
@@ -860,6 +870,7 @@ function showQuickAddEvent(prefillDate = null) {
                     initialValue: true,
                     initialValueType: 'persian',
                     observer: true,
+                    persianDigit: true, // نمایش اعداد به فارسی
                     onSelect: function(unix) {
                         const date = new Date(unix);
                         const j = toJalaali(date);
@@ -981,6 +992,7 @@ function showAddEvent() {
                     initialValue: true,
                     initialValueType: 'persian',
                     observer: true,
+                    persianDigit: true,
                     onSelect: function(unix) {
                         const date = new Date(unix);
                         const j = toJalaali(date);
@@ -1622,6 +1634,26 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
 console.log('📌 حالت فعلی:', calendarMode);
 console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
+
+// ============================================================
+// ✅ نمایش تب مدیریت برای ادمین (راه حل دوم)
+// ============================================================
+// این کد رو برای اطمینان بیشتر اضافه میکنیم
+setTimeout(async function() {
+    const user = (await supabaseClient.auth.getUser()).data.user;
+    if (user) {
+        const { data: userData } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+        if (userData && userData.role === 'admin') {
+            document.getElementById('tab-admin').style.display = 'block';
+            document.getElementById('tab-admin').classList.add('show');
+            console.log('✅ تب مدیریت با تاخیر نمایش داده شد');
+        }
+    }
+}, 2000);
 </script>
 </body>
 </html>
