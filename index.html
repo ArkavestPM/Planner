@@ -90,14 +90,8 @@
             .header{flex-direction:column;align-items:stretch}
             .calendar-toggle{justify-content:center}
         }
-        /* تقویم فارسی برای input date */
-        input[type="date"] {
-            direction: ltr;
-            text-align: right;
-        }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            margin-right: 5px;
-        }
+        input[type="date"]{direction:ltr;text-align:right}
+        input[type="date"]::-webkit-calendar-picker-indicator{margin-right:5px}
     </style>
 </head>
 <body>
@@ -251,7 +245,7 @@ let allUsers = [];
 // ============================================================
 // ====== حالت تقویم (شمسی/میلادی) ======
 // ============================================================
-let calendarMode = 'jalali'; // 'jalali' or 'gregorian'
+let calendarMode = 'jalali';
 
 function setCalendarMode(mode) {
     calendarMode = mode;
@@ -288,7 +282,7 @@ function getJalaaliMonthName(jm) {
 }
 
 function getJalaaliWeekday(date) {
-    const weekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+    const weekdays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
     return weekdays[date.getDay()];
 }
 
@@ -298,9 +292,12 @@ function getFullJalaaliDate(date) {
     return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
+// ============================================================
+// ✅ اصلاح شده: پنجشنبه و جمعه (day 4 و 5)
+// ============================================================
 function isWeekendJalaali(date) {
     const day = date.getDay();
-    return day === 5 || day === 6; // پنجشنبه=5، جمعه=6
+    return day === 4 || day === 5; // پنجشنبه=4، جمعه=5
 }
 
 function getJalaaliDaysInMonth(jy, jm) {
@@ -327,9 +324,10 @@ function getFullGregorianDate(date) {
     return `${weekdays[d.getDay()]} ${d.getDate()} ${getGregorianMonthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
+// ✅ اصلاح شده برای میلادی: پنجشنبه و جمعه
 function isWeekendGregorian(date) {
     const day = date.getDay();
-    return day === 5 || day === 6; // Friday=5, Saturday=6
+    return day === 4 || day === 5; // پنجشنبه=4، جمعه=5
 }
 
 // ============================================================
@@ -663,7 +661,6 @@ function renderJalaliCalendar(container) {
     html += '</div>';
     container.innerHTML = html;
     
-    // آپدیت زیرنویس
     const subtitle = document.getElementById('calendar-subtitle');
     if (subtitle) {
         const today = getFullJalaaliDate(new Date());
@@ -823,7 +820,6 @@ function showQuickAddEvent(prefillDate = null) {
     const gregDate = toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
     const dateInputVal = gregDate.toISOString().split('T')[0];
     
-    // نمایش تاریخ شمسی به فارسی
     const displayDate = `${parseInt(parts[2])} ${getJalaaliMonthName(parseInt(parts[1]))} ${parseInt(parts[0])}`;
 
     container.innerHTML = `
@@ -1536,6 +1532,7 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
 
 console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
 console.log('📌 حالت فعلی:', calendarMode);
+console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
 </script>
 </body>
 </html>
