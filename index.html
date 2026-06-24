@@ -41,7 +41,7 @@
         .badge-purple{background:#ede9fe;color:#5b21b6}
         .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f3f4f6;flex-wrap:wrap;gap:10px}
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
-        .calendar-grid .day{padding:15px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative;font-size:14px}
+        .calendar-grid .day{padding:12px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative;font-size:14px}
         .calendar-grid .day:hover{background:#e5e7eb;transform:scale(1.05)}
         .calendar-grid .day.today{background:#667eea;color:#fff;font-weight:700}
         .calendar-grid .day.has-event{border:2px solid #667eea}
@@ -102,9 +102,8 @@
             .calendar-toggle{justify-content:center}
         }
         .jalali-date-input{direction:ltr;text-align:right;cursor:pointer}
-        /* نمایش همیشه تب مدیریت برای ادمین */
-        #tab-admin{display:none!important}
-        #tab-admin.show{display:block!important}
+        /* نمایش اجباری تب مدیریت برای ادمین */
+        #tab-admin.admin-visible{display:block!important}
     </style>
 </head>
 <body>
@@ -157,6 +156,7 @@
         <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')">👑 مدیریت</button>
     </div>
 
+    <!-- بقیه تب‌ها -->
     <div id="tab-dashboard" class="tab-content active">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>📊 داشبورد</h3>
@@ -463,18 +463,21 @@ async function loadPlanner() {
         document.getElementById('user-name').textContent = user.email.split('@')[0];
         
         // ============================================================
-        // ✅ نمایش تب مدیریت - راه حل مستقیم
+        // ✅ نمایش تب مدیریت - راه حل قطعی
         // ============================================================
         const adminTab = document.getElementById('tab-admin');
+        console.log('📌 داده کاربر:', userData);
+        
         if (userData && userData.role === 'admin') {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
             adminTab.style.display = 'block';
-            adminTab.classList.add('show');
+            adminTab.classList.add('admin-visible');
             console.log('✅ تب مدیریت نمایش داده شد');
         } else {
             document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
             adminTab.style.display = 'none';
-            adminTab.classList.remove('show');
+            adminTab.classList.remove('admin-visible');
+            console.log('❌ کاربر ادمین نیست');
         }
         
         await loadAllData();
@@ -629,7 +632,8 @@ function renderJalaliCalendar(container) {
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    const offset = (firstDayOfWeek + 1) % 7;
+    // ✅ اصلاح offset برای تقویم شمسی (شنبه = 0)
+    const offset = firstDayOfWeek === 0 ? 0 : 7 - firstDayOfWeek;
     for (let i = 0; i < offset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
     }
@@ -799,7 +803,7 @@ function selectDateGregorian(dateStr) {
 }
 
 // ============================================================
-// توابع رویدادها با تقویم شمسی فارسی
+// توابع رویدادها
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -859,7 +863,6 @@ function showQuickAddEvent(prefillDate = null) {
         </div>
     `;
     
-    // راه‌اندازی تقویم شمسی با فرمت فارسی
     setTimeout(() => {
         const input = document.getElementById('quick-event-date-jalali');
         if (input) {
@@ -870,7 +873,7 @@ function showQuickAddEvent(prefillDate = null) {
                     initialValue: true,
                     initialValueType: 'persian',
                     observer: true,
-                    persianDigit: true, // نمایش اعداد به فارسی
+                    persianDigit: true,
                     onSelect: function(unix) {
                         const date = new Date(unix);
                         const j = toJalaali(date);
@@ -1636,24 +1639,32 @@ console.log('📌 حالت فعلی:', calendarMode);
 console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
 
 // ============================================================
-// ✅ نمایش تب مدیریت برای ادمین (راه حل دوم)
+// ✅ نمایش اجباری تب مدیریت (راه حل نهایی)
 // ============================================================
-// این کد رو برای اطمینان بیشتر اضافه میکنیم
 setTimeout(async function() {
-    const user = (await supabaseClient.auth.getUser()).data.user;
-    if (user) {
-        const { data: userData } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        if (userData && userData.role === 'admin') {
-            document.getElementById('tab-admin').style.display = 'block';
-            document.getElementById('tab-admin').classList.add('show');
-            console.log('✅ تب مدیریت با تاخیر نمایش داده شد');
+    try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user) {
+            const { data: userData } = await supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            
+            console.log('🔍 بررسی مجدد کاربر:', userData);
+            
+            if (userData && userData.role === 'admin') {
+                const adminTab = document.getElementById('tab-admin');
+                adminTab.style.display = 'block';
+                adminTab.classList.add('admin-visible');
+                document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
+                console.log('✅ تب مدیریت با تاخیر نمایش داده شد');
+            }
         }
+    } catch(e) {
+        console.log('خطا در بررسی مجدد:', e);
     }
-}, 2000);
+}, 3000);
 </script>
 </body>
 </html>
