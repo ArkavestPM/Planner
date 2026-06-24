@@ -35,7 +35,6 @@
         .badge-warning{background:#fef3c7;color:#92400e}
         .badge-danger{background:#fee2e2;color:#991b1b}
         .badge-info{background:#dbeafe;color:#1e40af}
-        .badge-purple{background:#ede9fe;color:#5b21b6}
         .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f3f4f6;flex-wrap:wrap;gap:10px}
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
         .calendar-grid .day{padding:15px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative;font-size:14px}
@@ -46,7 +45,6 @@
         .calendar-grid .day.today .event-dot{background:#fff}
         .calendar-grid .day.holiday{background:#fee2e2;color:#991b1b}
         .calendar-grid .day.holiday::after{content:'✗';position:absolute;top:-4px;right:2px;font-size:10px;color:#ef4444}
-        .calendar-grid .day.selected{background:#dbeafe;border:2px solid #667eea}
         .calendar-grid .day.weekend{background:#fef3c7;color:#92400e}
         .event-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:8px;margin-bottom:8px;border-right:4px solid #667eea;flex-wrap:wrap;gap:10px}
         .event-item .event-title{font-weight:600;color:#333}
@@ -66,11 +64,7 @@
         .finance-card.balance{background:#dbeafe}
         .finance-card .amount{font-size:24px;font-weight:700}
         .finance-card .label{font-size:14px;color:#6b7280}
-        .holiday-toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;cursor:pointer}
-        .holiday-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:#667eea;cursor:pointer}
         .date-display{font-size:14px;color:#6b7280;padding:8px 15px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
-        
-        /* پاسخگو برای موبایل */
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -119,7 +113,6 @@
         <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
     </div>
 
-    <!-- تب داشبورد -->
     <div id="tab-dashboard" class="tab-content active">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>📊 داشبورد</h3>
@@ -148,7 +141,6 @@
         </div>
     </div>
 
-    <!-- تب اهداف -->
     <div id="tab-goals" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>🎯 اهداف و پروژه‌ها</h3>
@@ -157,7 +149,6 @@
         <div id="goals-container">در حال بارگذاری...</div>
     </div>
 
-    <!-- تب تقویم -->
     <div id="tab-calendar" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>📆 تقویم و رویدادها</h3>
@@ -166,7 +157,6 @@
         <div id="calendar-container">در حال بارگذاری...</div>
     </div>
 
-    <!-- تب تعطیلات -->
     <div id="tab-holidays" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>🏖 مدیریت تعطیلات</h3>
@@ -181,7 +171,6 @@
         </div>
     </div>
 
-    <!-- تب مالی -->
     <div id="tab-finance" class="tab-content">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
             <h3>💰 وضعیت مالی</h3>
@@ -203,7 +192,6 @@ const { createClient } = supabase;
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
-let currentDate = new Date();
 let allEvents = [];
 let allGoals = [];
 let allHolidays = [];
@@ -213,18 +201,16 @@ let allFinances = [];
 // توابع کمکی تاریخ و زمان (منطقه زمانی تهران)
 // ============================================================
 function getTehranDate(date) {
-    // تبدیل به منطقه زمانی تهران
     return new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
 }
 
 function getTodayTehran() {
     const now = new Date();
-    return new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
+    return getTehranDate(now);
 }
 
 function getPersianDate(date) {
-    const tehranDate = getTehranDate(date);
-    return tehranDate.toLocaleDateString('fa-IR', {
+    return date.toLocaleDateString('fa-IR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -233,8 +219,7 @@ function getPersianDate(date) {
 }
 
 function getPersianMonthYear(date) {
-    const tehranDate = getTehranDate(date);
-    return tehranDate.toLocaleDateString('fa-IR', {
+    return date.toLocaleDateString('fa-IR', {
         month: 'long',
         year: 'numeric',
         timeZone: 'Asia/Tehran'
@@ -242,8 +227,7 @@ function getPersianMonthYear(date) {
 }
 
 function getPersianWeekday(date) {
-    const tehranDate = getTehranDate(date);
-    return tehranDate.toLocaleDateString('fa-IR', {
+    return date.toLocaleDateString('fa-IR', {
         weekday: 'long',
         timeZone: 'Asia/Tehran'
     });
@@ -265,13 +249,13 @@ function isToday(date) {
 function isWeekend(date) {
     const tehranDate = getTehranDate(date);
     const day = tehranDate.getDay();
-    return day === 5 || day === 6; // جمعه=5، شنبه=6
+    return day === 5 || day === 6;
 }
 
-function getWeekdayName(dayIndex) {
-    const names = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
-    return names[dayIndex] || '';
-}
+// ============================================================
+// متغیرهای سراسری با تاریخ درست
+// ============================================================
+let currentDate = getTodayTehran();
 
 // ============================================================
 // توابع احراز هویت
@@ -299,7 +283,7 @@ async function register() {
     const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
     if (error) { showAuthMessage('❌ ' + error.message, true); return; }
     currentUser = data.user;
-    showAuthMessage('✅ ثبت‌نام موفق! لطفاً ایمیل خود را تایید کنید یا وارد شوید.', false);
+    showAuthMessage('✅ ثبت‌نام موفق! لطفاً وارد شوید.', false);
     document.getElementById('register-form').classList.add('hidden');
     document.getElementById('login-email').value = email;
 }
@@ -352,9 +336,9 @@ async function loadAllData() {
 }
 
 // ============================================================
-// توابع تقویم با تاریخ فارسی درست
+// توابع تقویم
 // ============================================================
-function renderCalendar(containerId, showHolidays = false) {
+function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
@@ -363,7 +347,6 @@ function renderCalendar(containerId, showHolidays = false) {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // تنظیم نام ماه به فارسی
     const persianMonth = getPersianMonthYear(currentDate);
     const label = document.getElementById('calendar-month-label');
     if (label) label.textContent = persianMonth;
@@ -377,7 +360,6 @@ function renderCalendar(containerId, showHolidays = false) {
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    // روزهای خالی اول ماه
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
     for (let i = 0; i < startOffset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
@@ -408,54 +390,6 @@ function renderCalendar(containerId, showHolidays = false) {
 
     html += '</div>';
     container.innerHTML = html;
-
-    // برای تب تقویم، رویدادهای روز انتخاب شده رو نمایش بدیم
-    if (containerId === 'calendar-container') {
-        renderDayEvents(todayStr);
-    }
-}
-
-function renderDayEvents(dateStr) {
-    const container = document.getElementById('day-events-display');
-    if (!container) return;
-
-    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
-    const persianDate = new Date(dateStr).toLocaleDateString('fa-IR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: 'Asia/Tehran'
-    });
-
-    if (events.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="padding:20px">
-                <div class="icon">📭</div>
-                <p>هیچ رویدادی برای ${persianDate} ندارید</p>
-                <button class="btn btn-primary btn-sm" onclick="showQuickAddEvent('${dateStr}')" style="margin-top:10px">➕ افزودن رویداد</button>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = `
-        <h5 style="margin:15px 0 10px">📋 رویدادهای ${persianDate}</h5>
-        ${events.map(e => `
-            <div class="event-item">
-                <div>
-                    <div class="event-title">${e.title}</div>
-                    <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })} 
-                        - ${new Date(e.end_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}
-                    </div>
-                </div>
-                <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-                    <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
-                    <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">🗑</button>
-                </div>
-            </div>
-        `).join('')}
-    `;
 }
 
 function changeMonth(delta) {
@@ -610,6 +544,49 @@ function showAddEvent() {
     renderDayEvents(getDateString(getTodayTehran()));
 }
 
+function renderDayEvents(dateStr) {
+    const container = document.getElementById('day-events-display');
+    if (!container) return;
+
+    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
+    const persianDate = new Date(dateStr).toLocaleDateString('fa-IR', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: 'Asia/Tehran'
+    });
+
+    if (events.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding:20px">
+                <div class="icon">📭</div>
+                <p>هیچ رویدادی برای ${persianDate} ندارید</p>
+                <button class="btn btn-primary btn-sm" onclick="showQuickAddEvent('${dateStr}')" style="margin-top:10px">➕ افزودن رویداد</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <h5 style="margin:15px 0 10px">📋 رویدادهای ${persianDate}</h5>
+        ${events.map(e => `
+            <div class="event-item">
+                <div>
+                    <div class="event-title">${e.title}</div>
+                    <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })} 
+                        - ${new Date(e.end_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Tehran' })}
+                    </div>
+                </div>
+                <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+                    <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">🗑</button>
+                </div>
+            </div>
+        `).join('')}
+    `;
+}
+
 async function saveEvent() {
     const title = document.getElementById('event-title-input').value.trim();
     const desc = document.getElementById('event-desc-input').value.trim();
@@ -693,7 +670,6 @@ function renderHolidays() {
         return;
     }
 
-    // گروه‌بندی بر اساس ماه
     const grouped = {};
     allHolidays.forEach(h => {
         const month = h.date.substring(0, 7);
@@ -736,7 +712,6 @@ function addHoliday() {
         return;
     }
 
-    // بررسی اینکه روز تعطیل نباشه
     if (allHolidays.some(h => h.date === date)) {
         alert('این روز قبلاً به عنوان تعطیل ثبت شده است!');
         return;
@@ -767,7 +742,7 @@ async function removeHoliday(id) {
 }
 
 // ============================================================
-// توابع اهداف
+// توابع اهداف (خلاصه شده)
 // ============================================================
 async function loadGoals() {
     const { data, error } = await supabaseClient
@@ -801,8 +776,7 @@ function renderGoals() {
     let html = '';
     allGoals.forEach(g => {
         const projects = g.projects || [];
-        let totalAct = 0,
-            doneAct = 0;
+        let totalAct = 0, doneAct = 0;
         projects.forEach(p => {
             if (p.activities) {
                 totalAct += p.activities.length;
@@ -890,9 +864,6 @@ function renderGoals() {
     container.innerHTML = html;
 }
 
-// ============================================================
-// توابع مدیریت اهداف (خلاصه)
-// ============================================================
 function showAddGoal() {
     const container = document.getElementById('goals-container');
     container.innerHTML = `
@@ -925,9 +896,6 @@ async function deleteGoal(id) {
     updateDashboard();
 }
 
-// ============================================================
-// توابع مدیریت پروژه‌ها (خلاصه)
-// ============================================================
 function showAddProject(goalId) {
     const container = document.getElementById('goals-container');
     container.innerHTML = `
@@ -972,9 +940,6 @@ async function deleteProject(id) {
     updateDashboard();
 }
 
-// ============================================================
-// توابع مدیریت فعالیت‌ها (خلاصه)
-// ============================================================
 function showAddActivity(projectId) {
     const container = document.getElementById('goals-container');
     container.innerHTML = `
@@ -1212,28 +1177,6 @@ function renderTodayEvents() {
 }
 
 // ============================================================
-// ایجاد جدول تعطیلات در Supabase (یک بار اجرا کنید)
-// ============================================================
-async function createHolidaysTable() {
-    const sql = `
-        CREATE TABLE IF NOT EXISTS holidays (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-            date DATE NOT NULL,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-            UNIQUE(user_id, date)
-        );
-        ALTER TABLE holidays ENABLE ROW LEVEL SECURITY;
-        CREATE POLICY "Users can only see their own holidays"
-        ON holidays FOR ALL
-        USING (user_id = auth.uid())
-        WITH CHECK (user_id = auth.uid());
-    `;
-    // این کوئری رو توی SQL Editor Supabase اجرا کنید
-    console.log('لطفاً جدول holidays را در Supabase ایجاد کنید');
-}
-
-// ============================================================
 // شروع برنامه
 // ============================================================
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
@@ -1245,10 +1188,8 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
     }
 });
 
-// نمایش پیام برای ایجاد جدول تعطیلات
 console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
-console.log('📌 اگر خطای جدول holidays را دیدید، لطفاً آن را در Supabase ایجاد کنید.');
-console.log('📧 برای ورود از ایمیل و رمز عبور ثبت‌نامی استفاده کنید.');
+console.log('📌 تاریخ امروز تهران:', getPersianDate(getTodayTehran()));
 </script>
 </body>
 </html>
