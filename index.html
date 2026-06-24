@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 پلنر شخصی شمسی</title>
+    <title>📅 پلنر شخصی</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.6/dist/jalaali.min.js"></script>
     <style>
@@ -36,6 +36,7 @@
         .badge-warning{background:#fef3c7;color:#92400e}
         .badge-danger{background:#fee2e2;color:#991b1b}
         .badge-info{background:#dbeafe;color:#1e40af}
+        .badge-purple{background:#ede9fe;color:#5b21b6}
         .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f3f4f6;flex-wrap:wrap;gap:10px}
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
         .calendar-grid .day{padding:15px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative;font-size:14px}
@@ -74,6 +75,11 @@
         .user-status.pending{background:#fef3c7;color:#92400e}
         .user-status.approved{background:#d1fae5;color:#065f46}
         .user-status.rejected{background:#fee2e2;color:#991b1b}
+        .calendar-toggle{display:flex;gap:5px;background:#f3f4f6;border-radius:8px;padding:3px}
+        .calendar-toggle button{padding:5px 15px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;transition:all .3s;background:transparent;color:#6b7280}
+        .calendar-toggle button.active{background:#667eea;color:#fff}
+        .calendar-toggle button:hover{background:#e5e7eb}
+        .calendar-toggle button.active:hover{background:#5a67d8}
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -81,6 +87,16 @@
             .header h1{font-size:18px}
             .event-item{flex-direction:column;align-items:flex-start}
             .user-item{flex-direction:column;align-items:stretch}
+            .header{flex-direction:column;align-items:stretch}
+            .calendar-toggle{justify-content:center}
+        }
+        /* تقویم فارسی برای input date */
+        input[type="date"] {
+            direction: ltr;
+            text-align: right;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -88,7 +104,7 @@
 <div class="container" id="app">
 
 <div id="auth-section">
-    <h2>📅 پلنر شخصی شمسی</h2>
+    <h2>📅 پلنر شخصی</h2>
     <div id="auth-message" style="margin-bottom:15px"></div>
     <div class="auth-box">
         <h3 style="margin-bottom:20px">🔐 ورود</h3>
@@ -107,7 +123,13 @@
 
 <div id="planner-section" class="hidden">
     <div class="header">
-        <h1>📅 پلنر شخصی شمسی</h1>
+        <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
+            <h1>📅 پلنر شخصی</h1>
+            <div class="calendar-toggle" id="calendar-toggle">
+                <button class="active" onclick="setCalendarMode('jalali')" id="btn-jalali">🇮🇷 شمسی</button>
+                <button onclick="setCalendarMode('gregorian')" id="btn-gregorian">🇺🇸 میلادی</button>
+            </div>
+        </div>
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
             <span class="date-display" id="today-display"></span>
             <span>👤 <span id="user-name">کاربر</span></span>
@@ -137,7 +159,7 @@
         </div>
         <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
-                <h4>📆 تقویم شمسی</h4>
+                <h4>📆 تقویم <span style="font-size:13px;font-weight:400;color:#6b7280" id="calendar-subtitle"></span></h4>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                     <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
                     <span style="font-weight:600;font-size:16px" id="calendar-month-label"></span>
@@ -227,63 +249,87 @@ let allFinances = [];
 let allUsers = [];
 
 // ============================================================
+// ====== حالت تقویم (شمسی/میلادی) ======
+// ============================================================
+let calendarMode = 'jalali'; // 'jalali' or 'gregorian'
+
+function setCalendarMode(mode) {
+    calendarMode = mode;
+    document.getElementById('btn-jalali').classList.toggle('active', mode === 'jalali');
+    document.getElementById('btn-gregorian').classList.toggle('active', mode === 'gregorian');
+    renderCalendar('dashboard-calendar');
+    renderCalendar('calendar-container');
+    updateTodayDisplay();
+}
+
+// ============================================================
 // ====== توابع تاریخ شمسی با jalaali-js ======
 // ============================================================
 
-// تبدیل تاریخ میلادی به شمسی
 function toJalaali(date) {
     const g = new Date(date);
     const j = jalaali.toJalaali(g.getFullYear(), g.getMonth() + 1, g.getDate());
     return j;
 }
 
-// تبدیل تاریخ شمسی به میلادی
 function toGregorian(jy, jm, jd) {
     const g = jalaali.toGregorian(jy, jm, jd);
     return new Date(g.gy, g.gm - 1, g.gd);
 }
 
-// گرفتن تاریخ امروز شمسی
 function getTodayJalaali() {
     const now = new Date();
     return toJalaali(now);
 }
 
-// گرفتن تاریخ شمسی به صورت رشته
-function getJalaaliDateString(jy, jm, jd) {
-    return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
-}
-
-// گرفتن نام ماه شمسی
 function getJalaaliMonthName(jm) {
     const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
     return months[jm - 1];
 }
 
-// گرفتن نام روز هفته شمسی
 function getJalaaliWeekday(date) {
-    const weekdays = ['جمعه', 'شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه'];
+    const weekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
     return weekdays[date.getDay()];
 }
 
-// نمایش کامل تاریخ شمسی
 function getFullJalaaliDate(date) {
     const j = toJalaali(date);
     const weekday = getJalaaliWeekday(date);
     return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
-// بررسی اینکه روز پنجشنبه یا جمعه است
 function isWeekendJalaali(date) {
     const day = date.getDay();
     return day === 5 || day === 6; // پنجشنبه=5، جمعه=6
 }
 
-// گرفتن تعداد روزهای ماه شمسی
 function getJalaaliDaysInMonth(jy, jm) {
     if (jm <= 6) return 31;
     if (jm <= 11) return 30;
     return jalaali.isLeapJalaali(jy) ? 30 : 29;
+}
+
+function getJalaaliDateString(jy, jm, jd) {
+    return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
+}
+
+// ============================================================
+// ====== توابع تاریخ میلادی ======
+// ============================================================
+function getGregorianMonthName(gm) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[gm];
+}
+
+function getFullGregorianDate(date) {
+    const d = new Date(date);
+    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return `${weekdays[d.getDay()]} ${d.getDate()} ${getGregorianMonthName(d.getMonth())} ${d.getFullYear()}`;
+}
+
+function isWeekendGregorian(date) {
+    const day = date.getDay();
+    return day === 5 || day === 6; // Friday=5, Saturday=6
 }
 
 // ============================================================
@@ -292,12 +338,14 @@ function getJalaaliDaysInMonth(jy, jm) {
 let currentJalaaliYear = 0;
 let currentJalaaliMonth = 0;
 let currentJalaaliDay = 0;
+let currentGregorianDate = new Date();
 
 function setCurrentDateToToday() {
     const today = getTodayJalaali();
     currentJalaaliYear = today.jy;
     currentJalaaliMonth = today.jm;
     currentJalaaliDay = today.jd;
+    currentGregorianDate = new Date();
 }
 
 setCurrentDateToToday();
@@ -411,7 +459,11 @@ async function loadPlanner() {
 
 function updateTodayDisplay() {
     const today = new Date();
-    document.getElementById('today-display').textContent = getFullJalaaliDate(today);
+    if (calendarMode === 'jalali') {
+        document.getElementById('today-display').textContent = getFullJalaaliDate(today);
+    } else {
+        document.getElementById('today-display').textContent = getFullGregorianDate(today);
+    }
 }
 
 async function loadAllData() {
@@ -550,26 +602,31 @@ async function deleteUser(userId) {
 }
 
 // ============================================================
-// ====== توابع تقویم شمسی ======
+// ====== توابع تقویم ======
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    if (calendarMode === 'jalali') {
+        renderJalaliCalendar(container);
+    } else {
+        renderGregorianCalendar(container);
+    }
+}
+
+function renderJalaliCalendar(container) {
     const jy = currentJalaaliYear;
     const jm = currentJalaaliMonth;
     const daysInMonth = getJalaaliDaysInMonth(jy, jm);
 
-    // روز اول ماه شمسی به میلادی
     const firstDayGreg = toGregorian(jy, jm, 1);
-    const firstDayOfWeek = firstDayGreg.getDay(); // 0=یکشنبه در جاوااسکریپت
+    const firstDayOfWeek = firstDayGreg.getDay();
 
-    // تنظیم نام ماه
     document.getElementById('calendar-month-label').textContent = `${getJalaaliMonthName(jm)} ${jy}`;
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    // محاسبه offset: در تقویم شمسی شنبه=0
     const offset = (firstDayOfWeek + 1) % 7;
     for (let i = 0; i < offset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
@@ -605,26 +662,89 @@ function renderCalendar(containerId) {
 
     html += '</div>';
     container.innerHTML = html;
+    
+    // آپدیت زیرنویس
+    const subtitle = document.getElementById('calendar-subtitle');
+    if (subtitle) {
+        const today = getFullJalaaliDate(new Date());
+        subtitle.textContent = `امروز: ${today}`;
+    }
+}
+
+function renderGregorianCalendar(container) {
+    const date = currentGregorianDate;
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    document.getElementById('calendar-month-label').textContent = `${monthNames[month]} ${year}`;
+
+    let html = `<div class="weekday-names">${['S','M','T','W','T','F','S'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
+
+    const offset = firstDay;
+    for (let i = 0; i < offset; i++) {
+        html += `<div class="day" style="background:transparent;cursor:default"></div>`;
+    }
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateObj = new Date(year, month, d);
+        const dateStr = dateObj.toISOString().split('T')[0];
+        const isTodayDate = dateStr === todayStr;
+        const isWeekendDay = isWeekendGregorian(dateObj);
+        const hasEvent = allEvents.some(e => e.start_time && e.start_time.startsWith(dateStr));
+
+        let classes = 'day';
+        if (isTodayDate) classes += ' today';
+        if (isWeekendDay) classes += ' weekend';
+        if (hasEvent) classes += ' has-event';
+
+        html += `<div class="${classes}" onclick="selectDateGregorian('${dateStr}')">
+            ${d}
+            ${hasEvent ? '<div class="event-dot"></div>' : ''}
+        </div>`;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+    
+    const subtitle = document.getElementById('calendar-subtitle');
+    if (subtitle) {
+        const today = getFullGregorianDate(new Date());
+        subtitle.textContent = `Today: ${today}`;
+    }
 }
 
 function changeMonth(delta) {
-    currentJalaaliMonth += delta;
-    if (currentJalaaliMonth > 12) {
-        currentJalaaliMonth = 1;
-        currentJalaaliYear++;
-    } else if (currentJalaaliMonth < 1) {
-        currentJalaaliMonth = 12;
-        currentJalaaliYear--;
+    if (calendarMode === 'jalali') {
+        currentJalaaliMonth += delta;
+        if (currentJalaaliMonth > 12) {
+            currentJalaaliMonth = 1;
+            currentJalaaliYear++;
+        } else if (currentJalaaliMonth < 1) {
+            currentJalaaliMonth = 12;
+            currentJalaaliYear--;
+        }
+    } else {
+        currentGregorianDate.setMonth(currentGregorianDate.getMonth() + delta);
     }
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
 }
 
 function goToToday() {
-    const today = getTodayJalaali();
-    currentJalaaliYear = today.jy;
-    currentJalaaliMonth = today.jm;
-    currentJalaaliDay = today.jd;
+    if (calendarMode === 'jalali') {
+        const today = getTodayJalaali();
+        currentJalaaliYear = today.jy;
+        currentJalaaliMonth = today.jm;
+        currentJalaaliDay = today.jd;
+    } else {
+        currentGregorianDate = new Date();
+    }
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
 }
@@ -659,6 +779,24 @@ function selectDate(dateStr) {
     }
 }
 
+function selectDateGregorian(dateStr) {
+    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
+    const fullDate = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    if (events.length === 0) {
+        if (confirm(`📅 ${fullDate}\n\nNo events for this date.\nAdd a new event?`)) {
+            showQuickAddEvent(dateStr);
+        }
+    } else {
+        let msg = `📅 ${fullDate}\n\nEvents:\n`;
+        events.forEach((e, i) => {
+            const start = new Date(e.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            msg += `\n${i+1}. ${e.title}\n   ⏰ ${start}\n`;
+        });
+        alert(msg);
+    }
+}
+
 // ============================================================
 // ====== توابع رویدادها ======
 // ============================================================
@@ -684,10 +822,13 @@ function showQuickAddEvent(prefillDate = null) {
     const parts = dateStr.split('/');
     const gregDate = toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
     const dateInputVal = gregDate.toISOString().split('T')[0];
+    
+    // نمایش تاریخ شمسی به فارسی
+    const displayDate = `${parseInt(parts[2])} ${getJalaaliMonthName(parseInt(parts[1]))} ${parseInt(parts[0])}`;
 
     container.innerHTML = `
         <div style="background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px">
-            <h5 style="margin-bottom:10px">➕ رویداد جدید</h5>
+            <h5 style="margin-bottom:10px">➕ رویداد جدید - ${displayDate}</h5>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
                 <div><label style="display:block;font-size:12px;font-weight:600">عنوان</label>
                     <input id="quick-event-title" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
@@ -1225,7 +1366,12 @@ async function loadFinance() {
     if (allFinances.length) {
         allFinances.forEach(f => {
             const dateObj = new Date(f.date);
-            const persianDate = getFullJalaaliDate(dateObj);
+            let persianDate;
+            if (calendarMode === 'jalali') {
+                persianDate = getFullJalaaliDate(dateObj);
+            } else {
+                persianDate = getFullGregorianDate(dateObj);
+            }
             html += `
                 <div class="card" style="padding:12px">
                     <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -1388,8 +1534,8 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
     }
 });
 
-console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
-console.log('📌 تاریخ امروز:', getFullJalaaliDate(new Date()));
+console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
+console.log('📌 حالت فعلی:', calendarMode);
 </script>
 </body>
 </html>
