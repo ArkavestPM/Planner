@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 پلنر شخصی</title>
+    <title>📅 پلنر شخصی شمسی</title>
+    
+    <!-- کتابخانه‌های مورد نیاز -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.6/dist/jalaali.min.js"></script>
+    
+    <!-- کتابخانه persian-datepicker برای تقویم شمسی -->
+    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.0.0/dist/css/persian-datepicker.css">
+    <script src="https://unpkg.com/persian-datepicker@1.0.0/dist/js/persian-datepicker.js"></script>
+    
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;direction:rtl}
@@ -80,6 +87,31 @@
         .calendar-toggle button.active{background:#667eea;color:#fff}
         .calendar-toggle button:hover{background:#e5e7eb}
         .calendar-toggle button.active:hover{background:#5a67d8}
+        
+        /* استایل تقویم شمسی */
+        .persian-datepicker-rtl {
+            direction: rtl;
+        }
+        .persian-datepicker .dp-header {
+            background: #667eea !important;
+            color: white !important;
+        }
+        .persian-datepicker .dp-today {
+            background: #667eea !important;
+            color: white !important;
+        }
+        .persian-datepicker .dp-selected {
+            background: #667eea !important;
+            color: white !important;
+        }
+        .persian-datepicker .dp-cell {
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .persian-datepicker .dp-cell:hover {
+            background: #e5e7eb !important;
+        }
+        
         @media(max-width:640px){
             .container{padding:15px}
             .tab{padding:8px 12px;font-size:13px}
@@ -90,15 +122,18 @@
             .header{flex-direction:column;align-items:stretch}
             .calendar-toggle{justify-content:center}
         }
-        input[type="date"]{direction:ltr;text-align:right}
-        input[type="date"]::-webkit-calendar-picker-indicator{margin-right:5px}
+        .jalali-date-input {
+            direction: ltr;
+            text-align: right;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 <div class="container" id="app">
 
 <div id="auth-section">
-    <h2>📅 پلنر شخصی</h2>
+    <h2>📅 پلنر شخصی شمسی</h2>
     <div id="auth-message" style="margin-bottom:15px"></div>
     <div class="auth-box">
         <h3 style="margin-bottom:20px">🔐 ورود</h3>
@@ -118,7 +153,7 @@
 <div id="planner-section" class="hidden">
     <div class="header">
         <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-            <h1>📅 پلنر شخصی</h1>
+            <h1>📅 پلنر شخصی شمسی</h1>
             <div class="calendar-toggle" id="calendar-toggle">
                 <button class="active" onclick="setCalendarMode('jalali')" id="btn-jalali">🇮🇷 شمسی</button>
                 <button onclick="setCalendarMode('gregorian')" id="btn-gregorian">🇺🇸 میلادی</button>
@@ -153,7 +188,7 @@
         </div>
         <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
-                <h4>📆 تقویم <span style="font-size:13px;font-weight:400;color:#6b7280" id="calendar-subtitle"></span></h4>
+                <h4>📆 تقویم شمسی</h4>
                 <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
                     <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
                     <span style="font-weight:600;font-size:16px" id="calendar-month-label"></span>
@@ -292,12 +327,10 @@ function getFullJalaaliDate(date) {
     return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
 }
 
-// ============================================================
-// ✅ اصلاح شده: پنجشنبه و جمعه (day 4 و 5)
-// ============================================================
+// ✅ اصلاح شده: پنجشنبه (day 4) و جمعه (day 5)
 function isWeekendJalaali(date) {
     const day = date.getDay();
-    return day === 4 || day === 5; // پنجشنبه=4، جمعه=5
+    return day === 4 || day === 5;
 }
 
 function getJalaaliDaysInMonth(jy, jm) {
@@ -308,6 +341,19 @@ function getJalaaliDaysInMonth(jy, jm) {
 
 function getJalaaliDateString(jy, jm, jd) {
     return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
+}
+
+function parseJalaliDate(str) {
+    const parts = str.split('/');
+    if (parts.length === 3) {
+        const jy = parseInt(parts[0]);
+        const jm = parseInt(parts[1]);
+        const jd = parseInt(parts[2]);
+        if (!isNaN(jy) && !isNaN(jm) && !isNaN(jd)) {
+            return { jy, jm, jd };
+        }
+    }
+    return null;
 }
 
 // ============================================================
@@ -324,10 +370,9 @@ function getFullGregorianDate(date) {
     return `${weekdays[d.getDay()]} ${d.getDate()} ${getGregorianMonthName(d.getMonth())} ${d.getFullYear()}`;
 }
 
-// ✅ اصلاح شده برای میلادی: پنجشنبه و جمعه
 function isWeekendGregorian(date) {
     const day = date.getDay();
-    return day === 4 || day === 5; // پنجشنبه=4، جمعه=5
+    return day === 4 || day === 5;
 }
 
 // ============================================================
@@ -795,7 +840,7 @@ function selectDateGregorian(dateStr) {
 }
 
 // ============================================================
-// ====== توابع رویدادها ======
+// ====== توابع رویدادها با تقویم شمسی ======
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -817,10 +862,13 @@ function showQuickAddEvent(prefillDate = null) {
     const today = getTodayJalaali();
     const dateStr = prefillDate || `${today.jy}/${today.jm}/${today.jd}`;
     const parts = dateStr.split('/');
-    const gregDate = toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+    const jy = parseInt(parts[0]);
+    const jm = parseInt(parts[1]);
+    const jd = parseInt(parts[2]);
+    const gregDate = toGregorian(jy, jm, jd);
     const dateInputVal = gregDate.toISOString().split('T')[0];
     
-    const displayDate = `${parseInt(parts[2])} ${getJalaaliMonthName(parseInt(parts[1]))} ${parseInt(parts[0])}`;
+    const displayDate = `${jd} ${getJalaaliMonthName(jm)} ${jy}`;
 
     container.innerHTML = `
         <div style="background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px">
@@ -828,8 +876,8 @@ function showQuickAddEvent(prefillDate = null) {
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
                 <div><label style="display:block;font-size:12px;font-weight:600">عنوان</label>
                     <input id="quick-event-title" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
-                <div><label style="display:block;font-size:12px;font-weight:600">تاریخ</label>
-                    <input type="date" id="quick-event-date" value="${dateInputVal}" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
+                <div><label style="display:block;font-size:12px;font-weight:600">تاریخ شمسی</label>
+                    <input type="text" id="quick-event-date-jalali" value="${dateStr}" class="jalali-date-input" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;direction:rtl" placeholder="سال/ماه/روز" readonly></div>
                 <div><label style="display:block;font-size:12px;font-weight:600">ساعت</label>
                     <input type="time" id="quick-event-time" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
                 <div style="display:flex;gap:5px">
@@ -846,22 +894,85 @@ function showQuickAddEvent(prefillDate = null) {
                     <option value="appointment">قرار</option>
                 </select>
             </div>
+            <div style="margin-top:10px;font-size:12px;color:#6b7280">
+                💡 برای تغییر تاریخ روی فیلد کلیک کنید و تاریخ را وارد کنید
+            </div>
         </div>
     `;
+    
+    // راه‌اندازی تقویم شمسی
+    setTimeout(() => {
+        const input = document.getElementById('quick-event-date-jalali');
+        if (input) {
+            try {
+                const picker = new persianDatepicker(input, {
+                    format: 'YYYY/MM/DD',
+                    autoClose: true,
+                    initialValue: true,
+                    initialValueType: 'persian',
+                    observer: true,
+                    onSelect: function(unix) {
+                        const date = new Date(unix);
+                        const j = toJalaali(date);
+                        const str = `${j.jy}/${String(j.jm).padStart(2, '0')}/${String(j.jd).padStart(2, '0')}`;
+                        input.value = str;
+                        input.dataset.jalali = str;
+                    }
+                });
+            } catch(e) {
+                console.log('تقویم شمسی در دسترس نیست، از ورودی دستی استفاده کنید');
+            }
+        }
+    }, 100);
+}
+
+function getJalaliDateFromInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return null;
+    const val = input.value.trim();
+    if (!val) return null;
+    const parts = val.split('/');
+    if (parts.length === 3) {
+        const jy = parseInt(parts[0]);
+        const jm = parseInt(parts[1]);
+        const jd = parseInt(parts[2]);
+        if (!isNaN(jy) && !isNaN(jm) && !isNaN(jd) && jy > 1300) {
+            return { jy, jm, jd };
+        }
+    }
+    // اگر فرمت اشتباه بود، از مقدار data استفاده کن
+    if (input.dataset.jalali) {
+        const parts2 = input.dataset.jalali.split('/');
+        if (parts2.length === 3) {
+            return { jy: parseInt(parts2[0]), jm: parseInt(parts2[1]), jd: parseInt(parts2[2]) };
+        }
+    }
+    return null;
 }
 
 async function saveQuickEvent() {
     const title = document.getElementById('quick-event-title').value.trim();
-    const date = document.getElementById('quick-event-date').value;
-    const time = document.getElementById('quick-event-time').value;
     const type = document.getElementById('quick-event-type').value;
-
-    if (!title || !date || !time) {
-        alert('لطفاً عنوان، تاریخ و ساعت را وارد کنید!');
+    const time = document.getElementById('quick-event-time').value;
+    
+    // گرفتن تاریخ شمسی از فیلد
+    let jalaliDate = getJalaliDateFromInput('quick-event-date-jalali');
+    
+    if (!jalaliDate) {
+        // اگر تاریخ شمسی وارد نشده، از امروز استفاده کن
+        const today = getTodayJalaali();
+        jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
+    }
+    
+    const gregDate = toGregorian(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd);
+    const dateStr = gregDate.toISOString().split('T')[0];
+    
+    if (!title) {
+        alert('لطفاً عنوان را وارد کنید!');
         return;
     }
 
-    const start_time = new Date(`${date}T${time}`).toISOString();
+    const start_time = new Date(`${dateStr}T${time || '09:00'}`).toISOString();
     const end_time = new Date(new Date(start_time).getTime() + 3600000).toISOString();
 
     const { error } = await supabaseClient.from('calendar').insert({
@@ -886,6 +997,8 @@ function showAddEvent() {
     const container = document.getElementById('calendar-container');
     const now = new Date();
     const nowStr = now.toISOString().slice(0, 16);
+    const today = getTodayJalaali();
+    const defaultJalali = `${today.jy}/${today.jm}/${today.jd}`;
 
     container.innerHTML = `
         <div class="card" style="background:#f9fafb">
@@ -893,8 +1006,9 @@ function showAddEvent() {
             <div class="form-group"><label>عنوان *</label><input id="event-title-input" style="font-family:inherit"></div>
             <div class="form-group"><label>توضیحات</label><textarea id="event-desc-input" rows="2" style="font-family:inherit"></textarea></div>
             <div class="grid-2">
-                <div class="form-group"><label>شروع *</label><input type="datetime-local" id="event-start-input" value="${nowStr}" style="font-family:inherit"></div>
-                <div class="form-group"><label>پایان *</label><input type="datetime-local" id="event-end-input" value="${nowStr}" style="font-family:inherit"></div>
+                <div class="form-group"><label>تاریخ شمسی</label>
+                    <input type="text" id="event-date-jalali" value="${defaultJalali}" class="jalali-date-input" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;direction:rtl" placeholder="سال/ماه/روز" readonly></div>
+                <div class="form-group"><label>ساعت شروع</label><input type="time" id="event-start-time" style="font-family:inherit"></div>
             </div>
             <div class="form-group"><label>نوع</label>
                 <select id="event-type-input" style="font-family:inherit">
@@ -905,37 +1019,71 @@ function showAddEvent() {
                 </select>
             </div>
             <div style="display:flex;gap:10px">
-                <button class="btn btn-success" onclick="saveEvent()">💾 ذخیره</button>
+                <button class="btn btn-success" onclick="saveEventJalali()">💾 ذخیره</button>
                 <button class="btn btn-secondary" onclick="loadCalendarEvents();renderCalendar('calendar-container')">انصراف</button>
             </div>
         </div>
         <div id="day-events-display"></div>
     `;
+    
+    // راه‌اندازی تقویم شمسی
+    setTimeout(() => {
+        const input = document.getElementById('event-date-jalali');
+        if (input) {
+            try {
+                const picker = new persianDatepicker(input, {
+                    format: 'YYYY/MM/DD',
+                    autoClose: true,
+                    initialValue: true,
+                    initialValueType: 'persian',
+                    observer: true,
+                    onSelect: function(unix) {
+                        const date = new Date(unix);
+                        const j = toJalaali(date);
+                        const str = `${j.jy}/${String(j.jm).padStart(2, '0')}/${String(j.jd).padStart(2, '0')}`;
+                        input.value = str;
+                        input.dataset.jalali = str;
+                    }
+                });
+            } catch(e) {
+                console.log('تقویم شمسی در دسترس نیست');
+            }
+        }
+    }, 100);
 }
 
-async function saveEvent() {
+async function saveEventJalali() {
     const title = document.getElementById('event-title-input').value.trim();
     const desc = document.getElementById('event-desc-input').value.trim();
-    const start = document.getElementById('event-start-input').value;
-    const end = document.getElementById('event-end-input').value;
     const type = document.getElementById('event-type-input').value;
+    const time = document.getElementById('event-start-time').value;
+    
+    // گرفتن تاریخ شمسی
+    const input = document.getElementById('event-date-jalali');
+    let jalaliDate = getJalaliDateFromInput('event-date-jalali');
+    
+    if (!jalaliDate) {
+        const today = getTodayJalaali();
+        jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
+    }
+    
+    const gregDate = toGregorian(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd);
+    const dateStr = gregDate.toISOString().split('T')[0];
 
-    if (!title || !start || !end) {
-        alert('عنوان، شروع و پایان الزامی است!');
+    if (!title) {
+        alert('عنوان الزامی است!');
         return;
     }
 
-    if (new Date(start) >= new Date(end)) {
-        alert('زمان شروع باید قبل از پایان باشد!');
-        return;
-    }
+    const start_time = new Date(`${dateStr}T${time || '09:00'}`).toISOString();
+    const end_time = new Date(new Date(start_time).getTime() + 3600000).toISOString();
 
     const { error } = await supabaseClient.from('calendar').insert({
         user_id: currentUser.id,
         title,
         description: desc || null,
-        start_time: start,
-        end_time: end,
+        start_time,
+        end_time,
         type
     });
 
@@ -1530,7 +1678,7 @@ supabaseClient.auth.getSession().then(({ data: { session } }) => {
     }
 });
 
-console.log('🚀 پلنر شخصی با موفقیت بارگذاری شد!');
+console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
 console.log('📌 حالت فعلی:', calendarMode);
 console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
 </script>
