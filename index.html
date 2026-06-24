@@ -198,7 +198,7 @@ let allHolidays = [];
 let allFinances = [];
 
 // ============================================================
-// توابع کمکی تاریخ و زمان (منطقه زمانی تهران)
+// ====== تاریخ و زمان با منطقه زمانی تهران ======
 // ============================================================
 function getTehranDate(date) {
     return new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Tehran' }));
@@ -253,12 +253,12 @@ function isWeekend(date) {
 }
 
 // ============================================================
-// متغیرهای سراسری با تاریخ درست
+// ====== متغیرهای اصلی با تاریخ درست ======
 // ============================================================
 let currentDate = getTodayTehran();
 
 // ============================================================
-// توابع احراز هویت
+// ====== توابع احراز هویت ======
 // ============================================================
 function showAuthMessage(msg, isError = false) {
     document.getElementById('auth-message').innerHTML = `<div style="padding:12px;border-radius:8px;background:${isError?'#fee2e2':'#d1fae5'};color:${isError?'#991b1b':'#065f46'}">${msg}</div>`;
@@ -296,7 +296,7 @@ function logout() {
 }
 
 // ============================================================
-// توابع اصلی
+// ====== توابع اصلی ======
 // ============================================================
 function switchTab(tabId) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -336,21 +336,26 @@ async function loadAllData() {
 }
 
 // ============================================================
-// توابع تقویم
+// ====== توابع تقویم ======
 // ============================================================
 function renderCalendar(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const month = currentDate.getMonth();
+    // گرفتن اطلاعات ماه و سال از currentDate (که همیشه تهران هست)
     const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // روز اول ماه و تعداد روزهای ماه
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+    // نمایش نام ماه به فارسی
     const persianMonth = getPersianMonthYear(currentDate);
     const label = document.getElementById('calendar-month-label');
     if (label) label.textContent = persianMonth;
 
+    // نمایش تاریخ امروز
     const subtitle = document.getElementById('calendar-subtitle');
     if (subtitle) {
         const today = getTodayTehran();
@@ -360,7 +365,9 @@ function renderCalendar(containerId) {
 
     let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
 
-    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    // روزهای خالی اول ماه (تغییر offset برای تقویم شمسی)
+    // در تقویم شمسی، شنبه روز اول هفته است (0 = شنبه)
+    const startOffset = firstDay === 0 ? 0 : 7 - firstDay;
     for (let i = 0; i < startOffset; i++) {
         html += `<div class="day" style="background:transparent;cursor:default"></div>`;
     }
@@ -393,6 +400,7 @@ function renderCalendar(containerId) {
 }
 
 function changeMonth(delta) {
+    // تغییر ماه روی currentDate
     currentDate.setMonth(currentDate.getMonth() + delta);
     renderCalendar('dashboard-calendar');
     renderCalendar('calendar-container');
@@ -429,7 +437,7 @@ function selectDate(dateStr) {
 }
 
 // ============================================================
-// توابع رویدادها
+// ====== توابع رویدادها ======
 // ============================================================
 async function loadCalendarEvents() {
     const { data, error } = await supabaseClient
@@ -636,7 +644,7 @@ async function deleteEvent(id) {
 }
 
 // ============================================================
-// توابع تعطیلات
+// ====== توابع تعطیلات ======
 // ============================================================
 async function loadHolidays() {
     const { data, error } = await supabaseClient
@@ -742,7 +750,7 @@ async function removeHoliday(id) {
 }
 
 // ============================================================
-// توابع اهداف (خلاصه شده)
+// ====== توابع اهداف (خلاصه) ======
 // ============================================================
 async function loadGoals() {
     const { data, error } = await supabaseClient
@@ -992,7 +1000,7 @@ async function deleteActivity(id) {
 }
 
 // ============================================================
-// توابع مالی
+// ====== توابع مالی ======
 // ============================================================
 async function loadFinance() {
     const container = document.getElementById('finance-container');
@@ -1123,7 +1131,7 @@ async function deleteFinance(id) {
 }
 
 // ============================================================
-// توابع داشبورد
+// ====== توابع داشبورد ======
 // ============================================================
 function updateDashboard() {
     document.getElementById('dash-goals-count').textContent = allGoals.length;
@@ -1177,7 +1185,7 @@ function renderTodayEvents() {
 }
 
 // ============================================================
-// شروع برنامه
+// ====== شروع برنامه ======
 // ============================================================
 supabaseClient.auth.getSession().then(({ data: { session } }) => {
     if (session) {
