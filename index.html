@@ -6,8 +6,6 @@
 <title>برنامه یک‌ساله — ردیاب پیشرفت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment-jalaali@0.9.2/moment-jalaali.min.js"></script>
 <style>
 :root{
   --bg:#12151a;
@@ -90,25 +88,10 @@ section{margin-bottom:32px;}
 .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;overflow-x:auto;}
 .gantt-wrap{min-height:300px;}
 .gantt-container{position:relative;}
-.gantt .bar{fill:var(--panel-2);}
-.gantt .bar-progress{fill:var(--gold);}
-.gantt .bar-label{fill:var(--text);font-family:'Vazirmatn',sans-serif;font-size:10px;}
-.gantt .grid-header{fill:var(--panel);stroke:var(--border);}
-.gantt .grid-row{fill:transparent;}
-.gantt .grid-row:nth-child(even){fill:rgba(255,255,255,.015);}
-.gantt .row-line{stroke:var(--border);}
-.gantt .tick{stroke:var(--border);}
-.gantt .today-highlight{fill:rgba(212,162,76,.12);}
-.bar-wrapper.c1 .bar-progress{fill:var(--c1);} .bar-wrapper.c2 .bar-progress{fill:var(--c2);}
-.bar-wrapper.c3 .bar-progress{fill:var(--c3);} .bar-wrapper.c4 .bar-progress{fill:var(--c4);}
-.bar-wrapper.c5 .bar-progress{fill:var(--c5);} .bar-wrapper.c6 .bar-progress{fill:var(--c6);}
-.bar-wrapper.c7 .bar-progress{fill:var(--c7);} .bar-wrapper.c8 .bar-progress{fill:var(--c8);}
-.bar-wrapper.c9 .bar-progress{fill:var(--c9);}
 .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);}
 .legend span{display:inline-flex;align-items:center;gap:6px;}
 .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
 
-/* سلسله مراتبی */
 .level-1{padding-right:0;}
 .level-2{padding-right:24px;background:rgba(255,255,255,.02);}
 .level-3{padding-right:48px;background:rgba(255,255,255,.03);}
@@ -302,28 +285,64 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
  ],
  "tasks": [
   {"id":"t001","category":"دانش و آموزش","name":"تمرین زبان انگلیسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":8,"start":"2026-07-07","finish":"2026-08-11","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t002","category":"دانش و آموزش","name":"مطالعه مالی و اقتصادی","unit":"ساعت","qty_target":12,"qty_estimated":12,"hours_estimated":12,"priority":7,"start":"2026-09-02","finish":"2026-09-07","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t002","category":"دانش و آموزش","name":"مطالعه در زمینه مالی و اقتصادی","unit":"ساعت","qty_target":12,"qty_estimated":12,"hours_estimated":12,"priority":7,"start":"2026-09-02","finish":"2026-09-07","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t003","category":"دانش و آموزش","name":"مطالعه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-08","finish":"2026-09-17","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t004","category":"دانش و آموزش","name":"پیدا کردن دوره مدیریت پروژه","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":8,"start":"2026-08-12","finish":"2026-08-12","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t005","category":"دانش و آموزش","name":"کسب امتیاز PMI","unit":"PDU","qty_target":60,"qty_estimated":60,"hours_estimated":10,"priority":7,"start":"2026-09-18","finish":"2026-09-22","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t006","category":"دانش و آموزش","name":"آمادگی کارگاه PMBOK","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":8,"start":"2026-08-13","finish":"2026-09-01","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t004","category":"دانش و آموزش","name":"پیدا کردن دوره های مناسب برای شرکت مدیریت پروژه و امکانسنجی","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":8,"start":"2026-08-12","finish":"2026-08-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t005","category":"دانش و آموزش","name":"کسب و تایید امتیاز در سایت PMI","unit":"PDU","qty_target":60,"qty_estimated":60,"hours_estimated":10,"priority":7,"start":"2026-09-18","finish":"2026-09-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t006","category":"دانش و آموزش","name":"آمادگی برای برگزاری کارگاه PMBOK","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":8,"start":"2026-08-13","finish":"2026-09-01","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t007","category":"دانش و آموزش","name":"برگزاری کارگاه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-23","finish":"2026-10-02","parentId":null,"dependsOn":["t006"],"logs":[]},
   {"id":"t008","category":"سلامت جسم و ظاهر","name":"برنامه ریزی غذایی","unit":"ساعت","qty_target":6,"qty_estimated":6,"hours_estimated":6,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t009","category":"سلامت جسم و ظاهر","name":"ورزش روزانه+رزمی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":9,"start":"2026-07-10","finish":"2026-10-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t009","category":"سلامت جسم و ظاهر","name":"ورزش روزانه+مهارت رزمی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":9,"start":"2026-07-10","finish":"2026-10-12","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t010","category":"سلامت جسم و ظاهر","name":"چکاپ کلی","unit":"دفعه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":9,"start":"2026-10-13","finish":"2026-10-14","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t011","category":"سلامت روح و روان","name":"نماز قضا","unit":"روز","qty_target":365,"qty_estimated":365,"hours_estimated":3,"priority":6,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t012","category":"سلامت روح و روان","name":"مطالعه قرآن","unit":"جزء","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-11-21","finish":"2026-12-05","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t013","category":"سلامت روح و روان","name":"تفسیر قرآن","unit":"جزء","qty_target":1,"qty_estimated":1,"hours_estimated":20,"priority":8,"start":"2026-07-19","finish":"2026-07-28","parentId":null,"dependsOn":["t012"],"logs":[]},
-  {"id":"t014","category":"خانواده","name":"مطالعه درباره فرزندان","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":12,"priority":8,"start":"2026-09-01","finish":"2026-09-06","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t015","category":"خانواده","name":"رفاقت با همسر و فرزندان","unit":"ساعت","qty_target":150,"qty_estimated":150,"hours_estimated":150,"priority":7,"start":"2026-09-12","finish":"2026-11-25","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t016","category":"علایق","name":"طراحی و نقاشی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-09-01","finish":"2026-10-06","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t017","category":"علایق","name":"برنامه نویسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-10-07","finish":"2026-11-11","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t018","category":"شرایط اقتصادی","name":"بودجه بندی سالیانه","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":8,"start":"2026-07-23","finish":"2026-08-04","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t019","category":"شرایط کاری","name":"آشنایی با کارهای شرکت","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-11-06","finish":"2026-11-10","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t020","category":"ایجاد شرکت جدیدم","name":"تدوین مدل کسب و کار","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-01-01","finish":"2027-01-15","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t021","category":"ایجاد شرکت جدیدم","name":"تدوین طرح کسب و کار","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-16","finish":"2027-01-25","parentId":null,"dependsOn":["t020"],"logs":[]},
-  {"id":"t022","category":"ایجاد شرکت جدیدم","name":"طراحی هویت برند","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-26","finish":"2027-02-04","parentId":null,"dependsOn":["t021"],"logs":[]},
-  {"id":"t023","category":"ایجاد شرکت جدیدم","name":"طراحی سایت","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":7,"start":"2027-02-10","finish":"2027-03-01","parentId":null,"dependsOn":["t022"],"logs":[]}
+  {"id":"t011","category":"سلامت جسم و ظاهر","name":"بررسی راهکارهای رشد مو","unit":"ساعت","qty_target":3,"qty_estimated":3,"hours_estimated":3,"priority":9,"start":"2026-10-15","finish":"2026-10-16","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t012","category":"سلامت جسم و ظاهر","name":"بررسی راهکارهای ترمیم پوست","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-17","finish":"2026-10-17","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t013","category":"سلامت جسم و ظاهر","name":"پیداکردن ست های مناسب لباس","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-18","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t014","category":"سلامت روح و روان","name":"نماز قضا","unit":"روز","qty_target":365,"qty_estimated":365,"hours_estimated":3,"priority":6,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t015","category":"سلامت روح و روان","name":"روزه قضا و مستحبی","unit":"روز","qty_target":30,"qty_estimated":30,"hours_estimated":3,"priority":6,"start":"2027-03-11","finish":"2027-03-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t016","category":"سلامت روح و روان","name":"مطالعه قرآن","unit":"جزء","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-11-21","finish":"2026-12-05","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t017","category":"سلامت روح و روان","name":"نماز شب","unit":"روز","qty_target":4,"qty_estimated":4,"hours_estimated":4,"priority":5,"start":"2027-03-20","finish":"2027-03-21","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t018","category":"سلامت روح و روان","name":"تفسیر قرآن","unit":"جزء","qty_target":1,"qty_estimated":1,"hours_estimated":20,"priority":8,"start":"2026-07-19","finish":"2026-07-28","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t019","category":"سلامت روح و روان","name":"فیلم مذهبی","unit":"عدد","qty_target":3,"qty_estimated":3,"hours_estimated":40,"priority":8,"start":"2026-07-29","finish":"2026-08-17","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t020","category":"سلامت روح و روان","name":"رفتن به مشهد/قم","unit":"دفعه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":6,"start":"2027-03-13","finish":"2027-03-14","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t021","category":"سلامت روح و روان","name":"محاسبه پرداخت خمس","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":6,"start":"2027-03-15","finish":"2027-03-19","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t022","category":"سلامت روح و روان","name":"محاسبه پرداخت دیون","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-12-06","finish":"2026-12-08","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t023","category":"سلامت روح و روان","name":"ریلکسیشن + تکمیل فرم های خودآگاهی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":8,"start":"2026-08-18","finish":"2026-11-20","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t024","category":"سلامت روح و روان","name":"مطالعه درباره مکانیزم بدن","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t025","category":"سلامت روح و روان","name":"مطالعه درباره هیپنوتیزم","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":9,"start":"2026-07-10","finish":"2026-07-14","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t026","category":"سلامت روح و روان","name":"ارزیابی وضعیت معنوی فعلی و شناسایی مسیر پیشرفت","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-12-09","finish":"2026-12-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t027","category":"سلامت روح و روان","name":"مطالعه احادیث جهت درک بهتر مفاهیم","unit":"حدیث","qty_target":48,"qty_estimated":48,"hours_estimated":24,"priority":7,"start":"2026-12-19","finish":"2026-12-30","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t028","category":"سلامت روح و روان","name":"دسته بندی داده ها و تحلیل","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-12-31","finish":"2027-01-14","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t029","category":"سلامت روح و روان","name":"مطالعه عمیق قرآن و تحلیل آیات","unit":"ساعت","qty_target":50,"qty_estimated":50,"hours_estimated":50,"priority":7,"start":"2027-01-15","finish":"2027-02-08","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t030","category":"سلامت روح و روان","name":"شناخت مسئولیت ها از قرآن","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-02-09","finish":"2027-02-23","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t031","category":"سلامت روح و روان","name":"مطالعه کتاب های عرفانی و شناختی","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":30,"priority":7,"start":"2027-02-24","finish":"2027-03-10","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t032","category":"سلامت روح و روان","name":"مطالعه درباره روح","unit":"ساعت","qty_target":8,"qty_estimated":8,"hours_estimated":8,"priority":9,"start":"2026-07-15","finish":"2026-07-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t033","category":"خانواده","name":"مطالعه درباره فرزندان","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":12,"priority":8,"start":"2026-09-01","finish":"2026-09-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t034","category":"خانواده","name":"مطالعه درباره روابط همسران","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":10,"priority":7,"start":"2026-09-07","finish":"2026-09-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t035","category":"خانواده","name":"رفاقت با همسر و فرزندان","unit":"ساعت","qty_target":150,"qty_estimated":150,"hours_estimated":150,"priority":7,"start":"2026-09-12","finish":"2026-11-25","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t036","category":"خانواده","name":"گردش با خانواده","unit":"مرتبه","qty_target":24,"qty_estimated":24,"hours_estimated":72,"priority":7,"start":"2026-11-26","finish":"2026-12-31","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t037","category":"خانواده","name":"برنامه مسافرت","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":7,"start":"2027-01-01","finish":"2027-01-02","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t038","category":"خانواده","name":"برنامه ریزی برای رسیدگی به مادر","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":7,"start":"2027-01-03","finish":"2027-01-03","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t039","category":"علایق","name":"طراحی و نقاشی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-09-01","finish":"2026-10-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t040","category":"علایق","name":"برنامه نویسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-10-07","finish":"2026-11-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t041","category":"روابط اجتماعی","name":"تقویت قدرت بیان و متقاعد سازی","unit":"ساعت","qty_target":15,"qty_estimated":15,"hours_estimated":15,"priority":7,"start":"2026-10-01","finish":"2026-10-08","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t042","category":"روابط اجتماعی","name":"شرکت در سمینارها و جلسات مرتبط با کار","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-10-09","finish":"2026-10-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t043","category":"روابط اجتماعی","name":"رفت و آمد های دوره ای به کرمان","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":7,"start":"2026-10-12","finish":"2026-10-13","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t044","category":"روابط اجتماعی","name":"تقویت مهرخاور","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":6,"start":"2026-10-19","finish":"2026-10-20","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t045","category":"روابط اجتماعی","name":"کمک به نیازمندان فامیل","unit":"مبلغ(ریال)","qty_target":50000000,"qty_estimated":50000000,"hours_estimated":3,"priority":6,"start":"2026-10-21","finish":"2026-10-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t046","category":"روابط اجتماعی","name":"شرح خصوصیات دوست مناسب و هم فکر و سنجش دوست مناسب","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-10-14","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t047","category":"روابط اجتماعی","name":"کمک به خیریه و بررسی کمک به آزادی زندانیان","unit":"مبلغ(ریال)","qty_target":60000000,"qty_estimated":60000000,"hours_estimated":3,"priority":6,"start":"2026-10-23","finish":"2026-10-24","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t048","category":"روابط اجتماعی","name":"بررسی پتانسیل های کمک به دیگران","unit":"ساعت","qty_target":1,"qty_estimated":1,"hours_estimated":1,"priority":6,"start":"2026-10-25","finish":"2026-10-25","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t049","category":"شرایط اقتصادی","name":"بودجه بندی سالیانه و ثبت وضعیت مالی","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":8,"start":"2026-07-23","finish":"2026-08-04","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t050","category":"شرایط اقتصادی","name":"پس انداز سالیانه","unit":"مبلغ(ریال)","qty_target":300000000,"qty_estimated":300000000,"hours_estimated":3,"priority":8,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t051","category":"شرایط اقتصادی","name":"کسب آمادگی های لازم جهت اجرا کار دوم","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":9,"start":"2026-07-07","finish":"2026-07-19","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t052","category":"شرایط اقتصادی","name":"برنامه ریزی ایجاد استقلال مالی خانواده","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-20","finish":"2026-07-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t053","category":"شرایط کاری","name":"آشنایی با کارهای شرکت (اکتشاف و استخراج)","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-11-06","finish":"2026-11-10","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t054","category":"شرایط کاری","name":"ارتقای مسئولیت های کاری","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":8,"start":"2026-11-01","finish":"2026-11-05","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t055","category":"ایجاد شرکت جدیدم","name":"تدوین مدل کسب و کار","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-01-01","finish":"2027-01-15","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t056","category":"ایجاد شرکت جدیدم","name":"تدوین طرح کسب و کار (Business plan)","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-16","finish":"2027-01-25","parentId":null,"dependsOn":["t055"],"logs":[]},
+  {"id":"t057","category":"ایجاد شرکت جدیدم","name":"طراحی هویت برند","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-26","finish":"2027-02-04","parentId":null,"dependsOn":["t056"],"logs":[]},
+  {"id":"t058","category":"ایجاد شرکت جدیدم","name":"جذب اولین مشتری","unit":"تعداد","qty_target":1,"qty_estimated":1,"hours_estimated":10,"priority":7,"start":"2027-02-05","finish":"2027-02-09","parentId":null,"dependsOn":["t057"],"logs":[]},
+  {"id":"t059","category":"ایجاد شرکت جدیدم","name":"طراحی سایت","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":7,"start":"2027-02-10","finish":"2027-03-01","parentId":null,"dependsOn":["t058"],"logs":[]}
  ]
 }
 </script>
@@ -341,13 +360,18 @@ const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).sli
 
 function toJalaali(dateStr){
   if(!dateStr) return '';
-  const m = moment(dateStr, 'YYYY-MM-DD');
-  if(!m.isValid()) return dateStr;
-  return m.format('jYYYY/jMM/jDD');
+  try {
+    const parts = dateStr.split('-');
+    const d = new Date(parts[0], parts[1]-1, parts[2]);
+    if(isNaN(d)) return dateStr;
+    const jd = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
+      year:'numeric', month:'numeric', day:'numeric'
+    }).format(d);
+    return jd;
+  } catch(e){ return dateStr; }
 }
 
 function getCss(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
-
 function loadSeed(){ return JSON.parse(document.getElementById('seed-data').textContent); }
 
 // ===================== STATE =====================
@@ -399,11 +423,11 @@ function getLevel(taskId){
 // ===================== PERSIST =====================
 function persistAll(){
   localStorage.setItem(LS_KEY, JSON.stringify(state));
-  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  localStorage.setItem('yearplan_settings', JSON.stringify(settings));
 }
 
 function loadState(){
-  const savedSettings = localStorage.getItem(LS_SETTINGS);
+  const savedSettings = localStorage.getItem('yearplan_settings');
   if(savedSettings) settings = Object.assign(settings, JSON.parse(savedSettings));
   document.getElementById('weightSlider').value = settings.weight_volume;
 
@@ -452,7 +476,7 @@ function renderSummary(){
   document.getElementById('wTimeLabel').textContent = 'زمانی: ' + wt.toLocaleString('fa-IR') + '٪';
 }
 
-// ===================== RENDER: GANTT (Manual SVG) =====================
+// ===================== RENDER: GANTT =====================
 function renderGantt(){
   const svg = document.getElementById('ganttSvg');
   const tasks = state.tasks.filter(t => !activeCat || t.category === activeCat);
@@ -462,7 +486,6 @@ function renderGantt(){
     return;
   }
 
-  // پیدا کردن بازه زمانی
   let minDate = Infinity, maxDate = -Infinity;
   tasks.forEach(t => {
     const s = new Date(t.start).getTime();
@@ -488,7 +511,6 @@ function renderGantt(){
     html += `<line x1="${x}" y1="28" x2="${x}" y2="${height}" stroke="var(--border)" stroke-width="0.5"/>`;
   }
 
-  // Tasks
   tasks.forEach((t, idx) => {
     const y = 28 + idx * 32;
     const level = getLevel(t.id);
@@ -499,31 +521,23 @@ function renderGantt(){
     
     const {volPct, timePct} = computeTaskTotals(t);
     const progress = compositePct(volPct, timePct);
-    
     const color = getCss(CAT_CLASS[t.category] || '--c1');
     
-    // Row background
     html += `<rect x="0" y="${y}" width="${width}" height="30" fill="${idx%2===0?'var(--panel)':'var(--panel-2)'}" stroke="var(--border)" stroke-width="0.5"/>`;
+    html += `<text x="${10 + indent}" y="${y+20}" fill="var(--text)" font-size="12" font-family="Vazirmatn">${t.name}</text>`;
     
-    // Task name with indent
-    html += `<text x="${10 + indent}" y="${y+20}" fill="var(--text)" font-size="13" font-family="Vazirmatn">${t.name}</text>`;
-    
-    // Dependency badge
     if(t.dependsOn && t.dependsOn.length > 0){
       html += `<text x="${120 + indent}" y="${y+20}" fill="var(--gold)" font-size="10" font-family="Vazirmatn">↗ ${t.dependsOn.length}</text>`;
     }
     
-    // Bar
     html += `<rect x="${xStart}" y="${y+5}" width="${barWidth}" height="20" rx="4" fill="var(--panel-2)" stroke="${color}" stroke-width="1"/>`;
     if(progress > 0.01){
       html += `<rect x="${xStart}" y="${y+5}" width="${Math.max(2, barWidth * progress)}" height="20" rx="4" fill="${color}" opacity="0.8"/>`;
     }
     
-    // Progress text
-    html += `<text x="${xStart + Math.min(barWidth/2, barWidth-20)}" y="${y+19}" fill="var(--text)" font-size="10" font-family="Vazirmatn" text-anchor="middle">${Math.round(progress*100)}%</text>`;
+    html += `<text x="${xStart + Math.min(barWidth/2, barWidth-20)}" y="${y+19}" fill="var(--text)" font-size="9" font-family="Vazirmatn" text-anchor="middle">${Math.round(progress*100)}%</text>`;
   });
 
-  // Legend
   const legendEl = document.getElementById('legend');
   legendEl.innerHTML = state.categories.map(cat => 
     `<span><i style="background:${getCss(CAT_CLASS[cat])}"></i>${cat}</span>`
@@ -561,13 +575,13 @@ function renderTable(){
     
     tr.innerHTML = `
       <td class="name-cell">
-        <span style="cursor:pointer;color:var(--gold);" onclick="openEditModal('${t.id}')">✏️</span>
+        <span style="cursor:pointer;color:var(--gold);margin-left:6px;" onclick="openEditModal('${t.id}')">✏️</span>
         <span>${t.name}</span>
         ${t.dependsOn && t.dependsOn.length > 0 ? `<span class="dependency-badge">↗ ${t.dependsOn.length}</span>` : ''}
       </td>
       <td><span class="cat-dot" style="background:${getCss(CAT_CLASS[t.category])}"></span>${t.category}</td>
       <td>${['اصلی','زیرمجموعه','زیرمجموعه ۲','زیرمجموعه ۳'][Math.min(level,3)]}</td>
-      <td style="font-size:11px;color:var(--muted);">${dependsStr || '—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:100px;white-space:normal;">${dependsStr || '—'}</td>
       <td>${t.unit||'—'}</td>
       <td class="num">${t.qty_target?.toLocaleString('fa-IR')||'—'}</td>
       <td class="num">${t.qty_estimated?.toLocaleString('fa-IR')||'—'}</td>
@@ -870,7 +884,6 @@ loadState();
 renderAll();
 document.getElementById('todayDisplay').textContent = 'امروز: ' + toJalaali(todayISO());
 
-// Resize gantt on window resize
 window.addEventListener('resize', () => { renderGantt(); });
 </script>
 </body>
