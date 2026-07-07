@@ -1,1635 +1,1547 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 پلنر شخصی شمسی</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.6/dist/jalaali.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/persian-datepicker@1.0.0/dist/css/persian-datepicker.css">
-    <script src="https://unpkg.com/persian-datepicker@1.0.0/dist/js/persian-datepicker.js"></script>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;direction:rtl}
-        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-        .hidden{display:none!important}
-        .btn{padding:10px 20px;border:none;border-radius:10px;cursor:pointer;font-weight:600;transition:all .3s;font-family:inherit}
-        .btn:hover{transform:translateY(-2px)}
-        .btn-primary{background:#667eea;color:#fff}
-        .btn-success{background:#10b981;color:#fff}
-        .btn-danger{background:#ef4444;color:#fff}
-        .btn-secondary{background:#6b7280;color:#fff}
-        .btn-warning{background:#f59e0b;color:#fff}
-        .btn-sm{padding:5px 12px;font-size:12px}
-        .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:15px}
-        .form-group{margin-bottom:15px}
-        .form-group label{display:block;margin-bottom:5px;font-weight:600}
-        .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit}
-        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-        .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px}
-        @media(max-width:768px){.grid-2,.grid-3{grid-template-columns:1fr}}
-        .tab-bar{display:flex;gap:5px;border-bottom:3px solid #e5e7eb;margin-bottom:25px;flex-wrap:wrap;overflow-x:auto}
-        .tab{padding:12px 20px;cursor:pointer;border-bottom:3px solid transparent;font-weight:600;color:#6b7280;background:none;border-top:none;border-left:none;border-right:none;font-size:15px;white-space:nowrap;font-family:inherit}
-        .tab.active{color:#667eea;border-bottom-color:#667eea}
-        .tab-content{display:none}
-        .tab-content.active{display:block}
-        .badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-        .badge-success{background:#d1fae5;color:#065f46}
-        .badge-warning{background:#fef3c7;color:#92400e}
-        .badge-danger{background:#fee2e2;color:#991b1b}
-        .badge-info{background:#dbeafe;color:#1e40af}
-        .badge-purple{background:#ede9fe;color:#5b21b6}
-        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #f3f4f6;flex-wrap:wrap;gap:10px}
-        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px}
-        .calendar-grid .day{padding:15px 5px;text-align:center;border-radius:8px;background:#f9fafb;cursor:pointer;transition:all .2s;position:relative;font-size:14px}
-        .calendar-grid .day:hover{background:#e5e7eb;transform:scale(1.05)}
-        .calendar-grid .day.today{background:#667eea;color:#fff;font-weight:700}
-        .calendar-grid .day.has-event{border:2px solid #667eea}
-        .calendar-grid .day .event-dot{width:6px;height:6px;background:#667eea;border-radius:50%;position:absolute;bottom:4px;left:50%;transform:translateX(-50%)}
-        .calendar-grid .day.today .event-dot{background:#fff}
-        .calendar-grid .day.holiday{background:#fee2e2;color:#991b1b}
-        .calendar-grid .day.holiday::after{content:'✗';position:absolute;top:-4px;right:2px;font-size:10px;color:#ef4444}
-        .calendar-grid .day.weekend{background:#fef3c7;color:#92400e}
-        .event-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:8px;margin-bottom:8px;border-right:4px solid #667eea;flex-wrap:wrap;gap:10px}
-        .event-item .event-title{font-weight:600;color:#333}
-        .event-item .event-time{font-size:12px;color:#6b7280}
-        .event-item .event-type{padding:2px 10px;border-radius:12px;background:#dbeafe;color:#1e40af;font-size:11px;font-weight:600}
-        .weekday-names{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
-        .weekday-names div{text-align:center;font-weight:700;color:#6b7280;padding:5px;font-size:13px}
-        .empty-state{text-align:center;padding:40px 20px;color:#6b7280}
-        .empty-state .icon{font-size:48px;margin-bottom:15px}
-        .auth-box{background:#f8f9fa;padding:30px;border-radius:15px;max-width:400px;margin:0 auto}
-        #auth-section{max-width:500px;margin:50px auto}
-        #auth-section h2{text-align:center;color:#333;margin-bottom:30px}
-        .finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-bottom:20px}
-        .finance-card{padding:15px;border-radius:12px;text-align:center}
-        .finance-card.income{background:#d1fae5}
-        .finance-card.expense{background:#fee2e2}
-        .finance-card.balance{background:#dbeafe}
-        .finance-card .amount{font-size:24px;font-weight:700}
-        .finance-card .label{font-size:14px;color:#6b7280}
-        .date-display{font-size:14px;color:#6b7280;padding:8px 15px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb}
-        .user-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#f9fafb;border-radius:8px;margin-bottom:8px;flex-wrap:wrap;gap:10px}
-        .user-item .user-info{flex:1}
-        .user-item .user-info .name{font-weight:600;color:#333}
-        .user-item .user-info .email{font-size:12px;color:#6b7280}
-        .user-status{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
-        .user-status.pending{background:#fef3c7;color:#92400e}
-        .user-status.approved{background:#d1fae5;color:#065f46}
-        .user-status.rejected{background:#fee2e2;color:#991b1b}
-        .calendar-toggle{display:flex;gap:5px;background:#f3f4f6;border-radius:8px;padding:3px}
-        .calendar-toggle button{padding:5px 15px;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px;transition:all .3s;background:transparent;color:#6b7280}
-        .calendar-toggle button.active{background:#667eea;color:#fff}
-        .calendar-toggle button:hover{background:#e5e7eb}
-        .calendar-toggle button.active:hover{background:#5a67d8}
-        .persian-datepicker-rtl{direction:rtl}
-        .persian-datepicker .dp-header{background:#667eea!important;color:white!important}
-        .persian-datepicker .dp-today{background:#667eea!important;color:white!important}
-        .persian-datepicker .dp-selected{background:#667eea!important;color:white!important}
-        .persian-datepicker .dp-cell{cursor:pointer;border-radius:4px}
-        .persian-datepicker .dp-cell:hover{background:#e5e7eb!important}
-        @media(max-width:640px){
-            .container{padding:15px}
-            .tab{padding:8px 12px;font-size:13px}
-            .calendar-grid .day{padding:10px 3px;font-size:12px}
-            .header h1{font-size:18px}
-            .event-item{flex-direction:column;align-items:flex-start}
-            .user-item{flex-direction:column;align-items:stretch}
-            .header{flex-direction:column;align-items:stretch}
-            .calendar-toggle{justify-content:center}
-        }
-        .jalali-date-input{direction:ltr;text-align:right;cursor:pointer}
-        /* تب مدیریت برای همه نمایش داده میشه */
-        #tab-admin{display:block!important}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه یک‌ساله — ردیاب پیشرفت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#12151a;
+  --panel:#1a1e25;
+  --panel-2:#20242c;
+  --border:#2a2f3a;
+  --text:#eef1f5;
+  --muted:#8f99a8;
+  --gold:#d4a24c;
+  --teal:#4fb0a5;
+  --blue:#6b93c9;
+  --danger:#d0685f;
+  --radius:14px;
+
+  --c1:#6b93c9; --c2:#7cbf8e; --c3:#b48ee0; --c4:#e08a8a; --c5:#e0b45a;
+  --c6:#5ec2c2; --c7:#d19a5a; --c8:#8a97e0; --c9:#e07a9d;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Vazirmatn',sans-serif;
+  line-height:1.7;
+  padding:0 0 60px;
+}
+::selection{ background:var(--gold); color:#12151a;}
+a{color:var(--teal);}
+h1,h2,h3{margin:0;font-weight:700;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+button{
+  font-family:inherit;cursor:pointer;border:1px solid var(--border);
+  background:var(--panel-2);color:var(--text);border-radius:10px;padding:9px 16px;
+  font-size:14px;transition:.15s;
+}
+button:hover{border-color:var(--gold);}
+button.primary{background:var(--gold);color:#1a1508;border-color:var(--gold);font-weight:700;}
+button.primary:hover{filter:brightness(1.08);}
+button.ghost{background:transparent;}
+button.danger{color:var(--danger);border-color:var(--danger);background:transparent;}
+input,select,textarea{
+  font-family:inherit;background:var(--panel-2);color:var(--text);
+  border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:14px;
+}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+th{color:var(--muted);font-weight:600;font-size:12.5px;position:sticky;top:0;background:var(--panel);}
+tbody tr:hover{background:var(--panel-2);}
+.num{font-variant-numeric:tabular-nums;direction:ltr;text-align:left;}
+
+/* ===== header ===== */
+header.top{
+  border-bottom:1px solid var(--border);
+  padding:22px 0;margin-bottom:26px;
+  background:linear-gradient(180deg, rgba(212,162,76,.05), transparent);
+}
+.top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+.top-row h1{font-size:22px;}
+.top-row .sub{color:var(--muted);font-size:13px;margin-top:4px;}
+.sync-badge{font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
+.sync-badge.ok{color:var(--teal);border-color:var(--teal);}
+.sync-badge.local{color:var(--gold);border-color:var(--gold);}
+.sync-badge.err{color:var(--danger);border-color:var(--danger);}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ===== cards ===== */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.card .label{color:var(--muted);font-size:12.5px;margin-bottom:10px;}
+.card .value{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;}
+.card.gold .value{color:var(--gold);}
+.card.teal .value{color:var(--teal);}
+.card.blue .value{color:var(--blue);}
+.bar-track{height:7px;border-radius:6px;background:var(--panel-2);margin-top:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;}
+
+.weight-card{grid-column:span 2;}
+.weight-row{display:flex;align-items:center;gap:12px;margin-top:6px;}
+.weight-row input[type=range]{flex:1;accent-color:var(--gold);}
+.weight-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;}
+
+/* ===== sections ===== */
+section{margin-bottom:32px;}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.section-head h2{font-size:16px;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;}
+.chip.active{border-color:var(--gold);color:var(--text);background:rgba(212,162,76,.12);}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.gantt-wrap{overflow-x:auto;}
+#gantt-container{width:100%;}
+.gantt-container{background:transparent !important;}
+.gantt .bar{fill:var(--panel-2);}
+.gantt .bar-progress{fill:var(--gold);}
+.gantt .bar-label{fill:var(--text);font-family:'Vazirmatn',sans-serif;}
+.gantt .grid-header{fill:var(--panel);stroke:var(--border);}
+.gantt .grid-row{fill:transparent;}
+.gantt .grid-row:nth-child(even){fill:rgba(255,255,255,.015);}
+.gantt .row-line{stroke:var(--border);}
+.gantt .tick{stroke:var(--border);}
+.gantt .today-highlight{fill:rgba(212,162,76,.12);}
+.gantt-container .lower-text, .gantt-container .upper-text{fill:var(--muted);font-family:'Vazirmatn',sans-serif;}
+.gantt .arrow{stroke:var(--muted);}
+.bar-wrapper.c1 .bar-progress{fill:var(--c1);} .bar-wrapper.c2 .bar-progress{fill:var(--c2);}
+.bar-wrapper.c3 .bar-progress{fill:var(--c3);} .bar-wrapper.c4 .bar-progress{fill:var(--c4);}
+.bar-wrapper.c5 .bar-progress{fill:var(--c5);} .bar-wrapper.c6 .bar-progress{fill:var(--c6);}
+.bar-wrapper.c7 .bar-progress{fill:var(--c7);} .bar-wrapper.c8 .bar-progress{fill:var(--c8);}
+.bar-wrapper.c9 .bar-progress{fill:var(--c9);}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);}
+.legend span{display:inline-flex;align-items:center;gap:6px;}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+/* ===== log form ===== */
+.log-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
+.log-form label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.log-form .field{display:flex;flex-direction:column;}
+.log-form input,.log-form select{width:100%;}
+.log-history{margin-top:16px;max-height:220px;overflow:auto;}
+.log-item{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:13px;}
+.log-item .meta{color:var(--muted);font-size:12px;}
+
+/* ===== table controls ===== */
+.table-scroll{overflow:auto;max-height:560px;}
+td input, td select{width:100%;min-width:64px;font-size:13px;padding:5px 7px;}
+td.name-cell{white-space:normal;min-width:220px;}
+.pct-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700;}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;}
+.row-actions{display:flex;gap:6px;}
+.row-actions button{padding:5px 9px;font-size:12px;}
+
+/* ===== modal ===== */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+.modal-backdrop.show{display:flex;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:480px;width:100%;max-height:90vh;overflow:auto;}
+.modal h3{margin-bottom:14px;}
+.modal .field{margin-bottom:14px;}
+.modal .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+.modal .field input{width:100%;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;}
+
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
+
+@media (max-width:720px){
+  .weight-card{grid-column:span 1;}
+  .log-form{grid-template-columns:1fr 1fr;}
+  .log-form .field:first-child{grid-column:1/-1;}
+  th,td{font-size:12px;}
+}
+</style>
 </head>
 <body>
-<div class="container" id="app">
 
-<div id="auth-section">
-    <h2>📅 پلنر شخصی شمسی</h2>
-    <div id="auth-message" style="margin-bottom:15px"></div>
-    <div class="auth-box">
-        <h3 style="margin-bottom:20px">🔐 ورود</h3>
-        <form onsubmit="login(); return false;">
-            <div class="form-group"><label>📧 ایمیل</label><input type="email" id="login-email" placeholder="example@email.com"></div>
-            <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="login-password" placeholder="رمز عبور"></div>
-            <button type="submit" class="btn btn-primary" style="width:100%">ورود</button>
-        </form>
-        <p style="text-align:center;margin-top:15px;color:#6b7280">حساب ندارید؟ <a href="#" onclick="document.getElementById('register-form').classList.toggle('hidden')" style="color:#667eea;font-weight:600">ثبت‌نام</a></p>
+<header class="top">
+  <div class="wrap top-row">
+    <div>
+      <h1>برنامه یک‌ساله توسعه شخصی</h1>
+      <div class="sub">۱۷ تیر ۱۴۰۵ تا ۱۶ تیر ۱۴۰۶ — پیگیری روزانه پیشرفت</div>
     </div>
-    <div id="register-form" class="auth-box hidden">
-        <form onsubmit="register(); return false;">
-            <div class="form-group"><label>📧 ایمیل</label><input type="email" id="register-email" placeholder="example@email.com"></div>
-            <div class="form-group"><label>🔑 رمز عبور</label><input type="password" id="register-password" placeholder="حداقل ۶ کاراکتر"></div>
-            <button type="submit" class="btn btn-success" style="width:100%">ثبت‌نام</button>
-        </form>
+    <div class="header-actions">
+      <span id="syncBadge" class="sync-badge local">آفلاین (فقط این دستگاه)</span>
+      <button class="ghost" id="btnSettings">⚙ تنظیمات</button>
     </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="cards">
+    <div class="card gold">
+      <div class="label">پیشرفت ترکیبی کل برنامه</div>
+      <div class="value" id="cardComposite">۰٪</div>
+      <div class="bar-track"><div class="bar-fill" id="barComposite" style="background:var(--gold);width:0%"></div></div>
+    </div>
+    <div class="card teal">
+      <div class="label">پیشرفت حجمی (مقدار انجام‌شده)</div>
+      <div class="value" id="cardVolume">۰٪</div>
+      <div class="bar-track"><div class="bar-fill" id="barVolume" style="background:var(--teal);width:0%"></div></div>
+    </div>
+    <div class="card blue">
+      <div class="label">پیشرفت زمانی (ساعت صرف‌شده)</div>
+      <div class="value" id="cardTime">۰٪</div>
+      <div class="bar-track"><div class="bar-fill" id="barTime" style="background:var(--blue);width:0%"></div></div>
+    </div>
+    <div class="card weight-card">
+      <div class="label">سهم هرکدام در محاسبه پیشرفت ترکیبی</div>
+      <div class="weight-row">
+        <span style="color:var(--teal);font-size:12px;white-space:nowrap;">حجمی</span>
+        <input type="range" id="weightSlider" min="0" max="100" value="60">
+        <span style="color:var(--blue);font-size:12px;white-space:nowrap;">زمانی</span>
+      </div>
+      <div class="weight-labels">
+        <span id="wVolLabel">حجمی: ۶۰٪</span>
+        <span id="wTimeLabel">زمانی: ۴۰٪</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>نمودار گانت</h2>
+      <div class="chips" id="catChips"></div>
+    </div>
+    <div class="panel gantt-wrap">
+      <div id="gantt-container"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>ثبت پیشرفت امروز</h2></div>
+    <div class="panel">
+      <div class="log-form">
+        <div class="field">
+          <label>فعالیت</label>
+          <select id="logTask"></select>
+        </div>
+        <div class="field">
+          <label>تاریخ</label>
+          <input type="date" id="logDate">
+        </div>
+        <div class="field">
+          <label id="logQtyLabel">مقدار انجام‌شده</label>
+          <input type="number" step="any" id="logQty" placeholder="0">
+        </div>
+        <div class="field">
+          <label>ساعت صرف‌شده</label>
+          <input type="number" step="any" id="logHours" placeholder="0">
+        </div>
+        <button class="primary" id="btnAddLog">ثبت</button>
+      </div>
+      <div class="hint">هرکدام از دو فیلد را خالی بگذاری، فقط همان یکی ثبت می‌شود. با ثبت مکرر، مقدار جمع می‌شود.</div>
+      <div class="log-history" id="logHistory"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>فهرست کامل فعالیت‌ها (قابل ویرایش)</h2>
+      <button id="btnAddTask">+ فعالیت جدید</button>
+    </div>
+    <div class="panel table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>فعالیت</th><th>دسته</th><th>واحد</th><th>مقدار هدف</th>
+            <th>مقدار برآورد شده</th><th>ساعت برآوردی</th><th>اولویت</th>
+            <th>شروع</th><th>پایان</th><th>حجمی</th><th>زمانی</th><th>ترکیبی</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="taskBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>پشتیبان‌گیری</h2></div>
+    <div class="panel" style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="btnExport">⬇ خروجی JSON</button>
+      <button id="btnImport">⬆ ورودی JSON</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none;">
+      <button class="danger" id="btnReset">بازگشت به داده اولیه</button>
+    </div>
+  </section>
+
 </div>
 
-<div id="planner-section" class="hidden">
-    <div class="header">
-        <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-            <h1>📅 پلنر شخصی شمسی</h1>
-            <div class="calendar-toggle">
-                <button class="active" onclick="setCalendarMode('jalali')" id="btn-jalali">🇮🇷 شمسی</button>
-                <button onclick="setCalendarMode('gregorian')" id="btn-gregorian">🇺🇸 میلادی</button>
-            </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:15px;flex-wrap:wrap">
-            <span class="date-display" id="today-display"></span>
-            <span>👤 <span id="user-name">کاربر</span></span>
-            <span id="user-role-badge"></span>
-            <button class="btn btn-danger btn-sm" onclick="logout()">🚪 خروج</button>
-        </div>
-    </div>
+<footer>داده‌ها به‌صورت خودکار روی همین مرورگر ذخیره می‌شود؛ برای دیدن از چند دستگاه، Supabase را از تنظیمات وصل کن.</footer>
 
-    <div class="tab-bar">
-        <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 داشبورد</button>
-        <button class="tab" data-tab="goals" onclick="switchTab('goals')">🎯 اهداف</button>
-        <button class="tab" data-tab="calendar" onclick="switchTab('calendar')">📆 تقویم</button>
-        <button class="tab" data-tab="holidays" onclick="switchTab('holidays')">🏖 تعطیلات</button>
-        <button class="tab" data-tab="finance" onclick="switchTab('finance')">💰 مالی</button>
-        <button class="tab" id="tab-admin" data-tab="admin" onclick="switchTab('admin')">👑 مدیریت</button>
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal">
+    <h3>تنظیمات همگام‌سازی (Supabase)</h3>
+    <div class="field">
+      <label>Project URL</label>
+      <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co">
     </div>
-
-    <!-- تب داشبورد -->
-    <div id="tab-dashboard" class="tab-content active">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>📊 داشبورد</h3>
-            <button class="btn btn-primary" onclick="showQuickAddEvent()">➕ رویداد جدید</button>
-        </div>
-        <div class="grid-3" style="margin-bottom:20px">
-            <div class="card" style="text-align:center"><div style="font-size:32px">🎯</div><div style="font-size:24px;font-weight:700;color:#667eea" id="dash-goals-count">0</div><div style="color:#6b7280">هدف</div></div>
-            <div class="card" style="text-align:center"><div style="font-size:32px">📋</div><div style="font-size:24px;font-weight:700;color:#10b981" id="dash-tasks-count">0</div><div style="color:#6b7280">فعالیت</div></div>
-            <div class="card" style="text-align:center"><div style="font-size:32px">📅</div><div style="font-size:24px;font-weight:700;color:#f59e0b" id="dash-events-count">0</div><div style="color:#6b7280">رویداد امروز</div></div>
-        </div>
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px">
-                <h4>📆 تقویم شمسی</h4>
-                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(-1)">◀</button>
-                    <span style="font-weight:600;font-size:16px" id="calendar-month-label"></span>
-                    <button class="btn btn-secondary btn-sm" onclick="changeMonth(1)">▶</button>
-                    <button class="btn btn-primary btn-sm" onclick="goToToday()">امروز</button>
-                </div>
-            </div>
-            <div id="dashboard-calendar"></div>
-        </div>
-        <div class="card">
-            <h4>📋 رویدادهای امروز</h4>
-            <div id="today-events"></div>
-        </div>
+    <div class="field">
+      <label>Anon Public Key</label>
+      <input type="text" id="sbKey" placeholder="eyJhbGciOi...">
     </div>
-
-    <!-- تب اهداف -->
-    <div id="tab-goals" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>🎯 اهداف و پروژه‌ها</h3>
-            <button class="btn btn-primary" onclick="showAddGoal()">+ هدف جدید</button>
-        </div>
-        <div id="goals-container">در حال بارگذاری...</div>
+    <div class="field">
+      <label>شناسه برنامه (اگر چند برنامه در یک پروژه داری)</label>
+      <input type="text" id="sbId" placeholder="main" value="main">
     </div>
-
-    <!-- تب تقویم -->
-    <div id="tab-calendar" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>📆 تقویم و رویدادها</h3>
-            <button class="btn btn-primary" onclick="showAddEvent()">+ رویداد جدید</button>
-        </div>
-        <div id="calendar-container">در حال بارگذاری...</div>
+    <div class="hint">جدول لازم را با فایل schema.sql همراه این پروژه در Supebase SQL Editor اجرا کن. کلید anon را در کد نگه‌داشتن مشکلی ندارد، اما چون هرکسی که این کلید و URL را ببیند می‌تواند داده را بخواند/بنویسد، لینک صفحه و مخزن گیت‌هاب را عمومی تبلیغ نکن.</div>
+    <div class="modal-actions">
+      <button class="ghost" id="btnCloseSettings">بستن</button>
+      <button class="primary" id="btnSaveSettings">ذخیره و اتصال</button>
     </div>
-
-    <!-- تب تعطیلات -->
-    <div id="tab-holidays" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>🏖 مدیریت تعطیلات</h3>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-success btn-sm" onclick="addHoliday()">➕ افزودن تعطیل</button>
-                <button class="btn btn-secondary btn-sm" onclick="loadHolidays()">🔄 بروزرسانی</button>
-            </div>
-        </div>
-        <div class="card">
-            <p style="color:#6b7280;font-size:14px;margin-bottom:15px">✅ روزهای تعطیل را مشخص کنید. روزهای تعطیل با ✗ مشخص می‌شوند.</p>
-            <div id="holidays-container">در حال بارگذاری...</div>
-        </div>
-    </div>
-
-    <!-- تب مالی -->
-    <div id="tab-finance" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>💰 وضعیت مالی</h3>
-            <button class="btn btn-primary" onclick="showAddFinance()">+ ثبت مالی</button>
-        </div>
-        <div id="finance-container">در حال بارگذاری...</div>
-    </div>
-
-    <!-- تب مدیریت -->
-    <div id="tab-admin" class="tab-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px">
-            <h3>👑 مدیریت کاربران</h3>
-            <button class="btn btn-secondary btn-sm" onclick="loadUsers()">🔄 بروزرسانی</button>
-        </div>
-        <div class="card">
-            <h4>⏳ درخواست‌های جدید</h4>
-            <div id="pending-users">در حال بارگذاری...</div>
-        </div>
-        <div class="card">
-            <h4>✅ کاربران فعال</h4>
-            <div id="approved-users">در حال بارگذاری...</div>
-        </div>
-    </div>
+  </div>
 </div>
-</div>
+
+<script id="seed-data" type="application/json">
+{
+ "categories": [
+  "دانش و آموزش",
+  "سلامت جسم و ظاهر",
+  "سلامت روح و روان",
+  "خانواده",
+  "علایق",
+  "روابط اجتماعی",
+  "شرایط اقتصادی",
+  "شرایط کاری",
+  "ایجاد شرکت جدیدم"
+ ],
+ "tasks": [
+  {
+   "id": "t001",
+   "category": "دانش و آموزش",
+   "name": "تمرین زبان انگلیسی",
+   "unit": "ساعت",
+   "qty_target": 72.0,
+   "qty_estimated": 72.0,
+   "hours_estimated": 72.0,
+   "priority": 8,
+   "start": "2026-07-07",
+   "finish": "2026-08-11",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t002",
+   "category": "دانش و آموزش",
+   "name": "مطالعه در زمینه مالی و اقتصادی",
+   "unit": "ساعت",
+   "qty_target": 12.0,
+   "qty_estimated": 12.0,
+   "hours_estimated": 12.0,
+   "priority": 7,
+   "start": "2026-09-02",
+   "finish": "2026-09-07",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t003",
+   "category": "دانش و آموزش",
+   "name": "مطالعه PMBOK",
+   "unit": "ساعت",
+   "qty_target": 20.0,
+   "qty_estimated": 20.0,
+   "hours_estimated": 20.0,
+   "priority": 7,
+   "start": "2026-09-08",
+   "finish": "2026-09-17",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t004",
+   "category": "دانش و آموزش",
+   "name": "پیدا کردن دوره های مناسب برای شرکت مدیریت پروژه و امکانسنجی",
+   "unit": "ساعت",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 2.0,
+   "priority": 8,
+   "start": "2026-08-12",
+   "finish": "2026-08-12",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t005",
+   "category": "دانش و آموزش",
+   "name": "کسب و تایید امتیاز در سایت PMI",
+   "unit": "PDU",
+   "qty_target": 60.0,
+   "qty_estimated": 60.0,
+   "hours_estimated": 10.0,
+   "priority": 7,
+   "start": "2026-09-18",
+   "finish": "2026-09-22",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t006",
+   "category": "دانش و آموزش",
+   "name": "آمادگی برای برگزاری کارگاه PMBOK",
+   "unit": "ساعت",
+   "qty_target": 40.0,
+   "qty_estimated": 40.0,
+   "hours_estimated": 40.0,
+   "priority": 8,
+   "start": "2026-08-13",
+   "finish": "2026-09-01",
+   "notes": "آبان ماه شروع کنم کارگاهم رو",
+   "logs": []
+  },
+  {
+   "id": "t007",
+   "category": "دانش و آموزش",
+   "name": "برگزاری کارگاه PMBOK",
+   "unit": "ساعت",
+   "qty_target": 20.0,
+   "qty_estimated": 20.0,
+   "hours_estimated": 20.0,
+   "priority": 7,
+   "start": "2026-09-23",
+   "finish": "2026-10-02",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t008",
+   "category": "سلامت جسم و ظاهر",
+   "name": "برنامه ریزی غذایی",
+   "unit": "ساعت",
+   "qty_target": 6.0,
+   "qty_estimated": 6.0,
+   "hours_estimated": 6.0,
+   "priority": 9,
+   "start": "2026-07-07",
+   "finish": "2026-07-09",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t009",
+   "category": "سلامت جسم و ظاهر",
+   "name": "ورزش روزانه+مهارت رزمی",
+   "unit": "ساعت",
+   "qty_target": 190.0,
+   "qty_estimated": 190.0,
+   "hours_estimated": 190.0,
+   "priority": 9,
+   "start": "2026-07-10",
+   "finish": "2026-10-12",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t010",
+   "category": "سلامت جسم و ظاهر",
+   "name": "چکاپ کلی",
+   "unit": "دفعه",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 3.0,
+   "priority": 9,
+   "start": "2026-10-13",
+   "finish": "2026-10-14",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t011",
+   "category": "سلامت جسم و ظاهر",
+   "name": "بررسی راهکارهای رشد مو",
+   "unit": "ساعت",
+   "qty_target": 3.0,
+   "qty_estimated": 3.0,
+   "hours_estimated": 3.0,
+   "priority": 9,
+   "start": "2026-10-15",
+   "finish": "2026-10-16",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t012",
+   "category": "سلامت جسم و ظاهر",
+   "name": "بررسی راهکارهای ترمیم پوست",
+   "unit": "ساعت",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 2.0,
+   "priority": 9,
+   "start": "2026-10-17",
+   "finish": "2026-10-17",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t013",
+   "category": "سلامت جسم و ظاهر",
+   "name": "پیداکردن ست های مناسب لباس",
+   "unit": "ساعت",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 2.0,
+   "priority": 9,
+   "start": "2026-10-18",
+   "finish": "2026-10-18",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t014",
+   "category": "سلامت روح و روان",
+   "name": "نماز قضا",
+   "unit": "روز",
+   "qty_target": 365.0,
+   "qty_estimated": 365.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2026-07-07",
+   "finish": "2027-07-06",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t015",
+   "category": "سلامت روح و روان",
+   "name": "روزه قضا و مستحبی",
+   "unit": "روز",
+   "qty_target": 30.0,
+   "qty_estimated": 30.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2027-03-11",
+   "finish": "2027-03-12",
+   "notes": "10",
+   "logs": []
+  },
+  {
+   "id": "t016",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه قرآن",
+   "unit": "جزء",
+   "qty_target": 30.0,
+   "qty_estimated": 30.0,
+   "hours_estimated": 30.0,
+   "priority": 7,
+   "start": "2026-11-21",
+   "finish": "2026-12-05",
+   "notes": "30",
+   "logs": []
+  },
+  {
+   "id": "t017",
+   "category": "سلامت روح و روان",
+   "name": "نماز شب",
+   "unit": "روز",
+   "qty_target": 4.0,
+   "qty_estimated": 4.0,
+   "hours_estimated": 4.0,
+   "priority": 5,
+   "start": "2027-03-20",
+   "finish": "2027-03-21",
+   "notes": "4",
+   "logs": []
+  },
+  {
+   "id": "t018",
+   "category": "سلامت روح و روان",
+   "name": "تفسیر قرآن",
+   "unit": "جزء",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 20.0,
+   "priority": 8,
+   "start": "2026-07-19",
+   "finish": "2026-07-28",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t019",
+   "category": "سلامت روح و روان",
+   "name": "فیلم مذهبی",
+   "unit": "عدد",
+   "qty_target": 3.0,
+   "qty_estimated": 3.0,
+   "hours_estimated": 40.0,
+   "priority": 8,
+   "start": "2026-07-29",
+   "finish": "2026-08-17",
+   "notes": "3",
+   "logs": []
+  },
+  {
+   "id": "t020",
+   "category": "سلامت روح و روان",
+   "name": "رفتن به مشهد/قم",
+   "unit": "دفعه",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2027-03-13",
+   "finish": "2027-03-14",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t021",
+   "category": "سلامت روح و روان",
+   "name": "محاسبه پرداخت خمس",
+   "unit": "ساعت",
+   "qty_target": 10.0,
+   "qty_estimated": 10.0,
+   "hours_estimated": 10.0,
+   "priority": 6,
+   "start": "2027-03-15",
+   "finish": "2027-03-19",
+   "notes": "ابتدای هر سال",
+   "logs": []
+  },
+  {
+   "id": "t022",
+   "category": "سلامت روح و روان",
+   "name": "محاسبه پرداخت دیون",
+   "unit": "ساعت",
+   "qty_target": 5.0,
+   "qty_estimated": 5.0,
+   "hours_estimated": 5.0,
+   "priority": 7,
+   "start": "2026-12-06",
+   "finish": "2026-12-08",
+   "notes": "شناسایی و پرداخت",
+   "logs": []
+  },
+  {
+   "id": "t023",
+   "category": "سلامت روح و روان",
+   "name": "ریلکسیشن + تکمیل فرم های خودآگاهی",
+   "unit": "ساعت",
+   "qty_target": 190.0,
+   "qty_estimated": 190.0,
+   "hours_estimated": 190.0,
+   "priority": 8,
+   "start": "2026-08-18",
+   "finish": "2026-11-20",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t024",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه درباره مکانیزم بدن",
+   "unit": "ساعت",
+   "qty_target": 5.0,
+   "qty_estimated": 5.0,
+   "hours_estimated": 5.0,
+   "priority": 9,
+   "start": "2026-07-07",
+   "finish": "2026-07-09",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t025",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه درباره هیپنوتیزم",
+   "unit": "ساعت",
+   "qty_target": 10.0,
+   "qty_estimated": 10.0,
+   "hours_estimated": 10.0,
+   "priority": 9,
+   "start": "2026-07-10",
+   "finish": "2026-07-14",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t026",
+   "category": "سلامت روح و روان",
+   "name": "ارزیابی وضعیت معنوی فعلی و شناسایی مسیر پیشرفت",
+   "unit": "ساعت",
+   "qty_target": 20.0,
+   "qty_estimated": 20.0,
+   "hours_estimated": 20.0,
+   "priority": 7,
+   "start": "2026-12-09",
+   "finish": "2026-12-18",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t027",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه احادیث جهت درک بهتر مفاهیم",
+   "unit": "حدیث",
+   "qty_target": 48.0,
+   "qty_estimated": 48.0,
+   "hours_estimated": 24.0,
+   "priority": 7,
+   "start": "2026-12-19",
+   "finish": "2026-12-30",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t028",
+   "category": "سلامت روح و روان",
+   "name": "دسته بندی داده ها و تحلیل",
+   "unit": "ساعت",
+   "qty_target": 30.0,
+   "qty_estimated": 30.0,
+   "hours_estimated": 30.0,
+   "priority": 7,
+   "start": "2026-12-31",
+   "finish": "2027-01-14",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t029",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه عمیق قرآن و تحلیل آیات",
+   "unit": "ساعت",
+   "qty_target": 50.0,
+   "qty_estimated": 50.0,
+   "hours_estimated": 50.0,
+   "priority": 7,
+   "start": "2027-01-15",
+   "finish": "2027-02-08",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t030",
+   "category": "سلامت روح و روان",
+   "name": "شناخت مسئولیت ها از قرآن",
+   "unit": "ساعت",
+   "qty_target": 30.0,
+   "qty_estimated": 30.0,
+   "hours_estimated": 30.0,
+   "priority": 7,
+   "start": "2027-02-09",
+   "finish": "2027-02-23",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t031",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه کتاب های عرفانی و شناختی",
+   "unit": "کتاب",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 30.0,
+   "priority": 7,
+   "start": "2027-02-24",
+   "finish": "2027-03-10",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t032",
+   "category": "سلامت روح و روان",
+   "name": "مطالعه درباره روح",
+   "unit": "ساعت",
+   "qty_target": 8.0,
+   "qty_estimated": 8.0,
+   "hours_estimated": 8.0,
+   "priority": 9,
+   "start": "2026-07-15",
+   "finish": "2026-07-18",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t033",
+   "category": "خانواده",
+   "name": "مطالعه درباره فرزندان",
+   "unit": "کتاب",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 12.0,
+   "priority": 8,
+   "start": "2026-09-01",
+   "finish": "2026-09-06",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t034",
+   "category": "خانواده",
+   "name": "مطالعه درباره روابط همسران",
+   "unit": "کتاب",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 10.0,
+   "priority": 7,
+   "start": "2026-09-07",
+   "finish": "2026-09-11",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t035",
+   "category": "خانواده",
+   "name": "رفاقت با همسر و فرزندان",
+   "unit": "ساعت",
+   "qty_target": 150.0,
+   "qty_estimated": 150.0,
+   "hours_estimated": 150.0,
+   "priority": 7,
+   "start": "2026-09-12",
+   "finish": "2026-11-25",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t036",
+   "category": "خانواده",
+   "name": "گردش با خانواده",
+   "unit": "مرتبه",
+   "qty_target": 24.0,
+   "qty_estimated": 24.0,
+   "hours_estimated": 72.0,
+   "priority": 7,
+   "start": "2026-11-26",
+   "finish": "2026-12-31",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t037",
+   "category": "خانواده",
+   "name": "برنامه مسافرت",
+   "unit": "مرتبه",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 3.0,
+   "priority": 7,
+   "start": "2027-01-01",
+   "finish": "2027-01-02",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t038",
+   "category": "خانواده",
+   "name": "برنامه ریزی برای رسیدگی به مادر",
+   "unit": "ساعت",
+   "qty_target": 2.0,
+   "qty_estimated": 2.0,
+   "hours_estimated": 2.0,
+   "priority": 7,
+   "start": "2027-01-03",
+   "finish": "2027-01-03",
+   "notes": "یک مسافرت با مادر",
+   "logs": []
+  },
+  {
+   "id": "t039",
+   "category": "علایق",
+   "name": "طراحی و نقاشی",
+   "unit": "ساعت",
+   "qty_target": 72.0,
+   "qty_estimated": 72.0,
+   "hours_estimated": 72.0,
+   "priority": 10,
+   "start": "2026-09-01",
+   "finish": "2026-10-06",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t040",
+   "category": "علایق",
+   "name": "برنامه نویسی",
+   "unit": "ساعت",
+   "qty_target": 72.0,
+   "qty_estimated": 72.0,
+   "hours_estimated": 72.0,
+   "priority": 10,
+   "start": "2026-10-07",
+   "finish": "2026-11-11",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t041",
+   "category": "روابط اجتماعی",
+   "name": "تقویت قدرت بیان و متقاعد سازی",
+   "unit": "ساعت",
+   "qty_target": 15.0,
+   "qty_estimated": 15.0,
+   "hours_estimated": 15.0,
+   "priority": 7,
+   "start": "2026-10-01",
+   "finish": "2026-10-08",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t042",
+   "category": "روابط اجتماعی",
+   "name": "شرکت در سمینارها و جلسات مرتبط با کار",
+   "unit": "ساعت",
+   "qty_target": 5.0,
+   "qty_estimated": 5.0,
+   "hours_estimated": 5.0,
+   "priority": 7,
+   "start": "2026-10-09",
+   "finish": "2026-10-11",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t043",
+   "category": "روابط اجتماعی",
+   "name": "رفت و آمد های دوره ای به کرمان",
+   "unit": "مرتبه",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 3.0,
+   "priority": 7,
+   "start": "2026-10-12",
+   "finish": "2026-10-13",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t044",
+   "category": "روابط اجتماعی",
+   "name": "تقویت مهرخاور",
+   "unit": "مرتبه",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2026-10-19",
+   "finish": "2026-10-20",
+   "notes": "1",
+   "logs": []
+  },
+  {
+   "id": "t045",
+   "category": "روابط اجتماعی",
+   "name": "کمک به نیازمندان فامیل",
+   "unit": "مبلغ(ریال)",
+   "qty_target": 50000000.0,
+   "qty_estimated": 50000000.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2026-10-21",
+   "finish": "2026-10-22",
+   "notes": "50000000",
+   "logs": []
+  },
+  {
+   "id": "t046",
+   "category": "روابط اجتماعی",
+   "name": "شرح خصوصیات دوست مناسب و هم فکر و سنجش دوست مناسب",
+   "unit": "ساعت",
+   "qty_target": 10.0,
+   "qty_estimated": 10.0,
+   "hours_estimated": 10.0,
+   "priority": 7,
+   "start": "2026-10-14",
+   "finish": "2026-10-18",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t047",
+   "category": "روابط اجتماعی",
+   "name": "کمک به خیریه و بررسی کمک به آزادی زندانیان",
+   "unit": "مبلغ(ریال)",
+   "qty_target": 60000000.0,
+   "qty_estimated": 60000000.0,
+   "hours_estimated": 3.0,
+   "priority": 6,
+   "start": "2026-10-23",
+   "finish": "2026-10-24",
+   "notes": "60000000",
+   "logs": []
+  },
+  {
+   "id": "t048",
+   "category": "روابط اجتماعی",
+   "name": "بررسی پتانسیل های کمک به دیگران",
+   "unit": "ساعت",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 1.0,
+   "priority": 6,
+   "start": "2026-10-25",
+   "finish": "2026-10-25",
+   "notes": "مبلغ توانایی",
+   "logs": []
+  },
+  {
+   "id": "t049",
+   "category": "شرایط اقتصادی",
+   "name": "بودجه بندی سالیانه و ثبت وضعیت مالی",
+   "unit": "ساعت",
+   "qty_target": 25.0,
+   "qty_estimated": 25.0,
+   "hours_estimated": 25.0,
+   "priority": 8,
+   "start": "2026-07-23",
+   "finish": "2026-08-04",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t050",
+   "category": "شرایط اقتصادی",
+   "name": "پس انداز سالیانه",
+   "unit": "مبلغ(ریال)",
+   "qty_target": 300000000.0,
+   "qty_estimated": 300000000.0,
+   "hours_estimated": 3.0,
+   "priority": 8,
+   "start": "2026-07-07",
+   "finish": "2027-07-06",
+   "notes": "300000000",
+   "logs": []
+  },
+  {
+   "id": "t051",
+   "category": "شرایط اقتصادی",
+   "name": "کسب آمادگی های لازم جهت اجرا کار دوم",
+   "unit": "ساعت",
+   "qty_target": 25.0,
+   "qty_estimated": 25.0,
+   "hours_estimated": 25.0,
+   "priority": 9,
+   "start": "2026-07-07",
+   "finish": "2026-07-19",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t052",
+   "category": "شرایط اقتصادی",
+   "name": "برنامه ریزی ایجاد استقلال مالی خانواده",
+   "unit": "ساعت",
+   "qty_target": 5.0,
+   "qty_estimated": 5.0,
+   "hours_estimated": 5.0,
+   "priority": 9,
+   "start": "2026-07-20",
+   "finish": "2026-07-22",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t053",
+   "category": "شرایط کاری",
+   "name": "آشنایی با کارهای شرکت (اکتشاف و استخراج)",
+   "unit": "ساعت",
+   "qty_target": 10.0,
+   "qty_estimated": 10.0,
+   "hours_estimated": 10.0,
+   "priority": 7,
+   "start": "2026-11-06",
+   "finish": "2026-11-10",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t054",
+   "category": "شرایط کاری",
+   "name": "ارتقای مسئولیت های کاری",
+   "unit": "ساعت",
+   "qty_target": 10.0,
+   "qty_estimated": 10.0,
+   "hours_estimated": 10.0,
+   "priority": 8,
+   "start": "2026-11-01",
+   "finish": "2026-11-05",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t055",
+   "category": "ایجاد شرکت جدیدم",
+   "name": "تدوین مدل کسب و کار",
+   "unit": "ساعت",
+   "qty_target": 30.0,
+   "qty_estimated": 30.0,
+   "hours_estimated": 30.0,
+   "priority": 7,
+   "start": "2027-01-01",
+   "finish": "2027-01-15",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t056",
+   "category": "ایجاد شرکت جدیدم",
+   "name": "تدوین طرح کسب و کار (Business plan)",
+   "unit": "ساعت",
+   "qty_target": 20.0,
+   "qty_estimated": 20.0,
+   "hours_estimated": 20.0,
+   "priority": 7,
+   "start": "2027-01-16",
+   "finish": "2027-01-25",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t057",
+   "category": "ایجاد شرکت جدیدم",
+   "name": "طراحی هویت برند",
+   "unit": "ساعت",
+   "qty_target": 20.0,
+   "qty_estimated": 20.0,
+   "hours_estimated": 20.0,
+   "priority": 7,
+   "start": "2027-01-26",
+   "finish": "2027-02-04",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t058",
+   "category": "ایجاد شرکت جدیدم",
+   "name": "جذب اولین مشتری",
+   "unit": "تعداد",
+   "qty_target": 1.0,
+   "qty_estimated": 1.0,
+   "hours_estimated": 10.0,
+   "priority": 7,
+   "start": "2027-02-05",
+   "finish": "2027-02-09",
+   "notes": "",
+   "logs": []
+  },
+  {
+   "id": "t059",
+   "category": "ایجاد شرکت جدیدم",
+   "name": "طراحی سایت",
+   "unit": "ساعت",
+   "qty_target": 40.0,
+   "qty_estimated": 40.0,
+   "hours_estimated": 40.0,
+   "priority": 7,
+   "start": "2027-02-10",
+   "finish": "2027-03-01",
+   "notes": "",
+   "logs": []
+  }
+ ]
+}
+</script>
 
 <script>
-// ============================================================
-// تنظیمات Supabase
-// ============================================================
-const SUPABASE_URL = 'https://hcrvxbjwsxmdzamkuwhl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_-5k5xY6eWyBTrAvNIt-_iQ_8Ax6P9EW';
+/* ============ ثابت‌ها و کمکی‌ها ============ */
+const LS_KEY = 'yearplan_state_v1';
+const LS_SETTINGS = 'yearplan_settings_v1';
+const CAT_CLASS = {};
+const CAT_VARS  = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--c9'];
 
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const fmtPct = v => (isFinite(v) ? Math.round(v*100) : 0).toLocaleString('fa-IR') + '٪';
+const todayISO = () => new Date().toISOString().slice(0,10);
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const uid = () => 't' + Math.random().toString(36).slice(2,9);
 
-let currentUser = null;
-let currentUserData = null;
-let allEvents = [];
-let allGoals = [];
-let allHolidays = [];
-let allFinances = [];
-let allUsers = [];
-
-let calendarMode = 'jalali';
-
-function setCalendarMode(mode) {
-    calendarMode = mode;
-    document.getElementById('btn-jalali').classList.toggle('active', mode === 'jalali');
-    document.getElementById('btn-gregorian').classList.toggle('active', mode === 'gregorian');
-    renderCalendar('dashboard-calendar');
-    renderCalendar('calendar-container');
-    updateTodayDisplay();
+function loadSeed(){
+  return JSON.parse(document.getElementById('seed-data').textContent);
 }
 
-// ============================================================
-// توابع تاریخ شمسی
-// ============================================================
-function toJalaali(date) {
-    const g = new Date(date);
-    const j = jalaali.toJalaali(g.getFullYear(), g.getMonth() + 1, g.getDate());
-    return j;
+/* ============ وضعیت برنامه ============ */
+let state = null;       // { categories:[], tasks:[...] }
+let settings = { weight_volume:60, sb_url:'', sb_key:'', sb_id:'main' };
+let sbClient = null;
+let saveTimer = null;
+let ganttInstance = null;
+let activeCat = null;
+
+function computeTaskTotals(t){
+  const qtyDone = (t.logs||[]).reduce((s,l)=> s + (l.qty||0), 0);
+  const hoursDone = (t.logs||[]).reduce((s,l)=> s + (l.hours||0), 0);
+  const volPct = t.qty_estimated ? clamp01(qtyDone / t.qty_estimated) : 0;
+  const timePct = t.hours_estimated ? clamp01(hoursDone / t.hours_estimated) : 0;
+  return { qtyDone, hoursDone, volPct, timePct };
+}
+function compositePct(volPct, timePct){
+  const w = clamp01(settings.weight_volume/100);
+  return volPct*w + timePct*(1-w);
 }
 
-function toGregorian(jy, jm, jd) {
-    const g = jalaali.toGregorian(jy, jm, jd);
-    return new Date(g.gy, g.gm - 1, g.gd);
+/* ============ ذخیره‌سازی ============ */
+function persistLocal(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
 }
-
-function getTodayJalaali() {
-    const now = new Date();
-    return toJalaali(now);
-}
-
-function getJalaaliMonthName(jm) {
-    const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
-    return months[jm - 1];
-}
-
-function getJalaaliWeekday(date) {
-    const weekdays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
-    return weekdays[date.getDay()];
-}
-
-function getFullJalaaliDate(date) {
-    const j = toJalaali(date);
-    const weekday = getJalaaliWeekday(date);
-    return `${weekday} ${j.jd} ${getJalaaliMonthName(j.jm)} ${j.jy}`;
-}
-
-// ✅ پنجشنبه و جمعه (day 4 و 5)
-function isWeekendJalaali(date) {
-    const day = date.getDay();
-    return day === 4 || day === 5;
-}
-
-function getJalaaliDaysInMonth(jy, jm) {
-    if (jm <= 6) return 31;
-    if (jm <= 11) return 30;
-    return jalaali.isLeapJalaali(jy) ? 30 : 29;
-}
-
-function getJalaaliDateString(jy, jm, jd) {
-    return `${jy}/${String(jm).padStart(2, '0')}/${String(jd).padStart(2, '0')}`;
-}
-
-function parseJalaliDate(str) {
-    const parts = str.split('/');
-    if (parts.length === 3) {
-        const jy = parseInt(parts[0]);
-        const jm = parseInt(parts[1]);
-        const jd = parseInt(parts[2]);
-        if (!isNaN(jy) && !isNaN(jm) && !isNaN(jd)) {
-            return { jy, jm, jd };
-        }
+function scheduleRemoteSave(){
+  if(!sbClient) return;
+  setSyncBadge('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const { error } = await sbClient.from('plan_state').upsert({
+        id: settings.sb_id || 'main',
+        data: state,
+        updated_at: new Date().toISOString()
+      });
+      if(error) throw error;
+      setSyncBadge('ok');
+    }catch(e){
+      console.error(e);
+      setSyncBadge('err');
     }
-    return null;
+  }, 900);
+}
+function persistAll(){
+  persistLocal();
+  scheduleRemoteSave();
+}
+function setSyncBadge(mode){
+  const el = document.getElementById('syncBadge');
+  el.classList.remove('ok','local','err');
+  if(mode==='ok'){ el.textContent='همگام با Supabase'; el.classList.add('ok'); }
+  else if(mode==='saving'){ el.textContent='در حال ذخیره...'; el.classList.add('local'); }
+  else if(mode==='err'){ el.textContent='خطا در همگام‌سازی'; el.classList.add('err'); }
+  else { el.textContent = sbClient ? 'همگام با Supabase' : 'آفلاین (فقط این دستگاه)'; el.classList.add(sbClient?'ok':'local'); }
 }
 
-// ============================================================
-// توابع میلادی
-// ============================================================
-function getGregorianMonthName(gm) {
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    return months[gm];
+async function initSupabase(){
+  if(!settings.sb_url || !settings.sb_key || !window.supabase) return false;
+  try{
+    sbClient = window.supabase.createClient(settings.sb_url, settings.sb_key);
+    const { data, error } = await sbClient.from('plan_state').select('data').eq('id', settings.sb_id||'main').maybeSingle();
+    if(error) throw error;
+    if(data && data.data){ state = data.data; }
+    setSyncBadge('ok');
+    return true;
+  }catch(e){
+    console.error('supabase init failed', e);
+    sbClient = null;
+    setSyncBadge('err');
+    return false;
+  }
 }
 
-function getFullGregorianDate(date) {
-    const d = new Date(date);
-    const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return `${weekdays[d.getDay()]} ${d.getDate()} ${getGregorianMonthName(d.getMonth())} ${d.getFullYear()}`;
+async function bootstrapState(){
+  const savedSettings = localStorage.getItem(LS_SETTINGS);
+  if(savedSettings) settings = Object.assign(settings, JSON.parse(savedSettings));
+  document.getElementById('weightSlider').value = settings.weight_volume;
+
+  const savedLocal = localStorage.getItem(LS_KEY);
+  state = savedLocal ? JSON.parse(savedLocal) : loadSeed();
+
+  if(settings.sb_url && settings.sb_key){
+    await initSupabase();
+  }
+  if(!state){ state = loadSeed(); }
 }
 
-function isWeekendGregorian(date) {
-    const day = date.getDay();
-    return day === 4 || day === 5;
+/* ============ رنگ دسته‌ها ============ */
+function assignCategoryColors(){
+  state.categories.forEach((c,i)=>{ CAT_CLASS[c] = 'c' + ((i % 9) + 1); });
+}
+function catColorVar(cat){
+  const cls = CAT_CLASS[cat] || 'c1';
+  return getComputedStyle(document.documentElement).getPropertyValue('--'+cls).trim();
 }
 
-// ============================================================
-// متغیرهای اصلی
-// ============================================================
-let currentJalaaliYear = 0;
-let currentJalaaliMonth = 0;
-let currentJalaaliDay = 0;
-let currentGregorianDate = new Date();
+/* ============ رندر: کارت‌های خلاصه ============ */
+function renderSummary(){
+  let sumHoursEst=0, sumHoursDone=0, sumVolWeighted=0;
+  state.tasks.forEach(t=>{
+    const {hoursDone, volPct} = computeTaskTotals(t);
+    const w = t.hours_estimated || 0;
+    sumHoursEst += w;
+    sumHoursDone += hoursDone;
+    sumVolWeighted += volPct * w;
+  });
+  const overallTime = sumHoursEst ? clamp01(sumHoursDone/sumHoursEst) : 0;
+  const overallVol = sumHoursEst ? clamp01(sumVolWeighted/sumHoursEst) : 0;
+  const overallComposite = compositePct(overallVol, overallTime);
 
-function setCurrentDateToToday() {
-    const today = getTodayJalaali();
-    currentJalaaliYear = today.jy;
-    currentJalaaliMonth = today.jm;
-    currentJalaaliDay = today.jd;
-    currentGregorianDate = new Date();
-}
-setCurrentDateToToday();
+  document.getElementById('cardComposite').textContent = fmtPct(overallComposite);
+  document.getElementById('cardVolume').textContent = fmtPct(overallVol);
+  document.getElementById('cardTime').textContent = fmtPct(overallTime);
+  document.getElementById('barComposite').style.width = (overallComposite*100)+'%';
+  document.getElementById('barVolume').style.width = (overallVol*100)+'%';
+  document.getElementById('barTime').style.width = (overallTime*100)+'%';
 
-// ============================================================
-// توابع احراز هویت
-// ============================================================
-function showAuthMessage(msg, isError = false) {
-    document.getElementById('auth-message').innerHTML = `<div style="padding:12px;border-radius:8px;background:${isError?'#fee2e2':'#d1fae5'};color:${isError?'#991b1b':'#065f46'}">${msg}</div>`;
-}
-
-async function login() {
-    const email = document.getElementById('login-email').value;
-    const pass = document.getElementById('login-password').value;
-    if (!email || !pass) { showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true); return; }
-    
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
-    if (error) { showAuthMessage('❌ ' + error.message, true); return; }
-    
-    currentUser = data.user;
-    
-    const { data: userData } = await supabaseClient
-        .from('users')
-        .select('*')
-        .eq('id', currentUser.id)
-        .single();
-    
-    currentUserData = userData;
-    showAuthMessage('✅ ورود موفق!', false);
-    loadPlanner();
+  const wv = settings.weight_volume, wt = 100-wv;
+  document.getElementById('wVolLabel').textContent = 'حجمی: ' + wv.toLocaleString('fa-IR') + '٪';
+  document.getElementById('wTimeLabel').textContent = 'زمانی: ' + wt.toLocaleString('fa-IR') + '٪';
 }
 
-async function register() {
-    const email = document.getElementById('register-email').value;
-    const pass = document.getElementById('register-password').value;
-    if (!email || !pass) { showAuthMessage('لطفاً ایمیل و رمز عبور را وارد کنید.', true); return; }
-    if (pass.length < 6) { showAuthMessage('رمز عبور حداقل ۶ کاراکتر باشد.', true); return; }
-    
-    const { data, error } = await supabaseClient.auth.signUp({ email, password: pass });
-    if (error) { showAuthMessage('❌ ' + error.message, true); return; }
-    
-    currentUser = data.user;
-    
-    await supabaseClient.from('users').insert({
-        id: currentUser.id,
-        email: email,
-        role: 'user',
-        status: 'pending'
+/* ============ رندر: چیپ دسته‌ها ============ */
+function renderChips(){
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML='';
+  const allChip = document.createElement('div');
+  allChip.className = 'chip' + (activeCat===null?' active':'');
+  allChip.textContent='همه';
+  allChip.onclick = ()=>{ activeCat=null; renderAll(); };
+  wrap.appendChild(allChip);
+  state.categories.forEach(cat=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (activeCat===cat?' active':'');
+    chip.textContent = cat;
+    chip.onclick = ()=>{ activeCat = (activeCat===cat? null: cat); renderAll(); };
+    wrap.appendChild(chip);
+  });
+}
+
+/* ============ رندر: گانت ============ */
+function renderGantt(){
+  const container = document.getElementById('gantt-container');
+  const tasksForGantt = state.tasks
+    .filter(t=> !activeCat || t.category===activeCat)
+    .map(t=>{
+      const {volPct, timePct} = computeTaskTotals(t);
+      const pct = Math.round(compositePct(volPct,timePct)*100);
+      return {
+        id: t.id,
+        name: t.name,
+        start: t.start,
+        end: t.finish,
+        progress: pct,
+        custom_class: CAT_CLASS[t.category] || 'c1'
+      };
     });
-    
-    showAuthMessage('✅ ثبت‌نام موفق! منتظر تایید ادمین باشید.', false);
-    document.getElementById('register-form').classList.add('hidden');
-    document.getElementById('login-email').value = email;
+  container.innerHTML='';
+  if(tasksForGantt.length===0) return;
+  ganttInstance = new Gantt(container, tasksForGantt, {
+    view_mode:'Month',
+    language:'en',
+    on_click: t=> openEditFromGantt(t.id)
+  });
+
+  const legend = document.getElementById('legend');
+  legend.innerHTML='';
+  state.categories.forEach(cat=>{
+    const item = document.createElement('span');
+    item.innerHTML = `<i style="background:${getCss(CAT_CLASS[cat])}"></i>${cat}`;
+    legend.appendChild(item);
+  });
+}
+function getCss(cls){ return getComputedStyle(document.documentElement).getPropertyValue('--'+cls).trim(); }
+function openEditFromGantt(id){
+  const row = document.querySelector('tr[data-id="'+id+'"]');
+  if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.style.outline='2px solid var(--gold)'; setTimeout(()=>row.style.outline='',1200); }
 }
 
-function logout() {
-    supabaseClient.auth.signOut();
-    currentUser = null;
-    currentUserData = null;
-    document.getElementById('planner-section').classList.add('hidden');
-    document.getElementById('auth-section').classList.remove('hidden');
-}
-
-function isAdmin() {
-    return currentUserData && currentUserData.role === 'admin';
-}
-
-// ============================================================
-// توابع اصلی
-// ============================================================
-function switchTab(tabId) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-    const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
-    if (tab) tab.classList.add('active');
-    const content = document.getElementById(`tab-${tabId}`);
-    if (content) content.classList.add('active');
-    if (tabId === 'dashboard') updateDashboard();
-    if (tabId === 'holidays') loadHolidays();
-    if (tabId === 'admin') loadUsers();
-}
-
-async function loadPlanner() {
-    document.getElementById('auth-section').classList.add('hidden');
-    document.getElementById('planner-section').classList.remove('hidden');
-    
-    const user = (await supabaseClient.auth.getUser()).data.user;
-    if (user) {
-        const { data: userData } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        
-        currentUserData = userData;
-        
-        document.getElementById('user-name').textContent = user.email.split('@')[0];
-        
-        // نمایش نقش کاربر
-        if (userData && userData.role === 'admin') {
-            document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-danger">👑 ادمین</span>';
-        } else {
-            document.getElementById('user-role-badge').innerHTML = '<span class="badge badge-info">👤 کاربر</span>';
-        }
-        
-        await loadAllData();
-        updateDashboard();
-        updateTodayDisplay();
-    }
-}
-
-function updateTodayDisplay() {
-    const today = new Date();
-    if (calendarMode === 'jalali') {
-        document.getElementById('today-display').textContent = getFullJalaaliDate(today);
-    } else {
-        document.getElementById('today-display').textContent = getFullGregorianDate(today);
-    }
-}
-
-async function loadAllData() {
-    await loadGoals();
-    await loadCalendarEvents();
-    await loadHolidays();
-    await loadFinance();
-}
-
-// ============================================================
-// توابع مدیریت کاربران
-// ============================================================
-async function loadUsers() {
-    const { data, error } = await supabaseClient
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-    
-    if (error) {
-        document.getElementById('pending-users').innerHTML = `<p style="color:red">❌ ${error.message}</p>`;
-        return;
-    }
-    
-    allUsers = data || [];
-    
-    const pending = allUsers.filter(u => u.status === 'pending');
-    const approved = allUsers.filter(u => u.status === 'approved');
-    
-    const pendingContainer = document.getElementById('pending-users');
-    if (pending.length === 0) {
-        pendingContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ درخواست جدیدی وجود ندارد.</p>';
-    } else {
-        pendingContainer.innerHTML = pending.map(u => `
-            <div class="user-item">
-                <div class="user-info">
-                    <div class="name">${u.email}</div>
-                    <div class="email">${u.id}</div>
-                </div>
-                <div style="display:flex;gap:5px;flex-wrap:wrap">
-                    <span class="user-status pending">⏳ در انتظار</span>
-                    ${isAdmin() ? `
-                        <button class="btn btn-success btn-sm" onclick="approveUser('${u.id}')">✅ تایید</button>
-                        <button class="btn btn-danger btn-sm" onclick="rejectUser('${u.id}')">❌ رد</button>
-                    ` : '<span style="color:#9ca3af;">منتظر تایید ادمین</span>'}
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    const approvedContainer = document.getElementById('approved-users');
-    if (approved.length === 0) {
-        approvedContainer.innerHTML = '<p style="color:#9ca3af;padding:10px 0;">هیچ کاربر فعالی وجود ندارد.</p>';
-    } else {
-        approvedContainer.innerHTML = approved.map(u => `
-            <div class="user-item">
-                <div class="user-info">
-                    <div class="name">${u.email}</div>
-                    <div class="email">نقش: ${u.role || 'user'}</div>
-                </div>
-                <div style="display:flex;gap:5px;flex-wrap:wrap">
-                    <span class="user-status approved">✅ فعال</span>
-                    ${isAdmin() && u.id !== currentUser.id ? `
-                        <button class="btn btn-warning btn-sm" onclick="makeAdmin('${u.id}')">👑 ادمین</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑 حذف</button>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('');
-    }
-}
-
-async function approveUser(userId) {
-    if (!confirm('آیا از تایید این کاربر مطمئن هستید؟')) return;
-    const { error } = await supabaseClient
-        .from('users')
-        .update({ status: 'approved', role: 'user' })
-        .eq('id', userId);
-    if (error) { alert('❌ ' + error.message); return; }
-    showAuthMessage('✅ کاربر با موفقیت تایید شد!', false);
-    loadUsers();
-}
-
-async function rejectUser(userId) {
-    if (!confirm('آیا از رد این کاربر مطمئن هستید؟')) return;
-    const { error } = await supabaseClient
-        .from('users')
-        .update({ status: 'rejected' })
-        .eq('id', userId);
-    if (error) { alert('❌ ' + error.message); return; }
-    showAuthMessage('✅ کاربر رد شد.', false);
-    loadUsers();
-}
-
-async function makeAdmin(userId) {
-    if (!confirm('آیا از تبدیل این کاربر به ادمین مطمئن هستید؟')) return;
-    const { error } = await supabaseClient
-        .from('users')
-        .update({ role: 'admin' })
-        .eq('id', userId);
-    if (error) { alert('❌ ' + error.message); return; }
-    showAuthMessage('✅ کاربر به ادمین تبدیل شد!', false);
-    loadUsers();
-}
-
-async function deleteUser(userId) {
-    if (!confirm('آیا از حذف این کاربر مطمئن هستید؟')) return;
-    const { error } = await supabaseClient
-        .from('users')
-        .delete()
-        .eq('id', userId);
-    if (error) { alert('❌ ' + error.message); return; }
-    showAuthMessage('✅ کاربر حذف شد.', false);
-    loadUsers();
-}
-
-// ============================================================
-// توابع تقویم (به حالت قبل برگشت)
-// ============================================================
-function renderCalendar(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    if (calendarMode === 'jalali') {
-        renderJalaliCalendar(container);
-    } else {
-        renderGregorianCalendar(container);
-    }
-}
-
-function renderJalaliCalendar(container) {
-    const jy = currentJalaaliYear;
-    const jm = currentJalaaliMonth;
-    const daysInMonth = getJalaaliDaysInMonth(jy, jm);
-
-    const firstDayGreg = toGregorian(jy, jm, 1);
-    const firstDayOfWeek = firstDayGreg.getDay();
-
-    document.getElementById('calendar-month-label').textContent = `${getJalaaliMonthName(jm)} ${jy}`;
-
-    let html = `<div class="weekday-names">${['ش','ی','د','س','چ','پ','ج'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
-
-    const offset = (firstDayOfWeek + 1) % 7;
-    for (let i = 0; i < offset; i++) {
-        html += `<div class="day" style="background:transparent;cursor:default"></div>`;
-    }
-
-    const today = getTodayJalaali();
-    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateObj = toGregorian(jy, jm, d);
-        const dateStr = `${jy}/${jm}/${d}`;
-        const isTodayDate = dateStr === todayStr;
-        const isWeekendDay = isWeekendJalaali(dateObj);
-        const isHoliday = allHolidays.some(h => h.date === dateStr);
-        const hasEvent = allEvents.some(e => {
-            if (!e.start_time) return false;
-            const eventDate = new Date(e.start_time);
-            const ej = toJalaali(eventDate);
-            return `${ej.jy}/${ej.jm}/${ej.jd}` === dateStr;
-        });
-
-        let classes = 'day';
-        if (isTodayDate) classes += ' today';
-        if (isWeekendDay) classes += ' weekend';
-        if (isHoliday) classes += ' holiday';
-        if (hasEvent) classes += ' has-event';
-
-        html += `<div class="${classes}" onclick="selectDate('${dateStr}')">
-            ${d}
-            ${hasEvent ? '<div class="event-dot"></div>' : ''}
-        </div>`;
-    }
-
-    html += '</div>';
-    container.innerHTML = html;
-    
-    const subtitle = document.getElementById('calendar-subtitle');
-    if (subtitle) {
-        const today = getFullJalaaliDate(new Date());
-        subtitle.textContent = `امروز: ${today}`;
-    }
-}
-
-function renderGregorianCalendar(container) {
-    const date = currentGregorianDate;
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    document.getElementById('calendar-month-label').textContent = `${monthNames[month]} ${year}`;
-
-    let html = `<div class="weekday-names">${['S','M','T','W','T','F','S'].map(d => `<div>${d}</div>`).join('')}</div><div class="calendar-grid">`;
-
-    const offset = firstDay;
-    for (let i = 0; i < offset; i++) {
-        html += `<div class="day" style="background:transparent;cursor:default"></div>`;
-    }
-
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateObj = new Date(year, month, d);
-        const dateStr = dateObj.toISOString().split('T')[0];
-        const isTodayDate = dateStr === todayStr;
-        const isWeekendDay = isWeekendGregorian(dateObj);
-        const hasEvent = allEvents.some(e => e.start_time && e.start_time.startsWith(dateStr));
-
-        let classes = 'day';
-        if (isTodayDate) classes += ' today';
-        if (isWeekendDay) classes += ' weekend';
-        if (hasEvent) classes += ' has-event';
-
-        html += `<div class="${classes}" onclick="selectDateGregorian('${dateStr}')">
-            ${d}
-            ${hasEvent ? '<div class="event-dot"></div>' : ''}
-        </div>`;
-    }
-
-    html += '</div>';
-    container.innerHTML = html;
-    
-    const subtitle = document.getElementById('calendar-subtitle');
-    if (subtitle) {
-        const today = getFullGregorianDate(new Date());
-        subtitle.textContent = `Today: ${today}`;
-    }
-}
-
-function changeMonth(delta) {
-    if (calendarMode === 'jalali') {
-        currentJalaaliMonth += delta;
-        if (currentJalaaliMonth > 12) {
-            currentJalaaliMonth = 1;
-            currentJalaaliYear++;
-        } else if (currentJalaaliMonth < 1) {
-            currentJalaaliMonth = 12;
-            currentJalaaliYear--;
-        }
-    } else {
-        currentGregorianDate.setMonth(currentGregorianDate.getMonth() + delta);
-    }
-    renderCalendar('dashboard-calendar');
-    renderCalendar('calendar-container');
-}
-
-function goToToday() {
-    if (calendarMode === 'jalali') {
-        const today = getTodayJalaali();
-        currentJalaaliYear = today.jy;
-        currentJalaaliMonth = today.jm;
-        currentJalaaliDay = today.jd;
-    } else {
-        currentGregorianDate = new Date();
-    }
-    renderCalendar('dashboard-calendar');
-    renderCalendar('calendar-container');
-}
-
-function selectDate(dateStr) {
-    const parts = dateStr.split('/');
-    const jy = parseInt(parts[0]);
-    const jm = parseInt(parts[1]);
-    const jd = parseInt(parts[2]);
-    const gregDate = toGregorian(jy, jm, jd);
-    
-    const events = allEvents.filter(e => {
-        if (!e.start_time) return false;
-        const eventDate = new Date(e.start_time);
-        const ej = toJalaali(eventDate);
-        return `${ej.jy}/${ej.jm}/${ej.jd}` === dateStr;
-    });
-    
-    const fullDate = `${jd} ${getJalaaliMonthName(jm)} ${jy}`;
-
-    if (events.length === 0) {
-        if (confirm(`📅 ${fullDate}\n\nهیچ رویدادی برای این تاریخ وجود ندارد.\nآیا می‌خواهید یک رویداد جدید اضافه کنید؟`)) {
-            showQuickAddEvent(dateStr);
-        }
-    } else {
-        let msg = `📅 ${fullDate}\n\nرویدادها:\n`;
-        events.forEach((e, i) => {
-            const start = new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-            msg += `\n${i+1}. ${e.title}\n   ⏰ ${start}\n`;
-        });
-        alert(msg);
-    }
-}
-
-function selectDateGregorian(dateStr) {
-    const events = allEvents.filter(e => e.start_time && e.start_time.startsWith(dateStr));
-    const fullDate = new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-    if (events.length === 0) {
-        if (confirm(`📅 ${fullDate}\n\nNo events for this date.\nAdd a new event?`)) {
-            showQuickAddEvent(dateStr);
-        }
-    } else {
-        let msg = `📅 ${fullDate}\n\nEvents:\n`;
-        events.forEach((e, i) => {
-            const start = new Date(e.start_time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            msg += `\n${i+1}. ${e.title}\n   ⏰ ${start}\n`;
-        });
-        alert(msg);
-    }
-}
-
-// ============================================================
-// توابع رویدادها
-// ============================================================
-async function loadCalendarEvents() {
-    const { data, error } = await supabaseClient
-        .from('calendar')
-        .select('*')
-        .order('start_time', { ascending: true });
-
-    if (error) {
-        allEvents = [];
-        return;
-    }
-    allEvents = data || [];
-    renderCalendar('dashboard-calendar');
-    renderCalendar('calendar-container');
-}
-
-function showQuickAddEvent(prefillDate = null) {
-    const container = document.getElementById('today-events');
-    const today = getTodayJalaali();
-    const dateStr = prefillDate || `${today.jy}/${today.jm}/${today.jd}`;
-    const parts = dateStr.split('/');
-    const jy = parseInt(parts[0]);
-    const jm = parseInt(parts[1]);
-    const jd = parseInt(parts[2]);
-    const gregDate = toGregorian(jy, jm, jd);
-    const dateInputVal = gregDate.toISOString().split('T')[0];
-    
-    const displayDate = `${jd} ${getJalaaliMonthName(jm)} ${jy}`;
-
-    container.innerHTML = `
-        <div style="background:#f9fafb;padding:15px;border-radius:12px;margin-bottom:15px">
-            <h5 style="margin-bottom:10px">➕ رویداد جدید - ${displayDate}</h5>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
-                <div><label style="display:block;font-size:12px;font-weight:600">عنوان</label>
-                    <input id="quick-event-title" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
-                <div><label style="display:block;font-size:12px;font-weight:600">تاریخ شمسی</label>
-                    <input type="text" id="quick-event-date-jalali" value="${dateStr}" class="jalali-date-input" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;direction:rtl" placeholder="سال/ماه/روز" readonly></div>
-                <div><label style="display:block;font-size:12px;font-weight:600">ساعت</label>
-                    <input type="time" id="quick-event-time" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit"></div>
-                <div style="display:flex;gap:5px">
-                    <button class="btn btn-success btn-sm" onclick="saveQuickEvent()">💾</button>
-                    <button class="btn btn-secondary btn-sm" onclick="updateDashboard()">✖</button>
-                </div>
-            </div>
-            <div style="margin-top:10px">
-                <label style="display:block;font-size:12px;font-weight:600">نوع</label>
-                <select id="quick-event-type" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit">
-                    <option value="task">کار</option>
-                    <option value="meeting">جلسه</option>
-                    <option value="leisure">تفریح</option>
-                    <option value="appointment">قرار</option>
-                </select>
-            </div>
-            <div style="margin-top:10px;font-size:12px;color:#6b7280">
-                💡 برای انتخاب تاریخ روی فیلد کلیک کنید
-            </div>
-        </div>
+/* ============ رندر: جدول فعالیت‌ها ============ */
+function renderTable(){
+  const body = document.getElementById('taskBody');
+  body.innerHTML='';
+  const list = state.tasks.filter(t=> !activeCat || t.category===activeCat);
+  list.forEach(t=>{
+    const {volPct, timePct} = computeTaskTotals(t);
+    const comp = compositePct(volPct, timePct);
+    const tr = document.createElement('tr');
+    tr.dataset.id = t.id;
+    tr.innerHTML = `
+      <td class="name-cell"><input value="${escAttr(t.name)}" data-field="name"></td>
+      <td><span class="cat-dot" style="background:${getCss(CAT_CLASS[t.category])}"></span>
+        <select data-field="category">${state.categories.map(c=>`<option value="${escAttr(c)}" ${c===t.category?'selected':''}>${c}</option>`).join('')}</select>
+      </td>
+      <td><input value="${escAttr(t.unit||'')}" data-field="unit" style="width:64px"></td>
+      <td class="num"><input type="number" step="any" value="${t.qty_target??''}" data-field="qty_target" style="width:80px"></td>
+      <td class="num"><input type="number" step="any" value="${t.qty_estimated??''}" data-field="qty_estimated" style="width:80px"></td>
+      <td class="num"><input type="number" step="any" value="${t.hours_estimated??''}" data-field="hours_estimated" style="width:80px"></td>
+      <td class="num"><input type="number" value="${t.priority??''}" data-field="priority" style="width:56px"></td>
+      <td><input type="date" value="${t.start}" data-field="start"></td>
+      <td><input type="date" value="${t.finish}" data-field="finish"></td>
+      <td class="num">${pill(volPct,'--teal')}</td>
+      <td class="num">${pill(timePct,'--blue')}</td>
+      <td class="num">${pill(comp,'--gold')}</td>
+      <td><div class="row-actions"><button class="danger" data-act="del">حذف</button></div></td>
     `;
-    
-    setTimeout(() => {
-        const input = document.getElementById('quick-event-date-jalali');
-        if (input) {
-            try {
-                new persianDatepicker(input, {
-                    format: 'YYYY/MM/DD',
-                    autoClose: true,
-                    initialValue: true,
-                    initialValueType: 'persian',
-                    observer: true,
-                    persianDigit: true,
-                    onSelect: function(unix) {
-                        const date = new Date(unix);
-                        const j = toJalaali(date);
-                        const str = `${j.jy}/${String(j.jm).padStart(2, '0')}/${String(j.jd).padStart(2, '0')}`;
-                        input.value = str;
-                        input.dataset.jalali = str;
-                    }
-                });
-            } catch(e) {
-                console.log('تقویم شمسی در دسترس نیست');
-            }
-        }
-    }, 100);
-}
-
-function getJalaliDateFromInput(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return null;
-    const val = input.value.trim();
-    if (!val) return null;
-    const parts = val.split('/');
-    if (parts.length === 3) {
-        const jy = parseInt(parts[0]);
-        const jm = parseInt(parts[1]);
-        const jd = parseInt(parts[2]);
-        if (!isNaN(jy) && !isNaN(jm) && !isNaN(jd) && jy > 1300) {
-            return { jy, jm, jd };
-        }
-    }
-    if (input.dataset.jalali) {
-        const parts2 = input.dataset.jalali.split('/');
-        if (parts2.length === 3) {
-            return { jy: parseInt(parts2[0]), jm: parseInt(parts2[1]), jd: parseInt(parts2[2]) };
-        }
-    }
-    return null;
-}
-
-async function saveQuickEvent() {
-    const title = document.getElementById('quick-event-title').value.trim();
-    const type = document.getElementById('quick-event-type').value;
-    const time = document.getElementById('quick-event-time').value;
-    
-    let jalaliDate = getJalaliDateFromInput('quick-event-date-jalali');
-    if (!jalaliDate) {
-        const today = getTodayJalaali();
-        jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
-    }
-    
-    const gregDate = toGregorian(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd);
-    const dateStr = gregDate.toISOString().split('T')[0];
-    
-    if (!title) {
-        alert('لطفاً عنوان را وارد کنید!');
-        return;
-    }
-
-    const start_time = new Date(`${dateStr}T${time || '09:00'}`).toISOString();
-    const end_time = new Date(new Date(start_time).getTime() + 3600000).toISOString();
-
-    const { error } = await supabaseClient.from('calendar').insert({
-        user_id: currentUser.id,
-        title,
-        start_time,
-        end_time,
-        type
+    body.appendChild(tr);
+    tr.querySelectorAll('[data-field]').forEach(inp=>{
+      inp.addEventListener('change', e=> onTaskFieldChange(t.id, e.target.dataset.field, e.target.value));
     });
+    tr.querySelector('[data-act="del"]').addEventListener('click', ()=> deleteTask(t.id));
+  });
+}
+function pill(pct, colorVar){
+  const c = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
+  return `<span class="pct-pill" style="background:${c}22;color:${c}">${fmtPct(pct)}</span>`;
+}
+function escAttr(s){ return String(s??'').replace(/"/g,'&quot;'); }
 
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-
-    await loadCalendarEvents();
-    updateDashboard();
-    showAuthMessage('✅ رویداد با موفقیت اضافه شد!', false);
+function onTaskFieldChange(id, field, value){
+  const t = state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(['qty_target','qty_estimated','hours_estimated','priority'].includes(field)){
+    t[field] = value===''? null : Number(value);
+  } else {
+    t[field] = value;
+  }
+  persistAll();
+  renderAll();
+}
+function deleteTask(id){
+  if(!confirm('این فعالیت حذف شود؟')) return;
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  persistAll();
+  renderAll();
+}
+function addTask(){
+  const cat = activeCat || state.categories[0];
+  state.tasks.push({
+    id: uid(), category: cat, name: 'فعالیت جدید', unit:'ساعت',
+    qty_target: 1, qty_estimated: 1, hours_estimated: 1, priority: 5,
+    start: todayISO(), finish: todayISO(), notes:'', logs:[]
+  });
+  persistAll();
+  renderAll();
 }
 
-function showAddEvent() {
-    const container = document.getElementById('calendar-container');
-    const now = new Date();
-    const nowStr = now.toISOString().slice(0, 16);
-    const today = getTodayJalaali();
-    const defaultJalali = `${today.jy}/${today.jm}/${today.jd}`;
-
-    container.innerHTML = `
-        <div class="card" style="background:#f9fafb">
-            <h4>➕ رویداد جدید</h4>
-            <div class="form-group"><label>عنوان *</label><input id="event-title-input" style="font-family:inherit"></div>
-            <div class="form-group"><label>توضیحات</label><textarea id="event-desc-input" rows="2" style="font-family:inherit"></textarea></div>
-            <div class="grid-2">
-                <div class="form-group"><label>تاریخ شمسی</label>
-                    <input type="text" id="event-date-jalali" value="${defaultJalali}" class="jalali-date-input" style="width:100%;padding:8px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;direction:rtl" placeholder="سال/ماه/روز" readonly></div>
-                <div class="form-group"><label>ساعت شروع</label><input type="time" id="event-start-time" style="font-family:inherit"></div>
-            </div>
-            <div class="form-group"><label>نوع</label>
-                <select id="event-type-input" style="font-family:inherit">
-                    <option value="task">کار</option>
-                    <option value="meeting">جلسه</option>
-                    <option value="leisure">تفریح</option>
-                    <option value="appointment">قرار</option>
-                </select>
-            </div>
-            <div style="display:flex;gap:10px">
-                <button class="btn btn-success" onclick="saveEventJalali()">💾 ذخیره</button>
-                <button class="btn btn-secondary" onclick="loadCalendarEvents();renderCalendar('calendar-container')">انصراف</button>
-            </div>
-        </div>
-        <div id="day-events-display"></div>
-    `;
-    
-    setTimeout(() => {
-        const input = document.getElementById('event-date-jalali');
-        if (input) {
-            try {
-                new persianDatepicker(input, {
-                    format: 'YYYY/MM/DD',
-                    autoClose: true,
-                    initialValue: true,
-                    initialValueType: 'persian',
-                    observer: true,
-                    persianDigit: true,
-                    onSelect: function(unix) {
-                        const date = new Date(unix);
-                        const j = toJalaali(date);
-                        const str = `${j.jy}/${String(j.jm).padStart(2, '0')}/${String(j.jd).padStart(2, '0')}`;
-                        input.value = str;
-                        input.dataset.jalali = str;
-                    }
-                });
-            } catch(e) {
-                console.log('تقویم شمسی در دسترس نیست');
-            }
-        }
-    }, 100);
+/* ============ ثبت پیشرفت روزانه ============ */
+function fillLogTaskSelect(){
+  const sel = document.getElementById('logTask');
+  sel.innerHTML = state.categories.map(cat=>{
+    const opts = state.tasks.filter(t=>t.category===cat)
+      .map(t=>`<option value="${t.id}">${escAttr(t.name)}</option>`).join('');
+    return `<optgroup label="${cat}">${opts}</optgroup>`;
+  }).join('');
+  sel.onchange = updateLogQtyLabel;
+  updateLogQtyLabel();
+}
+function updateLogQtyLabel(){
+  const sel = document.getElementById('logTask');
+  const t = state.tasks.find(x=>x.id===sel.value);
+  document.getElementById('logQtyLabel').textContent = 'مقدار انجام‌شده' + (t&&t.unit? ' ('+t.unit+')':'');
+}
+function addLogEntry(){
+  const id = document.getElementById('logTask').value;
+  const date = document.getElementById('logDate').value || todayISO();
+  const qty = document.getElementById('logQty').value;
+  const hours = document.getElementById('logHours').value;
+  if(qty==='' && hours===''){ alert('حداقل یکی از مقدار یا ساعت را وارد کن.'); return; }
+  const t = state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  t.logs = t.logs || [];
+  t.logs.push({ date, qty: qty===''?0:Number(qty), hours: hours===''?0:Number(hours) });
+  document.getElementById('logQty').value='';
+  document.getElementById('logHours').value='';
+  persistAll();
+  renderAll();
+}
+function renderLogHistory(){
+  const wrap = document.getElementById('logHistory');
+  const entries = [];
+  state.tasks.forEach(t=> (t.logs||[]).forEach((l,idx)=> entries.push({...l, taskName:t.name, taskId:t.id, idx})));
+  entries.sort((a,b)=> b.date.localeCompare(a.date));
+  wrap.innerHTML = entries.slice(0,15).map(e=>`
+    <div class="log-item">
+      <span>${escAttr(e.taskName)} — ${e.qty?('+'+e.qty+' '):''}${e.hours?('+'+e.hours+' ساعت'):''}</span>
+      <span class="meta">${e.date}</span>
+    </div>`).join('') || '<div class="hint">هنوز ثبتی وجود ندارد.</div>';
 }
 
-async function saveEventJalali() {
-    const title = document.getElementById('event-title-input').value.trim();
-    const desc = document.getElementById('event-desc-input').value.trim();
-    const type = document.getElementById('event-type-input').value;
-    const time = document.getElementById('event-start-time').value;
-    
-    let jalaliDate = getJalaliDateFromInput('event-date-jalali');
-    if (!jalaliDate) {
-        const today = getTodayJalaali();
-        jalaliDate = { jy: today.jy, jm: today.jm, jd: today.jd };
-    }
-    
-    const gregDate = toGregorian(jalaliDate.jy, jalaliDate.jm, jalaliDate.jd);
-    const dateStr = gregDate.toISOString().split('T')[0];
-
-    if (!title) {
-        alert('عنوان الزامی است!');
-        return;
-    }
-
-    const start_time = new Date(`${dateStr}T${time || '09:00'}`).toISOString();
-    const end_time = new Date(new Date(start_time).getTime() + 3600000).toISOString();
-
-    const { error } = await supabaseClient.from('calendar').insert({
-        user_id: currentUser.id,
-        title,
-        description: desc || null,
-        start_time,
-        end_time,
-        type
-    });
-
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-
-    await loadCalendarEvents();
-    renderCalendar('calendar-container');
-    updateDashboard();
-    showAuthMessage('✅ رویداد با موفقیت اضافه شد!', false);
+/* ============ رندر کلی ============ */
+function renderAll(){
+  assignCategoryColors();
+  renderSummary();
+  renderChips();
+  renderGantt();
+  renderTable();
+  fillLogTaskSelect();
+  renderLogHistory();
 }
 
-async function deleteEvent(id) {
-    if (!confirm('آیا از حذف این رویداد مطمئن هستید؟')) return;
-    const { error } = await supabaseClient.from('calendar').delete().eq('id', id);
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    await loadCalendarEvents();
-    updateDashboard();
+/* ============ تنظیمات (مودال) ============ */
+function openSettings(){
+  document.getElementById('sbUrl').value = settings.sb_url||'';
+  document.getElementById('sbKey').value = settings.sb_key||'';
+  document.getElementById('sbId').value = settings.sb_id||'main';
+  document.getElementById('settingsModal').classList.add('show');
+}
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
+async function saveSettings(){
+  settings.sb_url = document.getElementById('sbUrl').value.trim();
+  settings.sb_key = document.getElementById('sbKey').value.trim();
+  settings.sb_id  = document.getElementById('sbId').value.trim() || 'main';
+  persistLocal();
+  if(settings.sb_url && settings.sb_key){
+    const ok = await initSupabase();
+    if(ok){ scheduleRemoteSave(); }
+  } else {
+    sbClient = null;
+    setSyncBadge();
+  }
+  closeSettings();
+  renderAll();
 }
 
-// ============================================================
-// توابع تعطیلات
-// ============================================================
-async function loadHolidays() {
-    const { data, error } = await supabaseClient
-        .from('holidays')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('date', { ascending: true });
-
-    if (error) {
-        allHolidays = [];
-        return;
-    }
-    allHolidays = data || [];
-    renderHolidays();
-    renderCalendar('dashboard-calendar');
-    renderCalendar('calendar-container');
+/* ============ پشتیبان‌گیری ============ */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(state, null, 1)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'yearplan-backup-'+todayISO()+'.json';
+  a.click();
+}
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed.tasks || !parsed.categories) throw new Error('ساختار نامعتبر');
+      state = parsed;
+      persistAll();
+      renderAll();
+    }catch(e){ alert('فایل معتبر نیست: '+e.message); }
+  };
+  reader.readAsText(file);
+}
+function resetToSeed(){
+  if(!confirm('همه تغییرات و ثبت‌های پیشرفت پاک و به حالت اولیه برگردد؟')) return;
+  state = loadSeed();
+  persistAll();
+  renderAll();
 }
 
-function renderHolidays() {
-    const container = document.getElementById('holidays-container');
-    if (!container) return;
-
-    if (allHolidays.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">🏖</div>
-                <p>هنوز روز تعطیلی ثبت نشده است</p>
-                <button class="btn btn-primary btn-sm" onclick="addHoliday()" style="margin-top:10px">➕ افزودن تعطیل</button>
-            </div>
-        `;
-        return;
-    }
-
-    const grouped = {};
-    allHolidays.forEach(h => {
-        const parts = h.date.split('/');
-        const monthKey = `${parts[0]}/${parts[1]}`;
-        if (!grouped[monthKey]) grouped[monthKey] = [];
-        grouped[monthKey].push(h);
-    });
-
-    let html = '';
-    Object.keys(grouped).sort().forEach(monthKey => {
-        const parts = monthKey.split('/');
-        const jy = parseInt(parts[0]);
-        const jm = parseInt(parts[1]);
-        const monthName = getJalaaliMonthName(jm);
-        html += `<h5 style="margin:15px 0 10px">${monthName} ${jy}</h5>`;
-        html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">`;
-        grouped[monthKey].forEach(h => {
-            const dateParts = h.date.split('/');
-            const jd = parseInt(dateParts[2]);
-            const gregDate = toGregorian(parseInt(dateParts[0]), parseInt(dateParts[1]), jd);
-            const persianDate = getFullJalaaliDate(gregDate);
-            html += `
-                <div class="card" style="padding:12px;display:flex;justify-content:space-between;align-items:center;background:#fef2f2;border-color:#fca5a5">
-                    <span>${persianDate}</span>
-                    <button class="btn btn-danger btn-sm" onclick="removeHoliday('${h.id}')">🗑</button>
-                </div>
-            `;
-        });
-        html += `</div>`;
-    });
-
-    container.innerHTML = html;
-}
-
-function addHoliday() {
-    const today = getTodayJalaali();
-    const defaultDate = `${today.jy}/${today.jm}/${today.jd}`;
-    const date = prompt('تاریخ تعطیل را وارد کنید (به فرمت سال/ماه/روز):', defaultDate);
-    if (!date) return;
-
-    if (!/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(date)) {
-        alert('فرمت تاریخ اشتباه است. لطفاً به فرمت سال/ماه/روز وارد کنید.');
-        return;
-    }
-
-    if (allHolidays.some(h => h.date === date)) {
-        alert('این روز قبلاً به عنوان تعطیل ثبت شده است!');
-        return;
-    }
-
-    supabaseClient.from('holidays').insert({
-        user_id: currentUser.id,
-        date: date
-    }).then(result => {
-        if (result.error) {
-            alert('❌ ' + result.error.message);
-            return;
-        }
-        loadHolidays();
-        showAuthMessage('✅ روز تعطیل با موفقیت اضافه شد!', false);
-    });
-}
-
-async function removeHoliday(id) {
-    if (!confirm('آیا از حذف این روز تعطیل مطمئن هستید؟')) return;
-    const { error } = await supabaseClient.from('holidays').delete().eq('id', id);
-    if (error) {
-        alert('❌ ' + error.message);
-        return;
-    }
-    loadHolidays();
-    showAuthMessage('✅ روز تعطیل حذف شد.', false);
-}
-
-// ============================================================
-// توابع اهداف (خلاصه)
-// ============================================================
-async function loadGoals() {
-    const { data, error } = await supabaseClient
-        .from('goals')
-        .select('*, projects(*, activities(*))')
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        allGoals = [];
-        return;
-    }
-    allGoals = data || [];
-    renderGoals();
-}
-
-function renderGoals() {
-    const container = document.getElementById('goals-container');
-    if (!container) return;
-
-    if (allGoals.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">🎯</div>
-                <h3>هنوز هدفی تعریف نشده</h3>
-                <button class="btn btn-primary" onclick="showAddGoal()" style="margin-top:15px">➕ افزودن هدف</button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    allGoals.forEach(g => {
-        const projects = g.projects || [];
-        let totalAct = 0, doneAct = 0;
-        projects.forEach(p => {
-            if (p.activities) {
-                totalAct += p.activities.length;
-                doneAct += p.activities.filter(a => a.is_done).length;
-            }
-        });
-        const progress = totalAct > 0 ? Math.round(doneAct / totalAct * 100) : 0;
-
-        html += `<div class="card">
-            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-                <div>
-                    <h4>🎯 ${g.title}</h4>
-                    ${g.description ? `<p style="color:#6b7280;font-size:14px">${g.description}</p>` : ''}
-                    <div style="display:flex;gap:10px;font-size:13px;color:#6b7280;flex-wrap:wrap">
-                        <span>📁 ${projects.length} پروژه</span>
-                        <span>📋 ${totalAct} فعالیت</span>
-                        <span>📊 ${progress}%</span>
-                    </div>
-                </div>
-                <div style="display:flex;gap:5px;flex-wrap:wrap">
-                    <button class="btn btn-primary btn-sm" onclick="showAddProject('${g.id}')">➕ پروژه</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteGoal('${g.id}')">🗑</button>
-                </div>
-            </div>
-        `;
-
-        if (projects.length) {
-            projects.forEach(p => {
-                const acts = p.activities || [];
-                const done = acts.filter(a => a.is_done).length;
-                const prog = acts.length ? Math.round(done / acts.length * 100) : 0;
-
-                html += `<div class="card" style="margin-right:20px;background:#f9fafb">
-                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-                        <div>
-                            <h5>📁 ${p.name}</h5>
-                            <p style="font-size:13px;color:#6b7280">
-                                وضعیت: <span class="badge ${p.status === 'تکمیل شده' ? 'badge-success' : p.status === 'در حال انجام' ? 'badge-warning' : 'badge-info'}">${p.status || 'برنامه‌ریزی'}</span>
-                                ${p.budget ? ` | 💰 ${p.budget.toLocaleString()} تومان` : ''}
-                                <span style="margin-right:10px">📊 ${prog}%</span>
-                            </p>
-                        </div>
-                        <div style="display:flex;gap:5px;flex-wrap:wrap">
-                            <button class="btn btn-success btn-sm" onclick="showAddActivity('${p.id}')">➕ فعالیت</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteProject('${p.id}')">🗑</button>
-                        </div>
-                    </div>
-                `;
-
-                if (acts.length) {
-                    acts.forEach(a => {
-                        html += `<div class="card" style="margin-right:20px;background:#fff">
-                            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-                                <div>
-                                    <h6>📋 ${a.title}</h6>
-                                    ${a.description ? `<p style="font-size:13px;color:#6b7280">${a.description}</p>` : ''}
-                                    <p style="font-size:12px;color:#6b7280">
-                                        ${a.estimated_hours ? `⏱ ${a.estimated_hours} ساعت` : ''}
-                                        ${a.estimated_cost ? ` | 💰 ${a.estimated_cost.toLocaleString()} تومان` : ''}
-                                        <span class="badge ${a.is_done ? 'badge-success' : 'badge-warning'}">
-                                            ${a.is_done ? '✅ انجام شده' : '⏳ در حال انجام'}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div style="display:flex;gap:5px;flex-wrap:wrap">
-                                    <button class="btn btn-${a.is_done ? 'warning' : 'success'} btn-sm" onclick="toggleActivity('${a.id}', ${!a.is_done})">
-                                        ${a.is_done ? '↩ بازگشت' : '✓ انجام شد'}
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteActivity('${a.id}')">🗑</button>
-                                </div>
-                            </div>
-                        </div>`;
-                    });
-                } else {
-                    html += `<p style="color:#9ca3af;font-size:13px;margin-right:20px">هیچ فعالیتی تعریف نشده</p>`;
-                }
-                html += `</div>`;
-            });
-        } else {
-            html += `<p style="color:#9ca3af;font-size:13px;margin-right:20px">هیچ پروژه‌ای تعریف نشده</p>`;
-        }
-        html += `</div>`;
-    });
-
-    container.innerHTML = html;
-}
-
-function showAddGoal() {
-    const container = document.getElementById('goals-container');
-    container.innerHTML = `
-        <div class="card" style="background:#f9fafb">
-            <h4>➕ هدف جدید</h4>
-            <div class="form-group"><label>عنوان *</label><input id="goal-title-input" style="font-family:inherit"></div>
-            <div class="form-group"><label>توضیحات</label><textarea id="goal-desc-input" rows="3" style="font-family:inherit"></textarea></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-success" onclick="saveGoal()">💾 ذخیره</button>
-                <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
-            </div>
-        </div>
-    `;
-}
-
-async function saveGoal() {
-    const title = document.getElementById('goal-title-input').value.trim();
-    const desc = document.getElementById('goal-desc-input').value.trim();
-    if (!title) { alert('عنوان الزامی است!'); return; }
-    const { error } = await supabaseClient.from('goals').insert({ title, description: desc || null, user_id: currentUser.id });
-    if (error) { alert('❌ ' + error.message); return; }
-    await loadGoals();
-    updateDashboard();
-}
-
-async function deleteGoal(id) {
-    if (!confirm('حذف شود؟')) return;
-    await supabaseClient.from('goals').delete().eq('id', id);
-    await loadGoals();
-    updateDashboard();
-}
-
-function showAddProject(goalId) {
-    const container = document.getElementById('goals-container');
-    container.innerHTML = `
-        <div class="card" style="background:#f9fafb">
-            <h4>📁 پروژه جدید</h4>
-            <div class="form-group"><label>نام *</label><input id="project-name-input" style="font-family:inherit"></div>
-            <div class="form-group"><label>وضعیت</label>
-                <select id="project-status-input" style="font-family:inherit">
-                    <option>برنامه‌ریزی</option><option>در حال انجام</option><option>تکمیل شده</option><option>متوقف شده</option>
-                </select>
-            </div>
-            <div class="grid-2">
-                <div class="form-group"><label>شروع</label><input type="date" id="project-start-input" style="font-family:inherit"></div>
-                <div class="form-group"><label>پایان</label><input type="date" id="project-end-input" style="font-family:inherit"></div>
-            </div>
-            <div class="form-group"><label>بودجه</label><input type="number" id="project-budget-input" placeholder="0" style="font-family:inherit"></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-success" onclick="saveProject('${goalId}')">💾 ذخیره</button>
-                <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
-            </div>
-        </div>
-    `;
-}
-
-async function saveProject(goalId) {
-    const name = document.getElementById('project-name-input').value.trim();
-    const status = document.getElementById('project-status-input').value;
-    const start = document.getElementById('project-start-input').value;
-    const end = document.getElementById('project-end-input').value;
-    const budget = parseFloat(document.getElementById('project-budget-input').value) || 0;
-    if (!name) { alert('نام پروژه الزامی است!'); return; }
-    const { error } = await supabaseClient.from('projects').insert({ goal_id: goalId, name, status, start_date: start || null, end_date: end || null, budget });
-    if (error) { alert('❌ ' + error.message); return; }
-    await loadGoals();
-    updateDashboard();
-}
-
-async function deleteProject(id) {
-    if (!confirm('حذف شود؟')) return;
-    await supabaseClient.from('projects').delete().eq('id', id);
-    await loadGoals();
-    updateDashboard();
-}
-
-function showAddActivity(projectId) {
-    const container = document.getElementById('goals-container');
-    container.innerHTML = `
-        <div class="card" style="background:#f9fafb">
-            <h4>📋 فعالیت جدید</h4>
-            <div class="form-group"><label>عنوان *</label><input id="activity-title-input" style="font-family:inherit"></div>
-            <div class="form-group"><label>توضیحات</label><textarea id="activity-desc-input" rows="3" style="font-family:inherit"></textarea></div>
-            <div class="grid-2">
-                <div class="form-group"><label>زمان تخمینی (ساعت)</label><input type="number" id="activity-hours-input" placeholder="0" style="font-family:inherit"></div>
-                <div class="form-group"><label>هزینه تخمینی (تومان)</label><input type="number" id="activity-cost-input" placeholder="0" style="font-family:inherit"></div>
-            </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-success" onclick="saveActivity('${projectId}')">💾 ذخیره</button>
-                <button class="btn btn-secondary" onclick="loadGoals()">انصراف</button>
-            </div>
-        </div>
-    `;
-}
-
-async function saveActivity(projectId) {
-    const title = document.getElementById('activity-title-input').value.trim();
-    const desc = document.getElementById('activity-desc-input').value.trim();
-    const hours = parseFloat(document.getElementById('activity-hours-input').value) || 0;
-    const cost = parseFloat(document.getElementById('activity-cost-input').value) || 0;
-    if (!title) { alert('عنوان فعالیت الزامی است!'); return; }
-    const { error } = await supabaseClient.from('activities').insert({
-        project_id: projectId,
-        title,
-        description: desc || null,
-        estimated_hours: hours,
-        estimated_cost: cost,
-        is_done: false
-    });
-    if (error) { alert('❌ ' + error.message); return; }
-    await loadGoals();
-    updateDashboard();
-}
-
-async function toggleActivity(id, isDone) {
-    await supabaseClient.from('activities').update({ is_done: isDone }).eq('id', id);
-    await loadGoals();
-    updateDashboard();
-}
-
-async function deleteActivity(id) {
-    if (!confirm('حذف شود؟')) return;
-    await supabaseClient.from('activities').delete().eq('id', id);
-    await loadGoals();
-    updateDashboard();
-}
-
-// ============================================================
-// توابع مالی
-// ============================================================
-async function loadFinance() {
-    const container = document.getElementById('finance-container');
-    if (!container) return;
-
-    const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const startStr = start.toISOString().split('T')[0];
-    const endStr = end.toISOString().split('T')[0];
-
-    const { data, error } = await supabaseClient
-        .from('daily_finance')
-        .select('*')
-        .gte('date', startStr)
-        .lte('date', endStr)
-        .order('date', { ascending: true });
-
-    if (error) {
-        container.innerHTML = `<div class="card" style="color:red">❌ ${error.message}</div>`;
-        return;
-    }
-
-    allFinances = data || [];
-    const totalIncome = allFinances.reduce((s, f) => s + (f.income || 0), 0);
-    const totalExpense = allFinances.reduce((s, f) => s + (f.expense || 0), 0);
-    const balance = totalIncome - totalExpense;
-
-    let html = `
-        <div class="finance-summary">
-            <div class="finance-card income"><div class="label">💰 درآمد</div><div class="amount">${totalIncome.toLocaleString()}</div></div>
-            <div class="finance-card expense"><div class="label">💸 هزینه</div><div class="amount">${totalExpense.toLocaleString()}</div></div>
-            <div class="finance-card balance"><div class="label">📊 مانده</div><div class="amount" style="color:${balance >= 0 ? '#065f46' : '#991b1b'}">${balance.toLocaleString()}</div></div>
-        </div>
-        <h5>📋 گزارش روزانه</h5>
-    `;
-
-    if (allFinances.length) {
-        allFinances.forEach(f => {
-            const dateObj = new Date(f.date);
-            let persianDate;
-            if (calendarMode === 'jalali') {
-                persianDate = getFullJalaaliDate(dateObj);
-            } else {
-                persianDate = getFullGregorianDate(dateObj);
-            }
-            html += `
-                <div class="card" style="padding:12px">
-                    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
-                        <div>
-                            <strong>${persianDate}</strong>
-                            ${f.note ? `<p style="font-size:12px;color:#6b7280">${f.note}</p>` : ''}
-                        </div>
-                        <div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap">
-                            <span style="color:#10b981;font-weight:600">+${(f.income || 0).toLocaleString()}</span>
-                            <span style="color:#ef4444;font-weight:600">-${(f.expense || 0).toLocaleString()}</span>
-                            <button class="btn btn-danger btn-sm" onclick="deleteFinance('${f.id}')">🗑</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    } else {
-        html += `<p style="color:#9ca3af;padding:20px;text-align:center">هنوز داده مالی ثبت نشده</p>`;
-    }
-
-    container.innerHTML = html;
-}
-
-function showAddFinance() {
-    const container = document.getElementById('finance-container');
-    const today = new Date().toISOString().split('T')[0];
-    container.innerHTML = `
-        <div class="card" style="background:#f9fafb">
-            <h4>💰 ثبت مالی</h4>
-            <div class="form-group"><label>تاریخ</label><input type="date" id="finance-date-input" value="${today}" style="font-family:inherit"></div>
-            <div class="grid-2">
-                <div class="form-group"><label>درآمد</label><input type="number" id="finance-income-input" placeholder="0" style="font-family:inherit"></div>
-                <div class="form-group"><label>هزینه</label><input type="number" id="finance-expense-input" placeholder="0" style="font-family:inherit"></div>
-            </div>
-            <div class="form-group"><label>یادداشت</label><input id="finance-note-input" style="font-family:inherit"></div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <button class="btn btn-success" onclick="saveFinance()">💾 ذخیره</button>
-                <button class="btn btn-secondary" onclick="loadFinance()">انصراف</button>
-            </div>
-        </div>
-    `;
-}
-
-async function saveFinance() {
-    const date = document.getElementById('finance-date-input').value;
-    const income = parseFloat(document.getElementById('finance-income-input').value) || 0;
-    const expense = parseFloat(document.getElementById('finance-expense-input').value) || 0;
-    const note = document.getElementById('finance-note-input').value.trim();
-
-    if (!date) { alert('تاریخ الزامی است!'); return; }
-    if (!income && !expense) { alert('حداقل یکی از فیلدها را پر کنید!'); return; }
-
-    const { data: existing } = await supabaseClient
-        .from('daily_finance')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .eq('date', date)
-        .maybeSingle();
-
-    let error;
-    if (existing) {
-        const { error: e } = await supabaseClient
-            .from('daily_finance')
-            .update({ income, expense, note: note || null })
-            .eq('id', existing.id);
-        error = e;
-    } else {
-        const { error: e } = await supabaseClient
-            .from('daily_finance')
-            .insert({ user_id: currentUser.id, date, income, expense, note: note || null });
-        error = e;
-    }
-
-    if (error) { alert('❌ ' + error.message); return; }
-    await loadFinance();
-    showAuthMessage('✅ ثبت مالی با موفقیت انجام شد!', false);
-}
-
-async function deleteFinance(id) {
-    if (!confirm('حذف شود؟')) return;
-    await supabaseClient.from('daily_finance').delete().eq('id', id);
-    await loadFinance();
-}
-
-// ============================================================
-// توابع داشبورد
-// ============================================================
-function updateDashboard() {
-    document.getElementById('dash-goals-count').textContent = allGoals.length;
-
-    let total = 0;
-    allGoals.forEach(g => {
-        if (g.projects) {
-            g.projects.forEach(p => {
-                if (p.activities) total += p.activities.length;
-            });
-        }
-    });
-    document.getElementById('dash-tasks-count').textContent = total;
-
-    const today = getTodayJalaali();
-    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
-    const todayEvents = allEvents.filter(e => {
-        if (!e.start_time) return false;
-        const eventDate = new Date(e.start_time);
-        const ej = toJalaali(eventDate);
-        return `${ej.jy}/${ej.jm}/${ej.jd}` === todayStr;
-    });
-    document.getElementById('dash-events-count').textContent = todayEvents.length;
-
-    renderCalendar('dashboard-calendar');
-    renderTodayEvents();
-}
-
-function renderTodayEvents() {
-    const container = document.getElementById('today-events');
-    const today = getTodayJalaali();
-    const todayStr = `${today.jy}/${today.jm}/${today.jd}`;
-    const todayEvents = allEvents.filter(e => {
-        if (!e.start_time) return false;
-        const eventDate = new Date(e.start_time);
-        const ej = toJalaali(eventDate);
-        return `${ej.jy}/${ej.jm}/${ej.jd}` === todayStr;
-    });
-
-    if (todayEvents.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="icon">📭</div>
-                <p>هیچ رویدادی برای امروز ندارید</p>
-                <button class="btn btn-primary btn-sm" onclick="showQuickAddEvent()" style="margin-top:10px">➕ افزودن رویداد</button>
-            </div>
-        `;
-        return;
-    }
-
-    container.innerHTML = todayEvents.map(e => `
-        <div class="event-item">
-            <div>
-                <div class="event-title">${e.title}</div>
-                <div class="event-time">⏰ ${new Date(e.start_time).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</div>
-            </div>
-            <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-                <span class="event-type">${e.type === 'meeting' ? 'جلسه' : e.type === 'task' ? 'کار' : e.type === 'leisure' ? 'تفریح' : 'قرار'}</span>
-                <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.id}')">🗑</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// ============================================================
-// شروع برنامه
-// ============================================================
-supabaseClient.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-        currentUser = session.user;
-        loadPlanner();
-    } else {
-        document.getElementById('auth-section').classList.remove('hidden');
-    }
+/* ============ رویدادها ============ */
+document.getElementById('weightSlider').addEventListener('input', e=>{
+  settings.weight_volume = Number(e.target.value);
+  persistLocal();
+  renderSummary();
+  renderGantt();
+  renderTable();
 });
+document.getElementById('btnAddLog').addEventListener('click', addLogEntry);
+document.getElementById('btnAddTask').addEventListener('click', addTask);
+document.getElementById('btnSettings').addEventListener('click', openSettings);
+document.getElementById('btnCloseSettings').addEventListener('click', closeSettings);
+document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
+document.getElementById('btnExport').addEventListener('click', exportJSON);
+document.getElementById('btnImport').addEventListener('click', ()=> document.getElementById('fileImport').click());
+document.getElementById('fileImport').addEventListener('change', e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); });
+document.getElementById('btnReset').addEventListener('click', resetToSeed);
+document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target.id==='settingsModal') closeSettings(); });
 
-console.log('🚀 پلنر شخصی شمسی با موفقیت بارگذاری شد!');
-console.log('📌 حالت فعلی:', calendarMode);
-console.log('✅ پنجشنبه و جمعه به درستی هایلایت میشوند!');
+/* ============ راه‌اندازی ============ */
+(async function init(){
+  document.getElementById('logDate').value = todayISO();
+  await bootstrapState();
+  renderAll();
+})();
 </script>
 </body>
 </html>
