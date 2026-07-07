@@ -6,21 +6,23 @@
 <title>برنامه یک‌ساله — ردیاب پیشرفت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
 <style>
 :root{
-  --bg:#12151a;
-  --panel:#1a1e25;
-  --panel-2:#20242c;
-  --border:#2a2f3a;
-  --text:#eef1f5;
-  --muted:#8f99a8;
+  --bg:#0d1117;
+  --panel:#161b22;
+  --panel-2:#1c2333;
+  --border:#30363d;
+  --text:#e6edf3;
+  --muted:#8b949e;
   --gold:#d4a24c;
   --teal:#4fb0a5;
   --blue:#6b93c9;
   --danger:#d0685f;
-  --radius:14px;
-  --c1:#6b93c9; --c2:#7cbf8e; --c3:#b48ee0; --c4:#e08a8a; --c5:#e0b45a;
-  --c6:#5ec2c2; --c7:#d19a5a; --c8:#8a97e0; --c9:#e07a9d;
+  --radius:12px;
+  --c1:#58a6ff; --c2:#3fb950; --c3:#d2a8ff; --c4:#f0883e; --c5:#f2cc60;
+  --c6:#79c0ff; --c7:#ff7b72; --c8:#a5d6ff; --c9:#bc8cff;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
@@ -29,107 +31,135 @@ body{
   color:var(--text);
   font-family:'Vazirmatn',sans-serif;
   line-height:1.7;
-  padding:0 0 60px;
+  padding:0 0 40px;
 }
-.wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px;}
 button{
   font-family:inherit;cursor:pointer;border:1px solid var(--border);
-  background:var(--panel-2);color:var(--text);border-radius:10px;padding:9px 16px;
-  font-size:14px;transition:.15s;
+  background:var(--panel-2);color:var(--text);border-radius:8px;padding:8px 14px;
+  font-size:13px;transition:.2s;
 }
 button:hover{border-color:var(--gold);}
-button.primary{background:var(--gold);color:#1a1508;border-color:var(--gold);font-weight:700;}
-button.primary:hover{filter:brightness(1.08);}
+button.primary{background:var(--gold);color:#0d1117;border-color:var(--gold);font-weight:700;}
+button.primary:hover{filter:brightness(1.1);}
 button.ghost{background:transparent;}
 button.danger{color:var(--danger);border-color:var(--danger);background:transparent;}
 input,select,textarea{
   font-family:inherit;background:var(--panel-2);color:var(--text);
-  border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:14px;
+  border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;
 }
 input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);}
-th{color:var(--muted);font-weight:600;font-size:12.5px;position:sticky;top:0;background:var(--panel);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--panel);}
 tbody tr:hover{background:var(--panel-2);}
 .num{font-variant-numeric:tabular-nums;direction:ltr;text-align:left;}
 
 header.top{
   border-bottom:1px solid var(--border);
-  padding:22px 0;margin-bottom:26px;
-  background:linear-gradient(180deg, rgba(212,162,76,.05), transparent);
+  padding:16px 0;margin-bottom:20px;
 }
-.top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
-.top-row h1{font-size:22px;}
-.top-row .sub{color:var(--muted);font-size:13px;margin-top:4px;}
-.header-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+.top-row h1{font-size:20px;}
+.top-row .sub{color:var(--muted);font-size:12px;margin-top:2px;}
+.header-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
-.card .label{color:var(--muted);font-size:12.5px;margin-bottom:10px;}
-.card .value{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+.card .label{color:var(--muted);font-size:11px;margin-bottom:6px;}
+.card .value{font-size:26px;font-weight:800;}
 .card.gold .value{color:var(--gold);}
 .card.teal .value{color:var(--teal);}
 .card.blue .value{color:var(--blue);}
-.bar-track{height:7px;border-radius:6px;background:var(--panel-2);margin-top:10px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:6px;}
+.bar-track{height:6px;border-radius:4px;background:var(--panel-2);margin-top:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;}
 
 .weight-card{grid-column:span 2;}
-.weight-row{display:flex;align-items:center;gap:12px;margin-top:6px;}
-.weight-row input[type=range]{flex:1;accent-color:var(--gold);}
-.weight-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;}
+.weight-row{display:flex;align-items:center;gap:10px;margin-top:4px;}
+.weight-row input[type=range]{flex:1;accent-color:var(--gold);height:4px;}
+.weight-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px;}
 
-section{margin-bottom:32px;}
-.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
-.section-head h2{font-size:16px;}
-.chips{display:flex;gap:6px;flex-wrap:wrap;}
-.chip{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;}
+section{margin-bottom:24px;}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.section-head h2{font-size:15px;}
+.chips{display:flex;gap:4px;flex-wrap:wrap;}
+.chip{font-size:11px;padding:4px 10px;border-radius:16px;border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;transition:.2s;}
 .chip.active{border-color:var(--gold);color:var(--text);background:rgba(212,162,76,.12);}
+.chip .pct{font-size:9px;color:var(--gold);margin-right:4px;}
 
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;overflow-x:auto;}
-.gantt-wrap{min-height:300px;}
-.gantt-container{position:relative;}
-.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);}
-.legend span{display:inline-flex;align-items:center;gap:6px;}
-.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;overflow:hidden;}
 
-.level-1{padding-right:0;}
-.level-2{padding-right:24px;background:rgba(255,255,255,.02);}
-.level-3{padding-right:48px;background:rgba(255,255,255,.03);}
-.dependency-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(212,162,76,.15);color:var(--gold);}
+/* ===== GANTT ===== */
+.gantt-wrap{position:relative;overflow:hidden;}
+.gantt-controls{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.gantt-controls button{padding:4px 12px;font-size:12px;}
+.gantt-controls .zoom-level{color:var(--muted);font-size:12px;margin:0 8px;}
+#gantt-container{width:100%;min-height:400px;overflow:auto;}
+#gantt-container .gantt .bar-label{fill:var(--text)!important;font-family:'Vazirmatn',sans-serif!important;font-size:11px!important;}
+#gantt-container .gantt .bar{fill:var(--panel-2)!important;stroke:var(--border)!important;}
+#gantt-container .gantt .bar-progress{fill:var(--gold)!important;}
+#gantt-container .gantt .grid-header{fill:var(--panel)!important;stroke:var(--border)!important;}
+#gantt-container .gantt .grid-row{fill:transparent!important;}
+#gantt-container .gantt .grid-row:nth-child(even){fill:rgba(255,255,255,.02)!important;}
+#gantt-container .gantt .row-line{stroke:var(--border)!important;}
+#gantt-container .gantt .tick{stroke:var(--border)!important;}
+#gantt-container .gantt .today-highlight{fill:rgba(212,162,76,.08)!important;}
+#gantt-container .gantt .arrow{stroke:var(--muted)!important;}
+#gantt-container .gantt .bar-wrapper.c1 .bar-progress{fill:var(--c1)!important;}
+#gantt-container .gantt .bar-wrapper.c2 .bar-progress{fill:var(--c2)!important;}
+#gantt-container .gantt .bar-wrapper.c3 .bar-progress{fill:var(--c3)!important;}
+#gantt-container .gantt .bar-wrapper.c4 .bar-progress{fill:var(--c4)!important;}
+#gantt-container .gantt .bar-wrapper.c5 .bar-progress{fill:var(--c5)!important;}
+#gantt-container .gantt .bar-wrapper.c6 .bar-progress{fill:var(--c6)!important;}
+#gantt-container .gantt .bar-wrapper.c7 .bar-progress{fill:var(--c7)!important;}
+#gantt-container .gantt .bar-wrapper.c8 .bar-progress{fill:var(--c8)!important;}
+#gantt-container .gantt .bar-wrapper.c9 .bar-progress{fill:var(--c9)!important;}
 
-.log-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
-.log-form label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+.gantt-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--muted);}
+.gantt-legend span{display:inline-flex;align-items:center;gap:5px;}
+.gantt-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+/* ===== TREE TABLE ===== */
+.tree-table{overflow:auto;max-height:500px;}
+.tree-table .level-1{padding-right:0;}
+.tree-table .level-2{padding-right:20px;background:rgba(255,255,255,.015);}
+.tree-table .level-3{padding-right:40px;background:rgba(255,255,255,.025);}
+.tree-table .level-header{background:rgba(255,255,255,.03);font-weight:700;}
+.tree-table .level-header td{color:var(--gold);}
+.category-summary{font-size:11px;color:var(--muted);margin-right:8px;}
+.category-summary .pct{color:var(--gold);font-weight:700;}
+.dep-badge{font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(212,162,76,.15);color:var(--gold);}
+.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:5px;}
+.pct-pill{display:inline-block;padding:1px 8px;border-radius:8px;font-size:11px;font-weight:700;}
+.row-actions{display:flex;gap:4px;flex-wrap:wrap;}
+.row-actions button{padding:3px 8px;font-size:11px;}
+
+.log-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end;}
+.log-form label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;}
 .log-form .field{display:flex;flex-direction:column;}
-.log-form input,.log-form select{width:100%;}
-.log-history{margin-top:16px;max-height:220px;overflow:auto;}
-.log-item{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:13px;}
-.log-item .meta{color:var(--muted);font-size:12px;}
+.log-form input,.log-form select{width:100%;padding:6px 8px;font-size:12px;}
+.log-history{margin-top:12px;max-height:180px;overflow:auto;}
+.log-item{display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border);font-size:12px;}
+.log-item .meta{color:var(--muted);font-size:11px;}
 
-.table-scroll{overflow:auto;max-height:560px;}
-td input, td select{width:100%;min-width:64px;font-size:13px;padding:5px 7px;}
-td.name-cell{min-width:200px;}
-.pct-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700;}
-.cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;}
-.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
-.row-actions button{padding:5px 9px;font-size:12px;}
-
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
 .modal-backdrop.show{display:flex;}
-.modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:500px;width:100%;max-height:90vh;overflow:auto;}
-.modal h3{margin-bottom:14px;}
-.modal .field{margin-bottom:14px;}
-.modal .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto;}
+.modal h3{margin-bottom:12px;font-size:16px;}
+.modal .field{margin-bottom:12px;}
+.modal .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
 .modal .field input,.modal .field select{width:100%;}
-.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
-.hint{font-size:12px;color:var(--muted);margin-top:6px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;}
 
-footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
+footer{color:var(--muted);font-size:11px;text-align:center;margin-top:30px;padding-top:16px;border-top:1px solid var(--border);}
 
 @media (max-width:720px){
   .weight-card{grid-column:span 1;}
   .log-form{grid-template-columns:1fr 1fr;}
   .log-form .field:first-child{grid-column:1/-1;}
-  th,td{font-size:12px;}
+  th,td{font-size:11px;padding:5px 4px;}
+  .cards{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -154,26 +184,26 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
 
   <section class="cards">
     <div class="card gold">
-      <div class="label">پیشرفت ترکیبی کل برنامه</div>
+      <div class="label">پیشرفت ترکیبی</div>
       <div class="value" id="cardComposite">۰٪</div>
       <div class="bar-track"><div class="bar-fill" id="barComposite" style="background:var(--gold);width:0%"></div></div>
     </div>
     <div class="card teal">
-      <div class="label">پیشرفت حجمی (مقدار انجام‌شده)</div>
+      <div class="label">پیشرفت حجمی</div>
       <div class="value" id="cardVolume">۰٪</div>
       <div class="bar-track"><div class="bar-fill" id="barVolume" style="background:var(--teal);width:0%"></div></div>
     </div>
     <div class="card blue">
-      <div class="label">پیشرفت زمانی (ساعت صرف‌شده)</div>
+      <div class="label">پیشرفت زمانی</div>
       <div class="value" id="cardTime">۰٪</div>
       <div class="bar-track"><div class="bar-fill" id="barTime" style="background:var(--blue);width:0%"></div></div>
     </div>
     <div class="card weight-card">
-      <div class="label">سهم هرکدام در محاسبه پیشرفت ترکیبی</div>
+      <div class="label">سهم حجمی و زمانی در پیشرفت ترکیبی</div>
       <div class="weight-row">
-        <span style="color:var(--teal);font-size:12px;white-space:nowrap;">حجمی</span>
+        <span style="color:var(--teal);font-size:12px;">حجمی</span>
         <input type="range" id="weightSlider" min="0" max="100" value="60">
-        <span style="color:var(--blue);font-size:12px;white-space:nowrap;">زمانی</span>
+        <span style="color:var(--blue);font-size:12px;">زمانی</span>
       </div>
       <div class="weight-labels">
         <span id="wVolLabel">حجمی: ۶۰٪</span>
@@ -182,15 +212,22 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
     </div>
   </section>
 
-  <!-- Gantt Chart -->
+  <!-- GANTT -->
   <section>
     <div class="section-head">
-      <h2>نمودار گانت</h2>
+      <h2>نمودار گانت — ساختار شکست</h2>
       <div class="chips" id="catChips"></div>
     </div>
     <div class="panel gantt-wrap">
-      <svg id="ganttSvg" width="100%" height="400"></svg>
-      <div class="legend" id="legend"></div>
+      <div class="gantt-controls">
+        <button onclick="zoomGantt('in')">🔍+</button>
+        <button onclick="zoomGantt('out')">🔍−</button>
+        <button onclick="zoomGantt('fit')">📐 متناسب</button>
+        <span class="zoom-level" id="zoomLevel">۱۰۰٪</span>
+        <span style="color:var(--muted);font-size:11px;margin-right:auto;">اسکرول ماوس برای زوم</span>
+      </div>
+      <div id="gantt-container" style="width:100%;min-height:400px;overflow:auto;"></div>
+      <div class="gantt-legend" id="ganttLegend"></div>
     </div>
   </section>
 
@@ -212,7 +249,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
           <input type="number" step="any" id="logQty" placeholder="0">
         </div>
         <div class="field">
-          <label>ساعت صرف‌شده</label>
+          <label>ساعت</label>
           <input type="number" step="any" id="logHours" placeholder="0">
         </div>
         <button class="primary" id="btnAddLog">ثبت</button>
@@ -221,23 +258,23 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
     </div>
   </section>
 
-  <!-- جدول فعالیت‌ها -->
+  <!-- TABLE -->
   <section>
     <div class="section-head">
-      <h2>فهرست فعالیت‌ها</h2>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <h2>فهرست فعالیت‌ها — ساختار شکست</h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button id="btnAddTask">+ فعالیت جدید</button>
         <button id="btnAddSubtask">+ زیرفعالیت</button>
       </div>
     </div>
-    <div class="panel table-scroll">
+    <div class="panel tree-table">
       <table>
         <thead>
           <tr>
-            <th style="min-width:200px;">فعالیت</th>
+            <th style="min-width:180px;">فعالیت</th>
             <th>دسته</th>
             <th>سطح</th>
-            <th>وابسته به</th>
+            <th>پیش‌نیاز</th>
             <th>واحد</th>
             <th>هدف</th>
             <th>برآورد</th>
@@ -256,9 +293,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
 
 </div>
 
-<footer>داده‌ها به‌صورت خودکار روی همین مرورگر ذخیره می‌شود.</footer>
+<footer>داده‌ها به‌صورت خودکار روی مرورگر ذخیره می‌شود.</footer>
 
-<!-- مودال ویرایش -->
 <div class="modal-backdrop" id="editModal">
   <div class="modal">
     <h3 id="editModalTitle">ویرایش فعالیت</h3>
@@ -272,75 +308,65 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
 
 <script id="seed-data" type="application/json">
 {
- "categories": [
-  "دانش و آموزش",
-  "سلامت جسم و ظاهر",
-  "سلامت روح و روان",
-  "خانواده",
-  "علایق",
-  "روابط اجتماعی",
-  "شرایط اقتصادی",
-  "شرایط کاری",
-  "ایجاد شرکت جدیدم"
- ],
+ "categories": ["دانش و آموزش","سلامت جسم و ظاهر","سلامت روح و روان","خانواده","علایق","روابط اجتماعی","شرایط اقتصادی","شرایط کاری","ایجاد شرکت جدیدم"],
  "tasks": [
   {"id":"t001","category":"دانش و آموزش","name":"تمرین زبان انگلیسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":8,"start":"2026-07-07","finish":"2026-08-11","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t002","category":"دانش و آموزش","name":"مطالعه در زمینه مالی و اقتصادی","unit":"ساعت","qty_target":12,"qty_estimated":12,"hours_estimated":12,"priority":7,"start":"2026-09-02","finish":"2026-09-07","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t002","category":"دانش و آموزش","name":"مطالعه مالی و اقتصادی","unit":"ساعت","qty_target":12,"qty_estimated":12,"hours_estimated":12,"priority":7,"start":"2026-09-02","finish":"2026-09-07","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t003","category":"دانش و آموزش","name":"مطالعه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-08","finish":"2026-09-17","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t004","category":"دانش و آموزش","name":"پیدا کردن دوره های مناسب برای شرکت مدیریت پروژه و امکانسنجی","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":8,"start":"2026-08-12","finish":"2026-08-12","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t005","category":"دانش و آموزش","name":"کسب و تایید امتیاز در سایت PMI","unit":"PDU","qty_target":60,"qty_estimated":60,"hours_estimated":10,"priority":7,"start":"2026-09-18","finish":"2026-09-22","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t006","category":"دانش و آموزش","name":"آمادگی برای برگزاری کارگاه PMBOK","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":8,"start":"2026-08-13","finish":"2026-09-01","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t004","category":"دانش و آموزش","name":"پیدا کردن دوره مدیریت پروژه","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":8,"start":"2026-08-12","finish":"2026-08-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t005","category":"دانش و آموزش","name":"کسب امتیاز PMI","unit":"PDU","qty_target":60,"qty_estimated":60,"hours_estimated":10,"priority":7,"start":"2026-09-18","finish":"2026-09-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t006","category":"دانش و آموزش","name":"آمادگی کارگاه PMBOK","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":8,"start":"2026-08-13","finish":"2026-09-01","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t007","category":"دانش و آموزش","name":"برگزاری کارگاه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-23","finish":"2026-10-02","parentId":null,"dependsOn":["t006"],"logs":[]},
   {"id":"t008","category":"سلامت جسم و ظاهر","name":"برنامه ریزی غذایی","unit":"ساعت","qty_target":6,"qty_estimated":6,"hours_estimated":6,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t009","category":"سلامت جسم و ظاهر","name":"ورزش روزانه+مهارت رزمی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":9,"start":"2026-07-10","finish":"2026-10-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t009","category":"سلامت جسم و ظاهر","name":"ورزش روزانه+رزمی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":9,"start":"2026-07-10","finish":"2026-10-12","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t010","category":"سلامت جسم و ظاهر","name":"چکاپ کلی","unit":"دفعه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":9,"start":"2026-10-13","finish":"2026-10-14","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t011","category":"سلامت جسم و ظاهر","name":"بررسی راهکارهای رشد مو","unit":"ساعت","qty_target":3,"qty_estimated":3,"hours_estimated":3,"priority":9,"start":"2026-10-15","finish":"2026-10-16","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t012","category":"سلامت جسم و ظاهر","name":"بررسی راهکارهای ترمیم پوست","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-17","finish":"2026-10-17","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t013","category":"سلامت جسم و ظاهر","name":"پیداکردن ست های مناسب لباس","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-18","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t011","category":"سلامت جسم و ظاهر","name":"بررسی رشد مو","unit":"ساعت","qty_target":3,"qty_estimated":3,"hours_estimated":3,"priority":9,"start":"2026-10-15","finish":"2026-10-16","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t012","category":"سلامت جسم و ظاهر","name":"بررسی ترمیم پوست","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-17","finish":"2026-10-17","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t013","category":"سلامت جسم و ظاهر","name":"پیداکردن ست لباس","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":9,"start":"2026-10-18","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t014","category":"سلامت روح و روان","name":"نماز قضا","unit":"روز","qty_target":365,"qty_estimated":365,"hours_estimated":3,"priority":6,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t015","category":"سلامت روح و روان","name":"روزه قضا و مستحبی","unit":"روز","qty_target":30,"qty_estimated":30,"hours_estimated":3,"priority":6,"start":"2027-03-11","finish":"2027-03-12","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t016","category":"سلامت روح و روان","name":"مطالعه قرآن","unit":"جزء","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-11-21","finish":"2026-12-05","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t017","category":"سلامت روح و روان","name":"نماز شب","unit":"روز","qty_target":4,"qty_estimated":4,"hours_estimated":4,"priority":5,"start":"2027-03-20","finish":"2027-03-21","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t018","category":"سلامت روح و روان","name":"تفسیر قرآن","unit":"جزء","qty_target":1,"qty_estimated":1,"hours_estimated":20,"priority":8,"start":"2026-07-19","finish":"2026-07-28","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t018","category":"سلامت روح و روان","name":"تفسیر قرآن","unit":"جزء","qty_target":1,"qty_estimated":1,"hours_estimated":20,"priority":8,"start":"2026-07-19","finish":"2026-07-28","parentId":null,"dependsOn":["t016"],"logs":[]},
   {"id":"t019","category":"سلامت روح و روان","name":"فیلم مذهبی","unit":"عدد","qty_target":3,"qty_estimated":3,"hours_estimated":40,"priority":8,"start":"2026-07-29","finish":"2026-08-17","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t020","category":"سلامت روح و روان","name":"رفتن به مشهد/قم","unit":"دفعه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":6,"start":"2027-03-13","finish":"2027-03-14","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t021","category":"سلامت روح و روان","name":"محاسبه پرداخت خمس","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":6,"start":"2027-03-15","finish":"2027-03-19","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t022","category":"سلامت روح و روان","name":"محاسبه پرداخت دیون","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-12-06","finish":"2026-12-08","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t023","category":"سلامت روح و روان","name":"ریلکسیشن + تکمیل فرم های خودآگاهی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":8,"start":"2026-08-18","finish":"2026-11-20","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t024","category":"سلامت روح و روان","name":"مطالعه درباره مکانیزم بدن","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t025","category":"سلامت روح و روان","name":"مطالعه درباره هیپنوتیزم","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":9,"start":"2026-07-10","finish":"2026-07-14","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t026","category":"سلامت روح و روان","name":"ارزیابی وضعیت معنوی فعلی و شناسایی مسیر پیشرفت","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-12-09","finish":"2026-12-18","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t027","category":"سلامت روح و روان","name":"مطالعه احادیث جهت درک بهتر مفاهیم","unit":"حدیث","qty_target":48,"qty_estimated":48,"hours_estimated":24,"priority":7,"start":"2026-12-19","finish":"2026-12-30","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t028","category":"سلامت روح و روان","name":"دسته بندی داده ها و تحلیل","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-12-31","finish":"2027-01-14","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t029","category":"سلامت روح و روان","name":"مطالعه عمیق قرآن و تحلیل آیات","unit":"ساعت","qty_target":50,"qty_estimated":50,"hours_estimated":50,"priority":7,"start":"2027-01-15","finish":"2027-02-08","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t030","category":"سلامت روح و روان","name":"شناخت مسئولیت ها از قرآن","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-02-09","finish":"2027-02-23","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t031","category":"سلامت روح و روان","name":"مطالعه کتاب های عرفانی و شناختی","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":30,"priority":7,"start":"2027-02-24","finish":"2027-03-10","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t032","category":"سلامت روح و روان","name":"مطالعه درباره روح","unit":"ساعت","qty_target":8,"qty_estimated":8,"hours_estimated":8,"priority":9,"start":"2026-07-15","finish":"2026-07-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t021","category":"سلامت روح و روان","name":"محاسبه خمس","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":6,"start":"2027-03-15","finish":"2027-03-19","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t022","category":"سلامت روح و روان","name":"محاسبه دیون","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-12-06","finish":"2026-12-08","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t023","category":"سلامت روح و روان","name":"ریلکسیشن+خودآگاهی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":8,"start":"2026-08-18","finish":"2026-11-20","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t024","category":"سلامت روح و روان","name":"مکانیزم بدن","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t025","category":"سلامت روح و روان","name":"هیپنوتیزم","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":9,"start":"2026-07-10","finish":"2026-07-14","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t026","category":"سلامت روح و روان","name":"ارزیابی وضعیت معنوی","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-12-09","finish":"2026-12-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t027","category":"سلامت روح و روان","name":"مطالعه احادیث","unit":"حدیث","qty_target":48,"qty_estimated":48,"hours_estimated":24,"priority":7,"start":"2026-12-19","finish":"2026-12-30","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t028","category":"سلامت روح و روان","name":"دسته بندی داده‌ها","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-12-31","finish":"2027-01-14","parentId":null,"dependsOn":["t027"],"logs":[]},
+  {"id":"t029","category":"سلامت روح و روان","name":"مطالعه عمیق قرآن","unit":"ساعت","qty_target":50,"qty_estimated":50,"hours_estimated":50,"priority":7,"start":"2027-01-15","finish":"2027-02-08","parentId":null,"dependsOn":["t028"],"logs":[]},
+  {"id":"t030","category":"سلامت روح و روان","name":"شناخت مسئولیت‌ها از قرآن","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-02-09","finish":"2027-02-23","parentId":null,"dependsOn":["t029"],"logs":[]},
+  {"id":"t031","category":"سلامت روح و روان","name":"کتاب‌های عرفانی","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":30,"priority":7,"start":"2027-02-24","finish":"2027-03-10","parentId":null,"dependsOn":["t030"],"logs":[]},
+  {"id":"t032","category":"سلامت روح و روان","name":"مطالعه روح","unit":"ساعت","qty_target":8,"qty_estimated":8,"hours_estimated":8,"priority":9,"start":"2026-07-15","finish":"2026-07-18","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t033","category":"خانواده","name":"مطالعه درباره فرزندان","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":12,"priority":8,"start":"2026-09-01","finish":"2026-09-06","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t034","category":"خانواده","name":"مطالعه درباره روابط همسران","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":10,"priority":7,"start":"2026-09-07","finish":"2026-09-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t034","category":"خانواده","name":"مطالعه روابط همسران","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":10,"priority":7,"start":"2026-09-07","finish":"2026-09-11","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t035","category":"خانواده","name":"رفاقت با همسر و فرزندان","unit":"ساعت","qty_target":150,"qty_estimated":150,"hours_estimated":150,"priority":7,"start":"2026-09-12","finish":"2026-11-25","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t036","category":"خانواده","name":"گردش با خانواده","unit":"مرتبه","qty_target":24,"qty_estimated":24,"hours_estimated":72,"priority":7,"start":"2026-11-26","finish":"2026-12-31","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t037","category":"خانواده","name":"برنامه مسافرت","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":7,"start":"2027-01-01","finish":"2027-01-02","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t038","category":"خانواده","name":"برنامه ریزی برای رسیدگی به مادر","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":7,"start":"2027-01-03","finish":"2027-01-03","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t038","category":"خانواده","name":"رسیدگی به مادر","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":7,"start":"2027-01-03","finish":"2027-01-03","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t039","category":"علایق","name":"طراحی و نقاشی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-09-01","finish":"2026-10-06","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t040","category":"علایق","name":"برنامه نویسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-10-07","finish":"2026-11-11","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t041","category":"روابط اجتماعی","name":"تقویت قدرت بیان و متقاعد سازی","unit":"ساعت","qty_target":15,"qty_estimated":15,"hours_estimated":15,"priority":7,"start":"2026-10-01","finish":"2026-10-08","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t042","category":"روابط اجتماعی","name":"شرکت در سمینارها و جلسات مرتبط با کار","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-10-09","finish":"2026-10-11","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t043","category":"روابط اجتماعی","name":"رفت و آمد های دوره ای به کرمان","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":7,"start":"2026-10-12","finish":"2026-10-13","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t041","category":"روابط اجتماعی","name":"تقویت قدرت بیان","unit":"ساعت","qty_target":15,"qty_estimated":15,"hours_estimated":15,"priority":7,"start":"2026-10-01","finish":"2026-10-08","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t042","category":"روابط اجتماعی","name":"شرکت در سمینارها","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":7,"start":"2026-10-09","finish":"2026-10-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t043","category":"روابط اجتماعی","name":"رفت و آمد به کرمان","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":7,"start":"2026-10-12","finish":"2026-10-13","parentId":null,"dependsOn":[],"logs":[]},
   {"id":"t044","category":"روابط اجتماعی","name":"تقویت مهرخاور","unit":"مرتبه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":6,"start":"2026-10-19","finish":"2026-10-20","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t045","category":"روابط اجتماعی","name":"کمک به نیازمندان فامیل","unit":"مبلغ(ریال)","qty_target":50000000,"qty_estimated":50000000,"hours_estimated":3,"priority":6,"start":"2026-10-21","finish":"2026-10-22","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t046","category":"روابط اجتماعی","name":"شرح خصوصیات دوست مناسب و هم فکر و سنجش دوست مناسب","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-10-14","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t047","category":"روابط اجتماعی","name":"کمک به خیریه و بررسی کمک به آزادی زندانیان","unit":"مبلغ(ریال)","qty_target":60000000,"qty_estimated":60000000,"hours_estimated":3,"priority":6,"start":"2026-10-23","finish":"2026-10-24","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t048","category":"روابط اجتماعی","name":"بررسی پتانسیل های کمک به دیگران","unit":"ساعت","qty_target":1,"qty_estimated":1,"hours_estimated":1,"priority":6,"start":"2026-10-25","finish":"2026-10-25","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t049","category":"شرایط اقتصادی","name":"بودجه بندی سالیانه و ثبت وضعیت مالی","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":8,"start":"2026-07-23","finish":"2026-08-04","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t050","category":"شرایط اقتصادی","name":"پس انداز سالیانه","unit":"مبلغ(ریال)","qty_target":300000000,"qty_estimated":300000000,"hours_estimated":3,"priority":8,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t051","category":"شرایط اقتصادی","name":"کسب آمادگی های لازم جهت اجرا کار دوم","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":9,"start":"2026-07-07","finish":"2026-07-19","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t052","category":"شرایط اقتصادی","name":"برنامه ریزی ایجاد استقلال مالی خانواده","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-20","finish":"2026-07-22","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t053","category":"شرایط کاری","name":"آشنایی با کارهای شرکت (اکتشاف و استخراج)","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-11-06","finish":"2026-11-10","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t054","category":"شرایط کاری","name":"ارتقای مسئولیت های کاری","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":8,"start":"2026-11-01","finish":"2026-11-05","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t055","category":"ایجاد شرکت جدیدم","name":"تدوین مدل کسب و کار","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-01-01","finish":"2027-01-15","parentId":null,"dependsOn":[],"logs":[]},
-  {"id":"t056","category":"ایجاد شرکت جدیدم","name":"تدوین طرح کسب و کار (Business plan)","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-16","finish":"2027-01-25","parentId":null,"dependsOn":["t055"],"logs":[]},
-  {"id":"t057","category":"ایجاد شرکت جدیدم","name":"طراحی هویت برند","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-26","finish":"2027-02-04","parentId":null,"dependsOn":["t056"],"logs":[]},
+  {"id":"t045","category":"روابط اجتماعی","name":"کمک به نیازمندان فامیل","unit":"ریال","qty_target":50000000,"qty_estimated":50000000,"hours_estimated":3,"priority":6,"start":"2026-10-21","finish":"2026-10-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t046","category":"روابط اجتماعی","name":"شناسایی دوست مناسب","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-10-14","finish":"2026-10-18","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t047","category":"روابط اجتماعی","name":"کمک به خیریه","unit":"ریال","qty_target":60000000,"qty_estimated":60000000,"hours_estimated":3,"priority":6,"start":"2026-10-23","finish":"2026-10-24","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t048","category":"روابط اجتماعی","name":"بررسی کمک به دیگران","unit":"ساعت","qty_target":1,"qty_estimated":1,"hours_estimated":1,"priority":6,"start":"2026-10-25","finish":"2026-10-25","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t049","category":"شرایط اقتصادی","name":"بودجه بندی سالیانه","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":8,"start":"2026-07-23","finish":"2026-08-04","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t050","category":"شرایط اقتصادی","name":"پس انداز سالیانه","unit":"ریال","qty_target":300000000,"qty_estimated":300000000,"hours_estimated":3,"priority":8,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t051","category":"شرایط اقتصادی","name":"آمادگی کار دوم","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":9,"start":"2026-07-07","finish":"2026-07-19","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t052","category":"شرایط اقتصادی","name":"استقلال مالی خانواده","unit":"ساعت","qty_target":5,"qty_estimated":5,"hours_estimated":5,"priority":9,"start":"2026-07-20","finish":"2026-07-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t053","category":"شرایط کاری","name":"آشنایی با کارهای شرکت","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-11-06","finish":"2026-11-10","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t054","category":"شرایط کاری","name":"ارتقای مسئولیت کاری","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":8,"start":"2026-11-01","finish":"2026-11-05","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t055","category":"ایجاد شرکت جدیدم","name":"مدل کسب و کار","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-01-01","finish":"2027-01-15","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t056","category":"ایجاد شرکت جدیدم","name":"طرح کسب و کار","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-16","finish":"2027-01-25","parentId":null,"dependsOn":["t055"],"logs":[]},
+  {"id":"t057","category":"ایجاد شرکت جدیدم","name":"هویت برند","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-26","finish":"2027-02-04","parentId":null,"dependsOn":["t056"],"logs":[]},
   {"id":"t058","category":"ایجاد شرکت جدیدم","name":"جذب اولین مشتری","unit":"تعداد","qty_target":1,"qty_estimated":1,"hours_estimated":10,"priority":7,"start":"2027-02-05","finish":"2027-02-09","parentId":null,"dependsOn":["t057"],"logs":[]},
   {"id":"t059","category":"ایجاد شرکت جدیدم","name":"طراحی سایت","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":7,"start":"2027-02-10","finish":"2027-03-01","parentId":null,"dependsOn":["t058"],"logs":[]}
  ]
@@ -349,9 +375,8 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
 
 <script>
 // ===================== CONSTANTS =====================
-const LS_KEY = 'yearplan_v2';
+const LS_KEY = 'yearplan_v3';
 const CAT_CLASS = {};
-const CAT_COLORS = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--c9'];
 
 const fmtPct = v => (isFinite(v) ? Math.round(v*100) : 0).toLocaleString('fa-IR') + '٪';
 const todayISO = () => new Date().toISOString().slice(0,10);
@@ -361,13 +386,9 @@ const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).sli
 function toJalaali(dateStr){
   if(!dateStr) return '';
   try {
-    const parts = dateStr.split('-');
-    const d = new Date(parts[0], parts[1]-1, parts[2]);
+    const d = new Date(dateStr);
     if(isNaN(d)) return dateStr;
-    const jd = new Intl.DateTimeFormat('fa-IR-u-ca-persian', {
-      year:'numeric', month:'numeric', day:'numeric'
-    }).format(d);
-    return jd;
+    return new Intl.DateTimeFormat('fa-IR-u-ca-persian', {year:'numeric',month:'numeric',day:'numeric'}).format(d);
   } catch(e){ return dateStr; }
 }
 
@@ -379,6 +400,8 @@ let state = null;
 let settings = { weight_volume: 60 };
 let activeCat = null;
 let editTargetId = null;
+let ganttInstance = null;
+let zoomLevel = 1;
 
 function computeTaskTotals(t){
   const qtyDone = (t.logs||[]).reduce((s,l)=> s + (l.qty||0), 0);
@@ -393,10 +416,7 @@ function compositePct(volPct, timePct){
   return volPct * w + timePct * (1 - w);
 }
 
-function getChildren(taskId){
-  return state.tasks.filter(t => t.parentId === taskId);
-}
-
+function getChildren(taskId){ return state.tasks.filter(t => t.parentId === taskId); }
 function getAncestors(taskId){
   const result = [];
   let current = state.tasks.find(t => t.id === taskId);
@@ -407,16 +427,10 @@ function getAncestors(taskId){
   }
   return result;
 }
-
 function getLevel(taskId){
   let level = 0;
   let current = state.tasks.find(t => t.id === taskId);
-  while(current && current.parentId){
-    level++;
-    const parent = state.tasks.find(t => t.id === current.parentId);
-    if(!parent) break;
-    current = parent;
-  }
+  while(current && current.parentId){ level++; const p = state.tasks.find(t => t.id === current.parentId); if(!p) break; current = p; }
   return Math.min(level, 3);
 }
 
@@ -430,24 +444,14 @@ function loadState(){
   const savedSettings = localStorage.getItem('yearplan_settings');
   if(savedSettings) settings = Object.assign(settings, JSON.parse(savedSettings));
   document.getElementById('weightSlider').value = settings.weight_volume;
-
   const saved = localStorage.getItem(LS_KEY);
-  if(saved){
-    try {
-      const parsed = JSON.parse(saved);
-      if(parsed.tasks && parsed.categories) state = parsed;
-      else state = loadSeed();
-    } catch(e){ state = loadSeed(); }
-  } else {
-    state = loadSeed();
-  }
+  if(saved){ try { const p = JSON.parse(saved); if(p.tasks && p.categories) state = p; else state = loadSeed(); } catch(e){ state = loadSeed(); } }
+  else state = loadSeed();
 }
 
 // ===================== CATEGORY COLORS =====================
 function assignColors(){
-  state.categories.forEach((c,i) => {
-    CAT_CLASS[c] = 'c' + ((i % 9) + 1);
-  });
+  state.categories.forEach((c,i) => { CAT_CLASS[c] = 'c' + ((i % 9) + 1); });
 }
 
 // ===================== RENDER: SUMMARY =====================
@@ -456,21 +460,17 @@ function renderSummary(){
   state.tasks.forEach(t=>{
     const {hoursDone, volPct} = computeTaskTotals(t);
     const w = t.hours_estimated || 0;
-    sumHoursEst += w;
-    sumHoursDone += hoursDone;
-    sumVolWeighted += volPct * w;
+    sumHoursEst += w; sumHoursDone += hoursDone; sumVolWeighted += volPct * w;
   });
   const overallTime = sumHoursEst ? clamp01(sumHoursDone/sumHoursEst) : 0;
   const overallVol = sumHoursEst ? clamp01(sumVolWeighted/sumHoursEst) : 0;
   const overallComposite = compositePct(overallVol, overallTime);
-
   document.getElementById('cardComposite').textContent = fmtPct(overallComposite);
   document.getElementById('cardVolume').textContent = fmtPct(overallVol);
   document.getElementById('cardTime').textContent = fmtPct(overallTime);
   document.getElementById('barComposite').style.width = (overallComposite*100)+'%';
   document.getElementById('barVolume').style.width = (overallVol*100)+'%';
   document.getElementById('barTime').style.width = (overallTime*100)+'%';
-
   const wv = settings.weight_volume, wt = 100-wv;
   document.getElementById('wVolLabel').textContent = 'حجمی: ' + wv.toLocaleString('fa-IR') + '٪';
   document.getElementById('wTimeLabel').textContent = 'زمانی: ' + wt.toLocaleString('fa-IR') + '٪';
@@ -478,72 +478,105 @@ function renderSummary(){
 
 // ===================== RENDER: GANTT =====================
 function renderGantt(){
-  const svg = document.getElementById('ganttSvg');
-  const tasks = state.tasks.filter(t => !activeCat || t.category === activeCat);
+  const container = document.getElementById('gantt-container');
+  const tasks = state.tasks
+    .filter(t => !activeCat || t.category === activeCat)
+    .map(t => {
+      const {volPct, timePct} = computeTaskTotals(t);
+      const pct = Math.round(compositePct(volPct, timePct) * 100);
+      const level = getLevel(t.id);
+      const indent = '  '.repeat(level);
+      return {
+        id: t.id,
+        name: indent + t.name,
+        start: t.start,
+        end: t.finish,
+        progress: Math.min(pct, 100),
+        custom_class: CAT_CLASS[t.category] || 'c1'
+      };
+    });
   
+  container.innerHTML = '';
   if(tasks.length === 0){
-    svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="var(--muted)" font-size="16">هیچ فعالیتی یافت نشد</text>`;
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);">هیچ فعالیتی یافت نشد</div>';
     return;
   }
 
-  let minDate = Infinity, maxDate = -Infinity;
-  tasks.forEach(t => {
-    const s = new Date(t.start).getTime();
-    const f = new Date(t.finish).getTime();
-    if(s < minDate) minDate = s;
-    if(f > maxDate) maxDate = f;
-  });
-  if(minDate === Infinity) { minDate = Date.now(); maxDate = Date.now() + 7*24*60*60*1000; }
-  const range = maxDate - minDate || 1;
+  try {
+    ganttInstance = new Gantt(container, tasks, {
+      view_mode: 'Month',
+      language: 'en',
+      custom_popup_html: function(task){
+        const t = state.tasks.find(x => x.id === task.id);
+        if(!t) return '';
+        const {volPct, timePct} = computeTaskTotals(t);
+        return `
+          <div style="padding:8px;font-size:12px;font-family:Vazirmatn;">
+            <strong>${task.name}</strong><br>
+            پیشرفت: ${task.progress}%<br>
+            شروع: ${toJalaali(task.start)}<br>
+            پایان: ${toJalaali(task.end)}<br>
+            ${t.unit ? 'واحد: '+t.unit : ''}
+          </div>
+        `;
+      },
+      on_click: function(task){
+        const t = state.tasks.find(x => x.id === task.id);
+        if(t) openEditModal(t.id);
+      }
+    });
+    
+    // Apply zoom
+    const ganttEl = container.querySelector('.gantt');
+    if(ganttEl) {
+      ganttEl.style.transform = `scale(${zoomLevel})`;
+      ganttEl.style.transformOrigin = 'top left';
+      ganttEl.style.width = `${100 / zoomLevel}%`;
+    }
+    
+    document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
+  } catch(e){ console.error('Gantt error:', e); }
+}
 
-  const width = svg.clientWidth || 800;
-  const height = Math.max(300, tasks.length * 32 + 40);
-  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+// ===================== ZOOM =====================
+function zoomGantt(action){
+  if(action === 'in') zoomLevel = Math.min(2, zoomLevel * 1.2);
+  else if(action === 'out') zoomLevel = Math.max(0.3, zoomLevel / 1.2);
+  else if(action === 'fit') zoomLevel = 1;
   
-  let html = '';
-  // Header
-  html += `<rect x="0" y="0" width="${width}" height="28" fill="var(--panel)" stroke="var(--border)"/>`;
-  html += `<text x="10" y="20" fill="var(--muted)" font-size="12" font-family="Vazirmatn">فعالیت</text>`;
-  
-  // Grid lines
-  for(let i = 0; i <= 10; i++){
-    const x = 180 + (width - 180) * (i/10);
-    html += `<line x1="${x}" y1="28" x2="${x}" y2="${height}" stroke="var(--border)" stroke-width="0.5"/>`;
+  const container = document.getElementById('gantt-container');
+  const ganttEl = container.querySelector('.gantt');
+  if(ganttEl) {
+    ganttEl.style.transform = `scale(${zoomLevel})`;
+    ganttEl.style.transformOrigin = 'top left';
+    ganttEl.style.width = `${100 / zoomLevel}%`;
   }
+  document.getElementById('zoomLevel').textContent = Math.round(zoomLevel * 100) + '%';
+}
 
-  tasks.forEach((t, idx) => {
-    const y = 28 + idx * 32;
-    const level = getLevel(t.id);
-    const indent = level * 20;
-    const xStart = 180 + ((new Date(t.start).getTime() - minDate) / range) * (width - 180);
-    const xEnd = 180 + ((new Date(t.finish).getTime() - minDate) / range) * (width - 180);
-    const barWidth = Math.max(4, xEnd - xStart);
+// ===================== RENDER: CHIPS =====================
+function renderChips(){
+  const wrap = document.getElementById('catChips');
+  wrap.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'chip' + (activeCat===null ? ' active' : '');
+  all.textContent = 'همه';
+  all.onclick = () => { activeCat = null; renderAll(); };
+  wrap.appendChild(all);
+  
+  state.categories.forEach(cat => {
+    const tasks = state.tasks.filter(t => t.category === cat);
+    const totalPct = tasks.reduce((s,t) => {
+      const {volPct, timePct} = computeTaskTotals(t);
+      return s + compositePct(volPct, timePct);
+    }, 0) / (tasks.length || 1);
     
-    const {volPct, timePct} = computeTaskTotals(t);
-    const progress = compositePct(volPct, timePct);
-    const color = getCss(CAT_CLASS[t.category] || '--c1');
-    
-    html += `<rect x="0" y="${y}" width="${width}" height="30" fill="${idx%2===0?'var(--panel)':'var(--panel-2)'}" stroke="var(--border)" stroke-width="0.5"/>`;
-    html += `<text x="${10 + indent}" y="${y+20}" fill="var(--text)" font-size="12" font-family="Vazirmatn">${t.name}</text>`;
-    
-    if(t.dependsOn && t.dependsOn.length > 0){
-      html += `<text x="${120 + indent}" y="${y+20}" fill="var(--gold)" font-size="10" font-family="Vazirmatn">↗ ${t.dependsOn.length}</text>`;
-    }
-    
-    html += `<rect x="${xStart}" y="${y+5}" width="${barWidth}" height="20" rx="4" fill="var(--panel-2)" stroke="${color}" stroke-width="1"/>`;
-    if(progress > 0.01){
-      html += `<rect x="${xStart}" y="${y+5}" width="${Math.max(2, barWidth * progress)}" height="20" rx="4" fill="${color}" opacity="0.8"/>`;
-    }
-    
-    html += `<text x="${xStart + Math.min(barWidth/2, barWidth-20)}" y="${y+19}" fill="var(--text)" font-size="9" font-family="Vazirmatn" text-anchor="middle">${Math.round(progress*100)}%</text>`;
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (activeCat===cat ? ' active' : '');
+    chip.innerHTML = `${cat} <span class="pct">${fmtPct(totalPct)}</span>`;
+    chip.onclick = () => { activeCat = (activeCat===cat ? null : cat); renderAll(); };
+    wrap.appendChild(chip);
   });
-
-  const legendEl = document.getElementById('legend');
-  legendEl.innerHTML = state.categories.map(cat => 
-    `<span><i style="background:${getCss(CAT_CLASS[cat])}"></i>${cat}</span>`
-  ).join('');
-
-  svg.innerHTML = html;
 }
 
 // ===================== RENDER: TABLE =====================
@@ -552,9 +585,8 @@ function renderTable(){
   body.innerHTML = '';
   
   const sorted = [...state.tasks].sort((a,b) => {
-    const levelA = getLevel(a.id);
-    const levelB = getLevel(b.id);
-    if(levelA !== levelB) return levelA - levelB;
+    const la = getLevel(a.id), lb = getLevel(b.id);
+    if(la !== lb) return la - lb;
     return (a.start||'').localeCompare(b.start||'');
   });
 
@@ -573,15 +605,17 @@ function renderTable(){
       return dep ? dep.name : id;
     }).join('، ');
     
+    const prefix = '  '.repeat(level) + (level > 0 ? '└─ ' : '');
+    
     tr.innerHTML = `
       <td class="name-cell">
-        <span style="cursor:pointer;color:var(--gold);margin-left:6px;" onclick="openEditModal('${t.id}')">✏️</span>
-        <span>${t.name}</span>
-        ${t.dependsOn && t.dependsOn.length > 0 ? `<span class="dependency-badge">↗ ${t.dependsOn.length}</span>` : ''}
+        <span style="cursor:pointer;color:var(--gold);margin-left:4px;" onclick="openEditModal('${t.id}')">✏️</span>
+        <span style="color:${level>0?'var(--muted)':'var(--text)'}">${prefix}${t.name}</span>
+        ${t.dependsOn && t.dependsOn.length > 0 ? `<span class="dep-badge">↗ ${t.dependsOn.length}</span>` : ''}
       </td>
       <td><span class="cat-dot" style="background:${getCss(CAT_CLASS[t.category])}"></span>${t.category}</td>
       <td>${['اصلی','زیرمجموعه','زیرمجموعه ۲','زیرمجموعه ۳'][Math.min(level,3)]}</td>
-      <td style="font-size:11px;color:var(--muted);max-width:100px;white-space:normal;">${dependsStr || '—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:80px;white-space:normal;word-break:break-all;">${dependsStr || '—'}</td>
       <td>${t.unit||'—'}</td>
       <td class="num">${t.qty_target?.toLocaleString('fa-IR')||'—'}</td>
       <td class="num">${t.qty_estimated?.toLocaleString('fa-IR')||'—'}</td>
@@ -589,10 +623,10 @@ function renderTable(){
       <td class="num">${t.priority||'—'}</td>
       <td>${toJalaali(t.start)}</td>
       <td>${toJalaali(t.finish)}</td>
-      <td class="num">${pill(comp,'--gold')}</td>
+      <td class="num"><span class="pct-pill" style="background:var(--gold)22;color:var(--gold)">${fmtPct(comp)}</span></td>
       <td>
         <div class="row-actions">
-          <button onclick="addSubtask('${t.id}')" title="افزودن زیرفعالیت">➕</button>
+          <button onclick="addSubtask('${t.id}')" title="زیرفعالیت">➕</button>
           <button onclick="openEditModal('${t.id}')">✏️</button>
           <button class="danger" onclick="deleteTask('${t.id}')">🗑</button>
         </div>
@@ -602,30 +636,7 @@ function renderTable(){
   });
 }
 
-function pill(pct, colorVar){
-  const c = getCss(colorVar);
-  return `<span class="pct-pill" style="background:${c}22;color:${c}">${fmtPct(pct)}</span>`;
-}
-
-// ===================== RENDER: CHIPS =====================
-function renderChips(){
-  const wrap = document.getElementById('catChips');
-  wrap.innerHTML = '';
-  const all = document.createElement('div');
-  all.className = 'chip' + (activeCat===null ? ' active' : '');
-  all.textContent = 'همه';
-  all.onclick = () => { activeCat = null; renderAll(); };
-  wrap.appendChild(all);
-  state.categories.forEach(cat => {
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (activeCat===cat ? ' active' : '');
-    chip.textContent = cat;
-    chip.onclick = () => { activeCat = (activeCat===cat ? null : cat); renderAll(); };
-    wrap.appendChild(chip);
-  });
-}
-
-// ===================== RENDER: LOG SELECT =====================
+// ===================== RENDER: LOG =====================
 function renderLogSelect(){
   const sel = document.getElementById('logTask');
   sel.innerHTML = state.categories.map(cat => {
@@ -673,61 +684,33 @@ function renderAll(){
 function addTask(){
   const cat = activeCat || state.categories[0];
   state.tasks.push({
-    id: uid(),
-    category: cat,
-    name: 'فعالیت جدید',
-    unit: 'ساعت',
-    qty_target: 1,
-    qty_estimated: 1,
-    hours_estimated: 1,
-    priority: 5,
-    start: todayISO(),
-    finish: todayISO(),
-    parentId: null,
-    dependsOn: [],
-    logs: []
+    id: uid(), category: cat, name: 'فعالیت جدید', unit: 'ساعت',
+    qty_target: 1, qty_estimated: 1, hours_estimated: 1, priority: 5,
+    start: todayISO(), finish: todayISO(), parentId: null, dependsOn: [], logs: []
   });
-  persistAll();
-  renderAll();
+  persistAll(); renderAll();
 }
 
 function addSubtask(parentId){
   const parent = state.tasks.find(t => t.id === parentId);
   if(!parent) return;
-  const level = getLevel(parentId);
-  if(level >= 3){ alert('حداکثر ۳ سطح مجاز است.'); return; }
-  
+  if(getLevel(parentId) >= 3){ alert('حداکثر ۳ سطح مجاز است.'); return; }
   state.tasks.push({
-    id: uid(),
-    category: parent.category,
-    name: 'زیرفعالیت جدید',
-    unit: parent.unit || 'ساعت',
-    qty_target: 1,
-    qty_estimated: 1,
-    hours_estimated: 1,
-    priority: parent.priority || 5,
-    start: parent.start || todayISO(),
-    finish: parent.finish || todayISO(),
-    parentId: parentId,
-    dependsOn: [],
-    logs: []
+    id: uid(), category: parent.category, name: 'زیرفعالیت جدید',
+    unit: parent.unit || 'ساعت', qty_target: 1, qty_estimated: 1,
+    hours_estimated: 1, priority: parent.priority || 5,
+    start: parent.start || todayISO(), finish: parent.finish || todayISO(),
+    parentId: parentId, dependsOn: [], logs: []
   });
-  persistAll();
-  renderAll();
+  persistAll(); renderAll();
 }
 
 function deleteTask(id){
   const children = getChildren(id);
-  if(children.length > 0){
-    if(!confirm(`این فعالیت ${children.length} زیرفعالیت دارد. با حذف آن، زیرفعالیت‌ها نیز حذف می‌شوند. ادامه می‌دهید؟`)) return;
-    const childIds = children.map(c => c.id);
-    state.tasks = state.tasks.filter(t => !childIds.includes(t.id) && t.id !== id);
-  } else {
-    if(!confirm('این فعالیت حذف شود؟')) return;
-    state.tasks = state.tasks.filter(t => t.id !== id);
-  }
-  persistAll();
-  renderAll();
+  if(children.length > 0 && !confirm(`این فعالیت ${children.length} زیرفعالیت دارد. حذف شود؟`)) return;
+  const childIds = children.map(c => c.id);
+  state.tasks = state.tasks.filter(t => !childIds.includes(t.id) && t.id !== id);
+  persistAll(); renderAll();
 }
 
 // ===================== EDIT MODAL =====================
@@ -735,7 +718,6 @@ function openEditModal(id){
   const t = state.tasks.find(x => x.id === id);
   if(!t) return;
   editTargetId = id;
-  
   document.getElementById('editModalTitle').textContent = 'ویرایش: ' + t.name;
   
   const depOptions = state.tasks
@@ -744,41 +726,30 @@ function openEditModal(id){
     .join('');
   
   document.getElementById('editModalBody').innerHTML = `
-    <div class="field">
-      <label>نام فعالیت</label>
-      <input type="text" id="editName" value="${t.name}">
+    <div class="field"><label>نام</label><input type="text" id="editName" value="${t.name}"></div>
+    <div class="field"><label>دسته</label><select id="editCategory">${state.categories.map(c => `<option ${c===t.category?'selected':''}>${c}</option>`).join('')}</select></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div class="field"><label>واحد</label><input type="text" id="editUnit" value="${t.unit||''}"></div>
+      <div class="field"><label>اولویت</label><input type="number" id="editPriority" value="${t.priority||5}" min="1" max="10"></div>
     </div>
-    <div class="field">
-      <label>دسته</label>
-      <select id="editCategory">${state.categories.map(c => `<option ${c===t.category?'selected':''}>${c}</option>`).join('')}</select>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div class="field"><label>هدف</label><input type="number" step="any" id="editTarget" value="${t.qty_target||0}"></div>
+      <div class="field"><label>برآورد</label><input type="number" step="any" id="editEstimated" value="${t.qty_estimated||0}"></div>
+      <div class="field"><label>ساعت</label><input type="number" step="any" id="editHours" value="${t.hours_estimated||0}"></div>
     </div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div><label>واحد</label><input type="text" id="editUnit" value="${t.unit||''}"></div>
-      <div><label>اولویت (۱-۱۰)</label><input type="number" id="editPriority" value="${t.priority||5}" min="1" max="10"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div class="field"><label>شروع</label><input type="date" id="editStart" value="${t.start||''}"></div>
+      <div class="field"><label>پایان</label><input type="date" id="editFinish" value="${t.finish||''}"></div>
     </div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-      <div><label>مقدار هدف</label><input type="number" step="any" id="editTarget" value="${t.qty_target||0}"></div>
-      <div><label>مقدار برآوردی</label><input type="number" step="any" id="editEstimated" value="${t.qty_estimated||0}"></div>
-      <div><label>ساعت برآوردی</label><input type="number" step="any" id="editHours" value="${t.hours_estimated||0}"></div>
-    </div>
-    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div><label>تاریخ شروع</label><input type="date" id="editStart" value="${t.start||''}"></div>
-      <div><label>تاریخ پایان</label><input type="date" id="editFinish" value="${t.finish||''}"></div>
-    </div>
-    <div class="field">
-      <label>وابستگی به (فعالیت‌های پیش‌نیاز)</label>
-      <select id="editDepends" multiple style="height:80px;">${depOptions}</select>
-      <div class="hint">کلید Ctrl را نگه دارید و چند گزینه انتخاب کنید</div>
-    </div>
+    <div class="field"><label>پیش‌نیازها (Ctrl+Click برای چند انتخاب)</label>
+      <select id="editDepends" multiple style="height:70px;">${depOptions}</select></div>
   `;
-  
   document.getElementById('editModal').classList.add('show');
 }
 
 function saveEditModal(){
   const t = state.tasks.find(x => x.id === editTargetId);
   if(!t) return;
-  
   t.name = document.getElementById('editName').value.trim() || t.name;
   t.category = document.getElementById('editCategory').value;
   t.unit = document.getElementById('editUnit').value.trim() || t.unit;
@@ -788,42 +759,26 @@ function saveEditModal(){
   t.hours_estimated = parseFloat(document.getElementById('editHours').value) || 0;
   t.start = document.getElementById('editStart').value || t.start;
   t.finish = document.getElementById('editFinish').value || t.finish;
-  
-  const depSelect = document.getElementById('editDepends');
-  t.dependsOn = Array.from(depSelect.selectedOptions).map(opt => opt.value);
-  
-  persistAll();
-  closeEditModal();
-  renderAll();
+  t.dependsOn = Array.from(document.getElementById('editDepends').selectedOptions).map(opt => opt.value);
+  persistAll(); closeEditModal(); renderAll();
 }
 
-function closeEditModal(){
-  document.getElementById('editModal').classList.remove('show');
-  editTargetId = null;
-}
+function closeEditModal(){ document.getElementById('editModal').classList.remove('show'); editTargetId = null; }
 
-// ===================== LOG ENTRY =====================
+// ===================== LOG =====================
 function addLogEntry(){
   const id = document.getElementById('logTask').value;
   const date = document.getElementById('logDate').value || todayISO();
   const qty = document.getElementById('logQty').value;
   const hours = document.getElementById('logHours').value;
   if(qty === '' && hours === ''){ alert('حداقل یکی از مقدار یا ساعت را وارد کنید.'); return; }
-  
   const t = state.tasks.find(x => x.id === id);
   if(!t) return;
-  
   t.logs = t.logs || [];
-  t.logs.push({
-    date: date,
-    qty: qty === '' ? 0 : Number(qty),
-    hours: hours === '' ? 0 : Number(hours)
-  });
-  
+  t.logs.push({ date, qty: qty===''?0:Number(qty), hours: hours===''?0:Number(hours) });
   document.getElementById('logQty').value = '';
   document.getElementById('logHours').value = '';
-  persistAll();
-  renderAll();
+  persistAll(); renderAll();
 }
 
 // ===================== BACKUP =====================
@@ -834,37 +789,21 @@ function exportJSON(){
   a.download = 'yearplan-'+todayISO()+'.json';
   a.click();
 }
-
 function importJSON(file){
   const reader = new FileReader();
   reader.onload = (e) => {
-    try {
-      const parsed = JSON.parse(e.target.result);
-      if(!parsed.tasks || !parsed.categories) throw new Error('ساختار نامعتبر');
-      state = parsed;
-      persistAll();
-      renderAll();
-    } catch(err){ alert('فایل معتبر نیست: ' + err.message); }
+    try { const p = JSON.parse(e.target.result); if(!p.tasks || !p.categories) throw new Error('ساختار نامعتبر'); state = p; persistAll(); renderAll(); }
+    catch(err){ alert('فایل معتبر نیست: ' + err.message); }
   };
   reader.readAsText(file);
 }
-
-function resetToSeed(){
-  if(!confirm('همه تغییرات پاک و به حالت اولیه برگردد؟')) return;
-  state = loadSeed();
-  persistAll();
-  renderAll();
-}
+function resetToSeed(){ if(!confirm('همه تغییرات پاک شود؟')) return; state = loadSeed(); persistAll(); renderAll(); }
 
 // ===================== EVENTS =====================
 document.getElementById('weightSlider').addEventListener('input', e => {
   settings.weight_volume = Number(e.target.value);
-  persistAll();
-  renderSummary();
-  renderGantt();
-  renderTable();
+  persistAll(); renderSummary(); renderGantt(); renderTable();
 });
-
 document.getElementById('btnAddLog').addEventListener('click', addLogEntry);
 document.getElementById('logTask').addEventListener('change', updateLogLabel);
 document.getElementById('btnAddTask').addEventListener('click', addTask);
@@ -873,18 +812,24 @@ document.getElementById('btnAddSubtask').addEventListener('click', () => {
   if(first) addSubtask(first.id);
   else alert('ابتدا یک فعالیت اصلی بسازید.');
 });
-document.getElementById('fileImport').addEventListener('change', e => {
-  if(e.target.files[0]) importJSON(e.target.files[0]);
-});
-
+document.getElementById('fileImport').addEventListener('change', e => { if(e.target.files[0]) importJSON(e.target.files[0]); });
 document.getElementById('logDate').value = todayISO();
+
+// Mouse wheel zoom for gantt
+document.getElementById('gantt-container').addEventListener('wheel', (e) => {
+  if(e.ctrlKey || e.metaKey){
+    e.preventDefault();
+    if(e.deltaY < 0) zoomGantt('in');
+    else zoomGantt('out');
+  }
+}, {passive: false});
 
 // ===================== INIT =====================
 loadState();
 renderAll();
 document.getElementById('todayDisplay').textContent = 'امروز: ' + toJalaali(todayISO());
 
-window.addEventListener('resize', () => { renderGantt(); });
+window.addEventListener('resize', () => { if(ganttInstance) renderGantt(); });
 </script>
 </body>
 </html>
