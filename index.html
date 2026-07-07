@@ -6,9 +6,8 @@
 <title>برنامه یک‌ساله — ردیاب پیشرفت</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css">
-<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment-jalaali@0.9.2/moment-jalaali.min.js"></script>
 <style>
 :root{
   --bg:#12151a;
@@ -22,7 +21,6 @@
   --blue:#6b93c9;
   --danger:#d0685f;
   --radius:14px;
-
   --c1:#6b93c9; --c2:#7cbf8e; --c3:#b48ee0; --c4:#e08a8a; --c5:#e0b45a;
   --c6:#5ec2c2; --c7:#d19a5a; --c8:#8a97e0; --c9:#e07a9d;
 }
@@ -35,9 +33,6 @@ body{
   line-height:1.7;
   padding:0 0 60px;
 }
-::selection{ background:var(--gold); color:#12151a;}
-a{color:var(--teal);}
-h1,h2,h3{margin:0;font-weight:700;}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
 button{
   font-family:inherit;cursor:pointer;border:1px solid var(--border);
@@ -53,14 +48,13 @@ input,select,textarea{
   font-family:inherit;background:var(--panel-2);color:var(--text);
   border:1px solid var(--border);border-radius:9px;padding:8px 10px;font-size:14px;
 }
-input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
 table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);}
 th{color:var(--muted);font-weight:600;font-size:12.5px;position:sticky;top:0;background:var(--panel);}
 tbody tr:hover{background:var(--panel-2);}
 .num{font-variant-numeric:tabular-nums;direction:ltr;text-align:left;}
 
-/* ===== header ===== */
 header.top{
   border-bottom:1px solid var(--border);
   padding:22px 0;margin-bottom:26px;
@@ -69,13 +63,8 @@ header.top{
 .top-row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
 .top-row h1{font-size:22px;}
 .top-row .sub{color:var(--muted);font-size:13px;margin-top:4px;}
-.sync-badge{font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);color:var(--muted);white-space:nowrap;}
-.sync-badge.ok{color:var(--teal);border-color:var(--teal);}
-.sync-badge.local{color:var(--gold);border-color:var(--gold);}
-.sync-badge.err{color:var(--danger);border-color:var(--danger);}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap;}
 
-/* ===== cards ===== */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px;}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
 .card .label{color:var(--muted);font-size:12.5px;margin-bottom:10px;}
@@ -91,7 +80,6 @@ header.top{
 .weight-row input[type=range]{flex:1;accent-color:var(--gold);}
 .weight-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px;}
 
-/* ===== sections ===== */
 section{margin-bottom:32px;}
 .section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
 .section-head h2{font-size:16px;}
@@ -99,21 +87,18 @@ section{margin-bottom:32px;}
 .chip{font-size:12px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;}
 .chip.active{border-color:var(--gold);color:var(--text);background:rgba(212,162,76,.12);}
 
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
-.gantt-wrap{overflow-x:auto;}
-#gantt-container{width:100%;}
-.gantt-container{background:transparent !important;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;overflow-x:auto;}
+.gantt-wrap{min-height:300px;}
+.gantt-container{position:relative;}
 .gantt .bar{fill:var(--panel-2);}
 .gantt .bar-progress{fill:var(--gold);}
-.gantt .bar-label{fill:var(--text);font-family:'Vazirmatn',sans-serif;}
+.gantt .bar-label{fill:var(--text);font-family:'Vazirmatn',sans-serif;font-size:10px;}
 .gantt .grid-header{fill:var(--panel);stroke:var(--border);}
 .gantt .grid-row{fill:transparent;}
 .gantt .grid-row:nth-child(even){fill:rgba(255,255,255,.015);}
 .gantt .row-line{stroke:var(--border);}
 .gantt .tick{stroke:var(--border);}
 .gantt .today-highlight{fill:rgba(212,162,76,.12);}
-.gantt-container .lower-text, .gantt-container .upper-text{fill:var(--muted);font-family:'Vazirmatn',sans-serif;}
-.gantt .arrow{stroke:var(--muted);}
 .bar-wrapper.c1 .bar-progress{fill:var(--c1);} .bar-wrapper.c2 .bar-progress{fill:var(--c2);}
 .bar-wrapper.c3 .bar-progress{fill:var(--c3);} .bar-wrapper.c4 .bar-progress{fill:var(--c4);}
 .bar-wrapper.c5 .bar-progress{fill:var(--c5);} .bar-wrapper.c6 .bar-progress{fill:var(--c6);}
@@ -123,7 +108,12 @@ section{margin-bottom:32px;}
 .legend span{display:inline-flex;align-items:center;gap:6px;}
 .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
 
-/* ===== log form ===== */
+/* سلسله مراتبی */
+.level-1{padding-right:0;}
+.level-2{padding-right:24px;background:rgba(255,255,255,.02);}
+.level-3{padding-right:48px;background:rgba(255,255,255,.03);}
+.dependency-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(212,162,76,.15);color:var(--gold);}
+
 .log-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
 .log-form label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
 .log-form .field{display:flex;flex-direction:column;}
@@ -132,23 +122,21 @@ section{margin-bottom:32px;}
 .log-item{display:flex;justify-content:space-between;padding:8px 4px;border-bottom:1px solid var(--border);font-size:13px;}
 .log-item .meta{color:var(--muted);font-size:12px;}
 
-/* ===== table controls ===== */
 .table-scroll{overflow:auto;max-height:560px;}
 td input, td select{width:100%;min-width:64px;font-size:13px;padding:5px 7px;}
-td.name-cell{white-space:normal;min-width:220px;}
+td.name-cell{min-width:200px;}
 .pct-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700;}
 .cat-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:6px;}
-.row-actions{display:flex;gap:6px;}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
 .row-actions button{padding:5px 9px;font-size:12px;}
 
-/* ===== modal ===== */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50;padding:16px;}
 .modal-backdrop.show{display:flex;}
-.modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:480px;width:100%;max-height:90vh;overflow:auto;}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:500px;width:100%;max-height:90vh;overflow:auto;}
 .modal h3{margin-bottom:14px;}
 .modal .field{margin-bottom:14px;}
 .modal .field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
-.modal .field input{width:100%;}
+.modal .field input,.modal .field select{width:100%;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
 .hint{font-size:12px;color:var(--muted);margin-top:6px;}
 
@@ -167,12 +155,14 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
 <header class="top">
   <div class="wrap top-row">
     <div>
-      <h1>برنامه یک‌ساله توسعه شخصی</h1>
-      <div class="sub">۱۷ تیر ۱۴۰۵ تا ۱۶ تیر ۱۴۰۶ — پیگیری روزانه پیشرفت</div>
+      <h1>📋 برنامه یک‌ساله توسعه شخصی</h1>
+      <div class="sub" id="todayDisplay">بارگذاری...</div>
     </div>
     <div class="header-actions">
-      <span id="syncBadge" class="sync-badge local">آفلاین (فقط این دستگاه)</span>
-      <button class="ghost" id="btnSettings">⚙ تنظیمات</button>
+      <button class="ghost" onclick="exportJSON()">⬇ خروجی</button>
+      <button class="ghost" onclick="document.getElementById('fileImport').click()">⬆ ورودی</button>
+      <input type="file" id="fileImport" accept="application/json" style="display:none;" onchange="importJSON(this.files[0])">
+      <button class="danger ghost" onclick="resetToSeed()">↺ بازنشانی</button>
     </div>
   </div>
 </header>
@@ -209,17 +199,19 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
     </div>
   </section>
 
+  <!-- Gantt Chart -->
   <section>
     <div class="section-head">
       <h2>نمودار گانت</h2>
       <div class="chips" id="catChips"></div>
     </div>
     <div class="panel gantt-wrap">
-      <div id="gantt-container"></div>
+      <svg id="ganttSvg" width="100%" height="400"></svg>
       <div class="legend" id="legend"></div>
     </div>
   </section>
 
+  <!-- ثبت پیشرفت -->
   <section>
     <div class="section-head"><h2>ثبت پیشرفت امروز</h2></div>
     <div class="panel">
@@ -242,23 +234,36 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
         </div>
         <button class="primary" id="btnAddLog">ثبت</button>
       </div>
-      <div class="hint">هرکدام از دو فیلد را خالی بگذاری، فقط همان یکی ثبت می‌شود. با ثبت مکرر، مقدار جمع می‌شود.</div>
       <div class="log-history" id="logHistory"></div>
     </div>
   </section>
 
+  <!-- جدول فعالیت‌ها -->
   <section>
     <div class="section-head">
-      <h2>فهرست کامل فعالیت‌ها (قابل ویرایش)</h2>
-      <button id="btnAddTask">+ فعالیت جدید</button>
+      <h2>فهرست فعالیت‌ها</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnAddTask">+ فعالیت جدید</button>
+        <button id="btnAddSubtask">+ زیرفعالیت</button>
+      </div>
     </div>
     <div class="panel table-scroll">
       <table>
         <thead>
           <tr>
-            <th>فعالیت</th><th>دسته</th><th>واحد</th><th>مقدار هدف</th>
-            <th>مقدار برآورد شده</th><th>ساعت برآوردی</th><th>اولویت</th>
-            <th>شروع</th><th>پایان</th><th>حجمی</th><th>زمانی</th><th>ترکیبی</th><th></th>
+            <th style="min-width:200px;">فعالیت</th>
+            <th>دسته</th>
+            <th>سطح</th>
+            <th>وابسته به</th>
+            <th>واحد</th>
+            <th>هدف</th>
+            <th>برآورد</th>
+            <th>ساعت</th>
+            <th>اولویت</th>
+            <th>شروع</th>
+            <th>پایان</th>
+            <th>پیشرفت</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="taskBody"></tbody>
@@ -266,39 +271,18 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
     </div>
   </section>
 
-  <section>
-    <div class="section-head"><h2>پشتیبان‌گیری</h2></div>
-    <div class="panel" style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button id="btnExport">⬇ خروجی JSON</button>
-      <button id="btnImport">⬆ ورودی JSON</button>
-      <input type="file" id="fileImport" accept="application/json" style="display:none;">
-      <button class="danger" id="btnReset">بازگشت به داده اولیه</button>
-    </div>
-  </section>
-
 </div>
 
-<footer>داده‌ها به‌صورت خودکار روی همین مرورگر ذخیره می‌شود؛ برای دیدن از چند دستگاه، Supabase را از تنظیمات وصل کن.</footer>
+<footer>داده‌ها به‌صورت خودکار روی همین مرورگر ذخیره می‌شود.</footer>
 
-<div class="modal-backdrop" id="settingsModal">
+<!-- مودال ویرایش -->
+<div class="modal-backdrop" id="editModal">
   <div class="modal">
-    <h3>تنظیمات همگام‌سازی (Supabase)</h3>
-    <div class="field">
-      <label>Project URL</label>
-      <input type="text" id="sbUrl" placeholder="https://xxxx.supabase.co">
-    </div>
-    <div class="field">
-      <label>Anon Public Key</label>
-      <input type="text" id="sbKey" placeholder="eyJhbGciOi...">
-    </div>
-    <div class="field">
-      <label>شناسه برنامه (اگر چند برنامه در یک پروژه داری)</label>
-      <input type="text" id="sbId" placeholder="main" value="main">
-    </div>
-    <div class="hint">جدول لازم را با فایل schema.sql همراه این پروژه در Supebase SQL Editor اجرا کن. کلید anon را در کد نگه‌داشتن مشکلی ندارد، اما چون هرکسی که این کلید و URL را ببیند می‌تواند داده را بخواند/بنویسد، لینک صفحه و مخزن گیت‌هاب را عمومی تبلیغ نکن.</div>
+    <h3 id="editModalTitle">ویرایش فعالیت</h3>
+    <div id="editModalBody"></div>
     <div class="modal-actions">
-      <button class="ghost" id="btnCloseSettings">بستن</button>
-      <button class="primary" id="btnSaveSettings">ذخیره و اتصال</button>
+      <button class="ghost" onclick="closeEditModal()">انصراف</button>
+      <button class="primary" onclick="saveEditModal()">ذخیره</button>
     </div>
   </div>
 </div>
@@ -317,859 +301,60 @@ footer{color:var(--muted);font-size:12px;text-align:center;margin-top:40px;}
   "ایجاد شرکت جدیدم"
  ],
  "tasks": [
-  {
-   "id": "t001",
-   "category": "دانش و آموزش",
-   "name": "تمرین زبان انگلیسی",
-   "unit": "ساعت",
-   "qty_target": 72.0,
-   "qty_estimated": 72.0,
-   "hours_estimated": 72.0,
-   "priority": 8,
-   "start": "2026-07-07",
-   "finish": "2026-08-11",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t002",
-   "category": "دانش و آموزش",
-   "name": "مطالعه در زمینه مالی و اقتصادی",
-   "unit": "ساعت",
-   "qty_target": 12.0,
-   "qty_estimated": 12.0,
-   "hours_estimated": 12.0,
-   "priority": 7,
-   "start": "2026-09-02",
-   "finish": "2026-09-07",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t003",
-   "category": "دانش و آموزش",
-   "name": "مطالعه PMBOK",
-   "unit": "ساعت",
-   "qty_target": 20.0,
-   "qty_estimated": 20.0,
-   "hours_estimated": 20.0,
-   "priority": 7,
-   "start": "2026-09-08",
-   "finish": "2026-09-17",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t004",
-   "category": "دانش و آموزش",
-   "name": "پیدا کردن دوره های مناسب برای شرکت مدیریت پروژه و امکانسنجی",
-   "unit": "ساعت",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 2.0,
-   "priority": 8,
-   "start": "2026-08-12",
-   "finish": "2026-08-12",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t005",
-   "category": "دانش و آموزش",
-   "name": "کسب و تایید امتیاز در سایت PMI",
-   "unit": "PDU",
-   "qty_target": 60.0,
-   "qty_estimated": 60.0,
-   "hours_estimated": 10.0,
-   "priority": 7,
-   "start": "2026-09-18",
-   "finish": "2026-09-22",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t006",
-   "category": "دانش و آموزش",
-   "name": "آمادگی برای برگزاری کارگاه PMBOK",
-   "unit": "ساعت",
-   "qty_target": 40.0,
-   "qty_estimated": 40.0,
-   "hours_estimated": 40.0,
-   "priority": 8,
-   "start": "2026-08-13",
-   "finish": "2026-09-01",
-   "notes": "آبان ماه شروع کنم کارگاهم رو",
-   "logs": []
-  },
-  {
-   "id": "t007",
-   "category": "دانش و آموزش",
-   "name": "برگزاری کارگاه PMBOK",
-   "unit": "ساعت",
-   "qty_target": 20.0,
-   "qty_estimated": 20.0,
-   "hours_estimated": 20.0,
-   "priority": 7,
-   "start": "2026-09-23",
-   "finish": "2026-10-02",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t008",
-   "category": "سلامت جسم و ظاهر",
-   "name": "برنامه ریزی غذایی",
-   "unit": "ساعت",
-   "qty_target": 6.0,
-   "qty_estimated": 6.0,
-   "hours_estimated": 6.0,
-   "priority": 9,
-   "start": "2026-07-07",
-   "finish": "2026-07-09",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t009",
-   "category": "سلامت جسم و ظاهر",
-   "name": "ورزش روزانه+مهارت رزمی",
-   "unit": "ساعت",
-   "qty_target": 190.0,
-   "qty_estimated": 190.0,
-   "hours_estimated": 190.0,
-   "priority": 9,
-   "start": "2026-07-10",
-   "finish": "2026-10-12",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t010",
-   "category": "سلامت جسم و ظاهر",
-   "name": "چکاپ کلی",
-   "unit": "دفعه",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 3.0,
-   "priority": 9,
-   "start": "2026-10-13",
-   "finish": "2026-10-14",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t011",
-   "category": "سلامت جسم و ظاهر",
-   "name": "بررسی راهکارهای رشد مو",
-   "unit": "ساعت",
-   "qty_target": 3.0,
-   "qty_estimated": 3.0,
-   "hours_estimated": 3.0,
-   "priority": 9,
-   "start": "2026-10-15",
-   "finish": "2026-10-16",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t012",
-   "category": "سلامت جسم و ظاهر",
-   "name": "بررسی راهکارهای ترمیم پوست",
-   "unit": "ساعت",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 2.0,
-   "priority": 9,
-   "start": "2026-10-17",
-   "finish": "2026-10-17",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t013",
-   "category": "سلامت جسم و ظاهر",
-   "name": "پیداکردن ست های مناسب لباس",
-   "unit": "ساعت",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 2.0,
-   "priority": 9,
-   "start": "2026-10-18",
-   "finish": "2026-10-18",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t014",
-   "category": "سلامت روح و روان",
-   "name": "نماز قضا",
-   "unit": "روز",
-   "qty_target": 365.0,
-   "qty_estimated": 365.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2026-07-07",
-   "finish": "2027-07-06",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t015",
-   "category": "سلامت روح و روان",
-   "name": "روزه قضا و مستحبی",
-   "unit": "روز",
-   "qty_target": 30.0,
-   "qty_estimated": 30.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2027-03-11",
-   "finish": "2027-03-12",
-   "notes": "10",
-   "logs": []
-  },
-  {
-   "id": "t016",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه قرآن",
-   "unit": "جزء",
-   "qty_target": 30.0,
-   "qty_estimated": 30.0,
-   "hours_estimated": 30.0,
-   "priority": 7,
-   "start": "2026-11-21",
-   "finish": "2026-12-05",
-   "notes": "30",
-   "logs": []
-  },
-  {
-   "id": "t017",
-   "category": "سلامت روح و روان",
-   "name": "نماز شب",
-   "unit": "روز",
-   "qty_target": 4.0,
-   "qty_estimated": 4.0,
-   "hours_estimated": 4.0,
-   "priority": 5,
-   "start": "2027-03-20",
-   "finish": "2027-03-21",
-   "notes": "4",
-   "logs": []
-  },
-  {
-   "id": "t018",
-   "category": "سلامت روح و روان",
-   "name": "تفسیر قرآن",
-   "unit": "جزء",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 20.0,
-   "priority": 8,
-   "start": "2026-07-19",
-   "finish": "2026-07-28",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t019",
-   "category": "سلامت روح و روان",
-   "name": "فیلم مذهبی",
-   "unit": "عدد",
-   "qty_target": 3.0,
-   "qty_estimated": 3.0,
-   "hours_estimated": 40.0,
-   "priority": 8,
-   "start": "2026-07-29",
-   "finish": "2026-08-17",
-   "notes": "3",
-   "logs": []
-  },
-  {
-   "id": "t020",
-   "category": "سلامت روح و روان",
-   "name": "رفتن به مشهد/قم",
-   "unit": "دفعه",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2027-03-13",
-   "finish": "2027-03-14",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t021",
-   "category": "سلامت روح و روان",
-   "name": "محاسبه پرداخت خمس",
-   "unit": "ساعت",
-   "qty_target": 10.0,
-   "qty_estimated": 10.0,
-   "hours_estimated": 10.0,
-   "priority": 6,
-   "start": "2027-03-15",
-   "finish": "2027-03-19",
-   "notes": "ابتدای هر سال",
-   "logs": []
-  },
-  {
-   "id": "t022",
-   "category": "سلامت روح و روان",
-   "name": "محاسبه پرداخت دیون",
-   "unit": "ساعت",
-   "qty_target": 5.0,
-   "qty_estimated": 5.0,
-   "hours_estimated": 5.0,
-   "priority": 7,
-   "start": "2026-12-06",
-   "finish": "2026-12-08",
-   "notes": "شناسایی و پرداخت",
-   "logs": []
-  },
-  {
-   "id": "t023",
-   "category": "سلامت روح و روان",
-   "name": "ریلکسیشن + تکمیل فرم های خودآگاهی",
-   "unit": "ساعت",
-   "qty_target": 190.0,
-   "qty_estimated": 190.0,
-   "hours_estimated": 190.0,
-   "priority": 8,
-   "start": "2026-08-18",
-   "finish": "2026-11-20",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t024",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه درباره مکانیزم بدن",
-   "unit": "ساعت",
-   "qty_target": 5.0,
-   "qty_estimated": 5.0,
-   "hours_estimated": 5.0,
-   "priority": 9,
-   "start": "2026-07-07",
-   "finish": "2026-07-09",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t025",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه درباره هیپنوتیزم",
-   "unit": "ساعت",
-   "qty_target": 10.0,
-   "qty_estimated": 10.0,
-   "hours_estimated": 10.0,
-   "priority": 9,
-   "start": "2026-07-10",
-   "finish": "2026-07-14",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t026",
-   "category": "سلامت روح و روان",
-   "name": "ارزیابی وضعیت معنوی فعلی و شناسایی مسیر پیشرفت",
-   "unit": "ساعت",
-   "qty_target": 20.0,
-   "qty_estimated": 20.0,
-   "hours_estimated": 20.0,
-   "priority": 7,
-   "start": "2026-12-09",
-   "finish": "2026-12-18",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t027",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه احادیث جهت درک بهتر مفاهیم",
-   "unit": "حدیث",
-   "qty_target": 48.0,
-   "qty_estimated": 48.0,
-   "hours_estimated": 24.0,
-   "priority": 7,
-   "start": "2026-12-19",
-   "finish": "2026-12-30",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t028",
-   "category": "سلامت روح و روان",
-   "name": "دسته بندی داده ها و تحلیل",
-   "unit": "ساعت",
-   "qty_target": 30.0,
-   "qty_estimated": 30.0,
-   "hours_estimated": 30.0,
-   "priority": 7,
-   "start": "2026-12-31",
-   "finish": "2027-01-14",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t029",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه عمیق قرآن و تحلیل آیات",
-   "unit": "ساعت",
-   "qty_target": 50.0,
-   "qty_estimated": 50.0,
-   "hours_estimated": 50.0,
-   "priority": 7,
-   "start": "2027-01-15",
-   "finish": "2027-02-08",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t030",
-   "category": "سلامت روح و روان",
-   "name": "شناخت مسئولیت ها از قرآن",
-   "unit": "ساعت",
-   "qty_target": 30.0,
-   "qty_estimated": 30.0,
-   "hours_estimated": 30.0,
-   "priority": 7,
-   "start": "2027-02-09",
-   "finish": "2027-02-23",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t031",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه کتاب های عرفانی و شناختی",
-   "unit": "کتاب",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 30.0,
-   "priority": 7,
-   "start": "2027-02-24",
-   "finish": "2027-03-10",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t032",
-   "category": "سلامت روح و روان",
-   "name": "مطالعه درباره روح",
-   "unit": "ساعت",
-   "qty_target": 8.0,
-   "qty_estimated": 8.0,
-   "hours_estimated": 8.0,
-   "priority": 9,
-   "start": "2026-07-15",
-   "finish": "2026-07-18",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t033",
-   "category": "خانواده",
-   "name": "مطالعه درباره فرزندان",
-   "unit": "کتاب",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 12.0,
-   "priority": 8,
-   "start": "2026-09-01",
-   "finish": "2026-09-06",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t034",
-   "category": "خانواده",
-   "name": "مطالعه درباره روابط همسران",
-   "unit": "کتاب",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 10.0,
-   "priority": 7,
-   "start": "2026-09-07",
-   "finish": "2026-09-11",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t035",
-   "category": "خانواده",
-   "name": "رفاقت با همسر و فرزندان",
-   "unit": "ساعت",
-   "qty_target": 150.0,
-   "qty_estimated": 150.0,
-   "hours_estimated": 150.0,
-   "priority": 7,
-   "start": "2026-09-12",
-   "finish": "2026-11-25",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t036",
-   "category": "خانواده",
-   "name": "گردش با خانواده",
-   "unit": "مرتبه",
-   "qty_target": 24.0,
-   "qty_estimated": 24.0,
-   "hours_estimated": 72.0,
-   "priority": 7,
-   "start": "2026-11-26",
-   "finish": "2026-12-31",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t037",
-   "category": "خانواده",
-   "name": "برنامه مسافرت",
-   "unit": "مرتبه",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 3.0,
-   "priority": 7,
-   "start": "2027-01-01",
-   "finish": "2027-01-02",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t038",
-   "category": "خانواده",
-   "name": "برنامه ریزی برای رسیدگی به مادر",
-   "unit": "ساعت",
-   "qty_target": 2.0,
-   "qty_estimated": 2.0,
-   "hours_estimated": 2.0,
-   "priority": 7,
-   "start": "2027-01-03",
-   "finish": "2027-01-03",
-   "notes": "یک مسافرت با مادر",
-   "logs": []
-  },
-  {
-   "id": "t039",
-   "category": "علایق",
-   "name": "طراحی و نقاشی",
-   "unit": "ساعت",
-   "qty_target": 72.0,
-   "qty_estimated": 72.0,
-   "hours_estimated": 72.0,
-   "priority": 10,
-   "start": "2026-09-01",
-   "finish": "2026-10-06",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t040",
-   "category": "علایق",
-   "name": "برنامه نویسی",
-   "unit": "ساعت",
-   "qty_target": 72.0,
-   "qty_estimated": 72.0,
-   "hours_estimated": 72.0,
-   "priority": 10,
-   "start": "2026-10-07",
-   "finish": "2026-11-11",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t041",
-   "category": "روابط اجتماعی",
-   "name": "تقویت قدرت بیان و متقاعد سازی",
-   "unit": "ساعت",
-   "qty_target": 15.0,
-   "qty_estimated": 15.0,
-   "hours_estimated": 15.0,
-   "priority": 7,
-   "start": "2026-10-01",
-   "finish": "2026-10-08",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t042",
-   "category": "روابط اجتماعی",
-   "name": "شرکت در سمینارها و جلسات مرتبط با کار",
-   "unit": "ساعت",
-   "qty_target": 5.0,
-   "qty_estimated": 5.0,
-   "hours_estimated": 5.0,
-   "priority": 7,
-   "start": "2026-10-09",
-   "finish": "2026-10-11",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t043",
-   "category": "روابط اجتماعی",
-   "name": "رفت و آمد های دوره ای به کرمان",
-   "unit": "مرتبه",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 3.0,
-   "priority": 7,
-   "start": "2026-10-12",
-   "finish": "2026-10-13",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t044",
-   "category": "روابط اجتماعی",
-   "name": "تقویت مهرخاور",
-   "unit": "مرتبه",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2026-10-19",
-   "finish": "2026-10-20",
-   "notes": "1",
-   "logs": []
-  },
-  {
-   "id": "t045",
-   "category": "روابط اجتماعی",
-   "name": "کمک به نیازمندان فامیل",
-   "unit": "مبلغ(ریال)",
-   "qty_target": 50000000.0,
-   "qty_estimated": 50000000.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2026-10-21",
-   "finish": "2026-10-22",
-   "notes": "50000000",
-   "logs": []
-  },
-  {
-   "id": "t046",
-   "category": "روابط اجتماعی",
-   "name": "شرح خصوصیات دوست مناسب و هم فکر و سنجش دوست مناسب",
-   "unit": "ساعت",
-   "qty_target": 10.0,
-   "qty_estimated": 10.0,
-   "hours_estimated": 10.0,
-   "priority": 7,
-   "start": "2026-10-14",
-   "finish": "2026-10-18",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t047",
-   "category": "روابط اجتماعی",
-   "name": "کمک به خیریه و بررسی کمک به آزادی زندانیان",
-   "unit": "مبلغ(ریال)",
-   "qty_target": 60000000.0,
-   "qty_estimated": 60000000.0,
-   "hours_estimated": 3.0,
-   "priority": 6,
-   "start": "2026-10-23",
-   "finish": "2026-10-24",
-   "notes": "60000000",
-   "logs": []
-  },
-  {
-   "id": "t048",
-   "category": "روابط اجتماعی",
-   "name": "بررسی پتانسیل های کمک به دیگران",
-   "unit": "ساعت",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 1.0,
-   "priority": 6,
-   "start": "2026-10-25",
-   "finish": "2026-10-25",
-   "notes": "مبلغ توانایی",
-   "logs": []
-  },
-  {
-   "id": "t049",
-   "category": "شرایط اقتصادی",
-   "name": "بودجه بندی سالیانه و ثبت وضعیت مالی",
-   "unit": "ساعت",
-   "qty_target": 25.0,
-   "qty_estimated": 25.0,
-   "hours_estimated": 25.0,
-   "priority": 8,
-   "start": "2026-07-23",
-   "finish": "2026-08-04",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t050",
-   "category": "شرایط اقتصادی",
-   "name": "پس انداز سالیانه",
-   "unit": "مبلغ(ریال)",
-   "qty_target": 300000000.0,
-   "qty_estimated": 300000000.0,
-   "hours_estimated": 3.0,
-   "priority": 8,
-   "start": "2026-07-07",
-   "finish": "2027-07-06",
-   "notes": "300000000",
-   "logs": []
-  },
-  {
-   "id": "t051",
-   "category": "شرایط اقتصادی",
-   "name": "کسب آمادگی های لازم جهت اجرا کار دوم",
-   "unit": "ساعت",
-   "qty_target": 25.0,
-   "qty_estimated": 25.0,
-   "hours_estimated": 25.0,
-   "priority": 9,
-   "start": "2026-07-07",
-   "finish": "2026-07-19",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t052",
-   "category": "شرایط اقتصادی",
-   "name": "برنامه ریزی ایجاد استقلال مالی خانواده",
-   "unit": "ساعت",
-   "qty_target": 5.0,
-   "qty_estimated": 5.0,
-   "hours_estimated": 5.0,
-   "priority": 9,
-   "start": "2026-07-20",
-   "finish": "2026-07-22",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t053",
-   "category": "شرایط کاری",
-   "name": "آشنایی با کارهای شرکت (اکتشاف و استخراج)",
-   "unit": "ساعت",
-   "qty_target": 10.0,
-   "qty_estimated": 10.0,
-   "hours_estimated": 10.0,
-   "priority": 7,
-   "start": "2026-11-06",
-   "finish": "2026-11-10",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t054",
-   "category": "شرایط کاری",
-   "name": "ارتقای مسئولیت های کاری",
-   "unit": "ساعت",
-   "qty_target": 10.0,
-   "qty_estimated": 10.0,
-   "hours_estimated": 10.0,
-   "priority": 8,
-   "start": "2026-11-01",
-   "finish": "2026-11-05",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t055",
-   "category": "ایجاد شرکت جدیدم",
-   "name": "تدوین مدل کسب و کار",
-   "unit": "ساعت",
-   "qty_target": 30.0,
-   "qty_estimated": 30.0,
-   "hours_estimated": 30.0,
-   "priority": 7,
-   "start": "2027-01-01",
-   "finish": "2027-01-15",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t056",
-   "category": "ایجاد شرکت جدیدم",
-   "name": "تدوین طرح کسب و کار (Business plan)",
-   "unit": "ساعت",
-   "qty_target": 20.0,
-   "qty_estimated": 20.0,
-   "hours_estimated": 20.0,
-   "priority": 7,
-   "start": "2027-01-16",
-   "finish": "2027-01-25",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t057",
-   "category": "ایجاد شرکت جدیدم",
-   "name": "طراحی هویت برند",
-   "unit": "ساعت",
-   "qty_target": 20.0,
-   "qty_estimated": 20.0,
-   "hours_estimated": 20.0,
-   "priority": 7,
-   "start": "2027-01-26",
-   "finish": "2027-02-04",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t058",
-   "category": "ایجاد شرکت جدیدم",
-   "name": "جذب اولین مشتری",
-   "unit": "تعداد",
-   "qty_target": 1.0,
-   "qty_estimated": 1.0,
-   "hours_estimated": 10.0,
-   "priority": 7,
-   "start": "2027-02-05",
-   "finish": "2027-02-09",
-   "notes": "",
-   "logs": []
-  },
-  {
-   "id": "t059",
-   "category": "ایجاد شرکت جدیدم",
-   "name": "طراحی سایت",
-   "unit": "ساعت",
-   "qty_target": 40.0,
-   "qty_estimated": 40.0,
-   "hours_estimated": 40.0,
-   "priority": 7,
-   "start": "2027-02-10",
-   "finish": "2027-03-01",
-   "notes": "",
-   "logs": []
-  }
+  {"id":"t001","category":"دانش و آموزش","name":"تمرین زبان انگلیسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":8,"start":"2026-07-07","finish":"2026-08-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t002","category":"دانش و آموزش","name":"مطالعه مالی و اقتصادی","unit":"ساعت","qty_target":12,"qty_estimated":12,"hours_estimated":12,"priority":7,"start":"2026-09-02","finish":"2026-09-07","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t003","category":"دانش و آموزش","name":"مطالعه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-08","finish":"2026-09-17","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t004","category":"دانش و آموزش","name":"پیدا کردن دوره مدیریت پروژه","unit":"ساعت","qty_target":2,"qty_estimated":2,"hours_estimated":2,"priority":8,"start":"2026-08-12","finish":"2026-08-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t005","category":"دانش و آموزش","name":"کسب امتیاز PMI","unit":"PDU","qty_target":60,"qty_estimated":60,"hours_estimated":10,"priority":7,"start":"2026-09-18","finish":"2026-09-22","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t006","category":"دانش و آموزش","name":"آمادگی کارگاه PMBOK","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":8,"start":"2026-08-13","finish":"2026-09-01","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t007","category":"دانش و آموزش","name":"برگزاری کارگاه PMBOK","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2026-09-23","finish":"2026-10-02","parentId":null,"dependsOn":["t006"],"logs":[]},
+  {"id":"t008","category":"سلامت جسم و ظاهر","name":"برنامه ریزی غذایی","unit":"ساعت","qty_target":6,"qty_estimated":6,"hours_estimated":6,"priority":9,"start":"2026-07-07","finish":"2026-07-09","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t009","category":"سلامت جسم و ظاهر","name":"ورزش روزانه+رزمی","unit":"ساعت","qty_target":190,"qty_estimated":190,"hours_estimated":190,"priority":9,"start":"2026-07-10","finish":"2026-10-12","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t010","category":"سلامت جسم و ظاهر","name":"چکاپ کلی","unit":"دفعه","qty_target":1,"qty_estimated":1,"hours_estimated":3,"priority":9,"start":"2026-10-13","finish":"2026-10-14","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t011","category":"سلامت روح و روان","name":"نماز قضا","unit":"روز","qty_target":365,"qty_estimated":365,"hours_estimated":3,"priority":6,"start":"2026-07-07","finish":"2027-07-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t012","category":"سلامت روح و روان","name":"مطالعه قرآن","unit":"جزء","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2026-11-21","finish":"2026-12-05","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t013","category":"سلامت روح و روان","name":"تفسیر قرآن","unit":"جزء","qty_target":1,"qty_estimated":1,"hours_estimated":20,"priority":8,"start":"2026-07-19","finish":"2026-07-28","parentId":null,"dependsOn":["t012"],"logs":[]},
+  {"id":"t014","category":"خانواده","name":"مطالعه درباره فرزندان","unit":"کتاب","qty_target":2,"qty_estimated":2,"hours_estimated":12,"priority":8,"start":"2026-09-01","finish":"2026-09-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t015","category":"خانواده","name":"رفاقت با همسر و فرزندان","unit":"ساعت","qty_target":150,"qty_estimated":150,"hours_estimated":150,"priority":7,"start":"2026-09-12","finish":"2026-11-25","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t016","category":"علایق","name":"طراحی و نقاشی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-09-01","finish":"2026-10-06","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t017","category":"علایق","name":"برنامه نویسی","unit":"ساعت","qty_target":72,"qty_estimated":72,"hours_estimated":72,"priority":10,"start":"2026-10-07","finish":"2026-11-11","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t018","category":"شرایط اقتصادی","name":"بودجه بندی سالیانه","unit":"ساعت","qty_target":25,"qty_estimated":25,"hours_estimated":25,"priority":8,"start":"2026-07-23","finish":"2026-08-04","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t019","category":"شرایط کاری","name":"آشنایی با کارهای شرکت","unit":"ساعت","qty_target":10,"qty_estimated":10,"hours_estimated":10,"priority":7,"start":"2026-11-06","finish":"2026-11-10","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t020","category":"ایجاد شرکت جدیدم","name":"تدوین مدل کسب و کار","unit":"ساعت","qty_target":30,"qty_estimated":30,"hours_estimated":30,"priority":7,"start":"2027-01-01","finish":"2027-01-15","parentId":null,"dependsOn":[],"logs":[]},
+  {"id":"t021","category":"ایجاد شرکت جدیدم","name":"تدوین طرح کسب و کار","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-16","finish":"2027-01-25","parentId":null,"dependsOn":["t020"],"logs":[]},
+  {"id":"t022","category":"ایجاد شرکت جدیدم","name":"طراحی هویت برند","unit":"ساعت","qty_target":20,"qty_estimated":20,"hours_estimated":20,"priority":7,"start":"2027-01-26","finish":"2027-02-04","parentId":null,"dependsOn":["t021"],"logs":[]},
+  {"id":"t023","category":"ایجاد شرکت جدیدم","name":"طراحی سایت","unit":"ساعت","qty_target":40,"qty_estimated":40,"hours_estimated":40,"priority":7,"start":"2027-02-10","finish":"2027-03-01","parentId":null,"dependsOn":["t022"],"logs":[]}
  ]
 }
 </script>
 
 <script>
-/* ============ ثابت‌ها و کمکی‌ها ============ */
-const LS_KEY = 'yearplan_state_v1';
-const LS_SETTINGS = 'yearplan_settings_v1';
+// ===================== CONSTANTS =====================
+const LS_KEY = 'yearplan_v2';
 const CAT_CLASS = {};
-const CAT_VARS  = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--c9'];
+const CAT_COLORS = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--c9'];
 
 const fmtPct = v => (isFinite(v) ? Math.round(v*100) : 0).toLocaleString('fa-IR') + '٪';
 const todayISO = () => new Date().toISOString().slice(0,10);
 const clamp01 = v => Math.max(0, Math.min(1, v));
-const uid = () => 't' + Math.random().toString(36).slice(2,9);
+const uid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 
-function loadSeed(){
-  return JSON.parse(document.getElementById('seed-data').textContent);
+function toJalaali(dateStr){
+  if(!dateStr) return '';
+  const m = moment(dateStr, 'YYYY-MM-DD');
+  if(!m.isValid()) return dateStr;
+  return m.format('jYYYY/jMM/jDD');
 }
 
-/* ============ وضعیت برنامه ============ */
-let state = null;       // { categories:[], tasks:[...] }
-let settings = { weight_volume:60, sb_url:'', sb_key:'', sb_id:'main' };
-let sbClient = null;
-let saveTimer = null;
-let ganttInstance = null;
+function getCss(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+
+function loadSeed(){ return JSON.parse(document.getElementById('seed-data').textContent); }
+
+// ===================== STATE =====================
+let state = null;
+let settings = { weight_volume: 60 };
 let activeCat = null;
+let editTargetId = null;
 
 function computeTaskTotals(t){
   const qtyDone = (t.logs||[]).reduce((s,l)=> s + (l.qty||0), 0);
@@ -1178,89 +363,70 @@ function computeTaskTotals(t){
   const timePct = t.hours_estimated ? clamp01(hoursDone / t.hours_estimated) : 0;
   return { qtyDone, hoursDone, volPct, timePct };
 }
+
 function compositePct(volPct, timePct){
   const w = clamp01(settings.weight_volume/100);
-  return volPct*w + timePct*(1-w);
+  return volPct * w + timePct * (1 - w);
 }
 
-/* ============ ذخیره‌سازی ============ */
-function persistLocal(){
+function getChildren(taskId){
+  return state.tasks.filter(t => t.parentId === taskId);
+}
+
+function getAncestors(taskId){
+  const result = [];
+  let current = state.tasks.find(t => t.id === taskId);
+  while(current && current.parentId){
+    const parent = state.tasks.find(t => t.id === current.parentId);
+    if(parent){ result.push(parent); current = parent; }
+    else break;
+  }
+  return result;
+}
+
+function getLevel(taskId){
+  let level = 0;
+  let current = state.tasks.find(t => t.id === taskId);
+  while(current && current.parentId){
+    level++;
+    const parent = state.tasks.find(t => t.id === current.parentId);
+    if(!parent) break;
+    current = parent;
+  }
+  return Math.min(level, 3);
+}
+
+// ===================== PERSIST =====================
+function persistAll(){
   localStorage.setItem(LS_KEY, JSON.stringify(state));
   localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
 }
-function scheduleRemoteSave(){
-  if(!sbClient) return;
-  setSyncBadge('saving');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{
-      const { error } = await sbClient.from('plan_state').upsert({
-        id: settings.sb_id || 'main',
-        data: state,
-        updated_at: new Date().toISOString()
-      });
-      if(error) throw error;
-      setSyncBadge('ok');
-    }catch(e){
-      console.error(e);
-      setSyncBadge('err');
-    }
-  }, 900);
-}
-function persistAll(){
-  persistLocal();
-  scheduleRemoteSave();
-}
-function setSyncBadge(mode){
-  const el = document.getElementById('syncBadge');
-  el.classList.remove('ok','local','err');
-  if(mode==='ok'){ el.textContent='همگام با Supabase'; el.classList.add('ok'); }
-  else if(mode==='saving'){ el.textContent='در حال ذخیره...'; el.classList.add('local'); }
-  else if(mode==='err'){ el.textContent='خطا در همگام‌سازی'; el.classList.add('err'); }
-  else { el.textContent = sbClient ? 'همگام با Supabase' : 'آفلاین (فقط این دستگاه)'; el.classList.add(sbClient?'ok':'local'); }
-}
 
-async function initSupabase(){
-  if(!settings.sb_url || !settings.sb_key || !window.supabase) return false;
-  try{
-    sbClient = window.supabase.createClient(settings.sb_url, settings.sb_key);
-    const { data, error } = await sbClient.from('plan_state').select('data').eq('id', settings.sb_id||'main').maybeSingle();
-    if(error) throw error;
-    if(data && data.data){ state = data.data; }
-    setSyncBadge('ok');
-    return true;
-  }catch(e){
-    console.error('supabase init failed', e);
-    sbClient = null;
-    setSyncBadge('err');
-    return false;
-  }
-}
-
-async function bootstrapState(){
+function loadState(){
   const savedSettings = localStorage.getItem(LS_SETTINGS);
   if(savedSettings) settings = Object.assign(settings, JSON.parse(savedSettings));
   document.getElementById('weightSlider').value = settings.weight_volume;
 
-  const savedLocal = localStorage.getItem(LS_KEY);
-  state = savedLocal ? JSON.parse(savedLocal) : loadSeed();
-
-  if(settings.sb_url && settings.sb_key){
-    await initSupabase();
+  const saved = localStorage.getItem(LS_KEY);
+  if(saved){
+    try {
+      const parsed = JSON.parse(saved);
+      if(parsed.tasks && parsed.categories) state = parsed;
+      else state = loadSeed();
+    } catch(e){ state = loadSeed(); }
+  } else {
+    state = loadSeed();
   }
-  if(!state){ state = loadSeed(); }
 }
 
-/* ============ رنگ دسته‌ها ============ */
-function assignCategoryColors(){
-  state.categories.forEach((c,i)=>{ CAT_CLASS[c] = 'c' + ((i % 9) + 1); });
-}
-function catColorVar(cat){
-  const cls = CAT_CLASS[cat] || 'c1';
-  return getComputedStyle(document.documentElement).getPropertyValue('--'+cls).trim();
+// ===================== CATEGORY COLORS =====================
+function assignColors(){
+  state.categories.forEach((c,i) => {
+    CAT_CLASS[c] = 'c' + ((i % 9) + 1);
+  });
 }
 
-/* ============ رندر: کارت‌های خلاصه ============ */
+// ===================== RENDER: SUMMARY =====================
 function renderSummary(){
   let sumHoursEst=0, sumHoursDone=0, sumVolWeighted=0;
   state.tasks.forEach(t=>{
@@ -1286,262 +452,426 @@ function renderSummary(){
   document.getElementById('wTimeLabel').textContent = 'زمانی: ' + wt.toLocaleString('fa-IR') + '٪';
 }
 
-/* ============ رندر: چیپ دسته‌ها ============ */
+// ===================== RENDER: GANTT (Manual SVG) =====================
+function renderGantt(){
+  const svg = document.getElementById('ganttSvg');
+  const tasks = state.tasks.filter(t => !activeCat || t.category === activeCat);
+  
+  if(tasks.length === 0){
+    svg.innerHTML = `<text x="50%" y="50%" text-anchor="middle" fill="var(--muted)" font-size="16">هیچ فعالیتی یافت نشد</text>`;
+    return;
+  }
+
+  // پیدا کردن بازه زمانی
+  let minDate = Infinity, maxDate = -Infinity;
+  tasks.forEach(t => {
+    const s = new Date(t.start).getTime();
+    const f = new Date(t.finish).getTime();
+    if(s < minDate) minDate = s;
+    if(f > maxDate) maxDate = f;
+  });
+  if(minDate === Infinity) { minDate = Date.now(); maxDate = Date.now() + 7*24*60*60*1000; }
+  const range = maxDate - minDate || 1;
+
+  const width = svg.clientWidth || 800;
+  const height = Math.max(300, tasks.length * 32 + 40);
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  
+  let html = '';
+  // Header
+  html += `<rect x="0" y="0" width="${width}" height="28" fill="var(--panel)" stroke="var(--border)"/>`;
+  html += `<text x="10" y="20" fill="var(--muted)" font-size="12" font-family="Vazirmatn">فعالیت</text>`;
+  
+  // Grid lines
+  for(let i = 0; i <= 10; i++){
+    const x = 180 + (width - 180) * (i/10);
+    html += `<line x1="${x}" y1="28" x2="${x}" y2="${height}" stroke="var(--border)" stroke-width="0.5"/>`;
+  }
+
+  // Tasks
+  tasks.forEach((t, idx) => {
+    const y = 28 + idx * 32;
+    const level = getLevel(t.id);
+    const indent = level * 20;
+    const xStart = 180 + ((new Date(t.start).getTime() - minDate) / range) * (width - 180);
+    const xEnd = 180 + ((new Date(t.finish).getTime() - minDate) / range) * (width - 180);
+    const barWidth = Math.max(4, xEnd - xStart);
+    
+    const {volPct, timePct} = computeTaskTotals(t);
+    const progress = compositePct(volPct, timePct);
+    
+    const color = getCss(CAT_CLASS[t.category] || '--c1');
+    
+    // Row background
+    html += `<rect x="0" y="${y}" width="${width}" height="30" fill="${idx%2===0?'var(--panel)':'var(--panel-2)'}" stroke="var(--border)" stroke-width="0.5"/>`;
+    
+    // Task name with indent
+    html += `<text x="${10 + indent}" y="${y+20}" fill="var(--text)" font-size="13" font-family="Vazirmatn">${t.name}</text>`;
+    
+    // Dependency badge
+    if(t.dependsOn && t.dependsOn.length > 0){
+      html += `<text x="${120 + indent}" y="${y+20}" fill="var(--gold)" font-size="10" font-family="Vazirmatn">↗ ${t.dependsOn.length}</text>`;
+    }
+    
+    // Bar
+    html += `<rect x="${xStart}" y="${y+5}" width="${barWidth}" height="20" rx="4" fill="var(--panel-2)" stroke="${color}" stroke-width="1"/>`;
+    if(progress > 0.01){
+      html += `<rect x="${xStart}" y="${y+5}" width="${Math.max(2, barWidth * progress)}" height="20" rx="4" fill="${color}" opacity="0.8"/>`;
+    }
+    
+    // Progress text
+    html += `<text x="${xStart + Math.min(barWidth/2, barWidth-20)}" y="${y+19}" fill="var(--text)" font-size="10" font-family="Vazirmatn" text-anchor="middle">${Math.round(progress*100)}%</text>`;
+  });
+
+  // Legend
+  const legendEl = document.getElementById('legend');
+  legendEl.innerHTML = state.categories.map(cat => 
+    `<span><i style="background:${getCss(CAT_CLASS[cat])}"></i>${cat}</span>`
+  ).join('');
+
+  svg.innerHTML = html;
+}
+
+// ===================== RENDER: TABLE =====================
+function renderTable(){
+  const body = document.getElementById('taskBody');
+  body.innerHTML = '';
+  
+  const sorted = [...state.tasks].sort((a,b) => {
+    const levelA = getLevel(a.id);
+    const levelB = getLevel(b.id);
+    if(levelA !== levelB) return levelA - levelB;
+    return (a.start||'').localeCompare(b.start||'');
+  });
+
+  sorted.forEach(t => {
+    const {volPct, timePct} = computeTaskTotals(t);
+    const comp = compositePct(volPct, timePct);
+    const level = getLevel(t.id);
+    const levelClass = `level-${Math.min(level,3)}`;
+    
+    const tr = document.createElement('tr');
+    tr.className = levelClass;
+    tr.dataset.id = t.id;
+    
+    const dependsStr = (t.dependsOn||[]).map(id => {
+      const dep = state.tasks.find(d => d.id === id);
+      return dep ? dep.name : id;
+    }).join('، ');
+    
+    tr.innerHTML = `
+      <td class="name-cell">
+        <span style="cursor:pointer;color:var(--gold);" onclick="openEditModal('${t.id}')">✏️</span>
+        <span>${t.name}</span>
+        ${t.dependsOn && t.dependsOn.length > 0 ? `<span class="dependency-badge">↗ ${t.dependsOn.length}</span>` : ''}
+      </td>
+      <td><span class="cat-dot" style="background:${getCss(CAT_CLASS[t.category])}"></span>${t.category}</td>
+      <td>${['اصلی','زیرمجموعه','زیرمجموعه ۲','زیرمجموعه ۳'][Math.min(level,3)]}</td>
+      <td style="font-size:11px;color:var(--muted);">${dependsStr || '—'}</td>
+      <td>${t.unit||'—'}</td>
+      <td class="num">${t.qty_target?.toLocaleString('fa-IR')||'—'}</td>
+      <td class="num">${t.qty_estimated?.toLocaleString('fa-IR')||'—'}</td>
+      <td class="num">${t.hours_estimated?.toLocaleString('fa-IR')||'—'}</td>
+      <td class="num">${t.priority||'—'}</td>
+      <td>${toJalaali(t.start)}</td>
+      <td>${toJalaali(t.finish)}</td>
+      <td class="num">${pill(comp,'--gold')}</td>
+      <td>
+        <div class="row-actions">
+          <button onclick="addSubtask('${t.id}')" title="افزودن زیرفعالیت">➕</button>
+          <button onclick="openEditModal('${t.id}')">✏️</button>
+          <button class="danger" onclick="deleteTask('${t.id}')">🗑</button>
+        </div>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function pill(pct, colorVar){
+  const c = getCss(colorVar);
+  return `<span class="pct-pill" style="background:${c}22;color:${c}">${fmtPct(pct)}</span>`;
+}
+
+// ===================== RENDER: CHIPS =====================
 function renderChips(){
   const wrap = document.getElementById('catChips');
-  wrap.innerHTML='';
-  const allChip = document.createElement('div');
-  allChip.className = 'chip' + (activeCat===null?' active':'');
-  allChip.textContent='همه';
-  allChip.onclick = ()=>{ activeCat=null; renderAll(); };
-  wrap.appendChild(allChip);
-  state.categories.forEach(cat=>{
+  wrap.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'chip' + (activeCat===null ? ' active' : '');
+  all.textContent = 'همه';
+  all.onclick = () => { activeCat = null; renderAll(); };
+  wrap.appendChild(all);
+  state.categories.forEach(cat => {
     const chip = document.createElement('div');
-    chip.className = 'chip' + (activeCat===cat?' active':'');
+    chip.className = 'chip' + (activeCat===cat ? ' active' : '');
     chip.textContent = cat;
-    chip.onclick = ()=>{ activeCat = (activeCat===cat? null: cat); renderAll(); };
+    chip.onclick = () => { activeCat = (activeCat===cat ? null : cat); renderAll(); };
     wrap.appendChild(chip);
   });
 }
 
-/* ============ رندر: گانت ============ */
-function renderGantt(){
-  const container = document.getElementById('gantt-container');
-  const tasksForGantt = state.tasks
-    .filter(t=> !activeCat || t.category===activeCat)
-    .map(t=>{
-      const {volPct, timePct} = computeTaskTotals(t);
-      const pct = Math.round(compositePct(volPct,timePct)*100);
-      return {
-        id: t.id,
-        name: t.name,
-        start: t.start,
-        end: t.finish,
-        progress: pct,
-        custom_class: CAT_CLASS[t.category] || 'c1'
-      };
-    });
-  container.innerHTML='';
-  if(tasksForGantt.length===0) return;
-  ganttInstance = new Gantt(container, tasksForGantt, {
-    view_mode:'Month',
-    language:'en',
-    on_click: t=> openEditFromGantt(t.id)
-  });
-
-  const legend = document.getElementById('legend');
-  legend.innerHTML='';
-  state.categories.forEach(cat=>{
-    const item = document.createElement('span');
-    item.innerHTML = `<i style="background:${getCss(CAT_CLASS[cat])}"></i>${cat}`;
-    legend.appendChild(item);
-  });
-}
-function getCss(cls){ return getComputedStyle(document.documentElement).getPropertyValue('--'+cls).trim(); }
-function openEditFromGantt(id){
-  const row = document.querySelector('tr[data-id="'+id+'"]');
-  if(row){ row.scrollIntoView({behavior:'smooth', block:'center'}); row.style.outline='2px solid var(--gold)'; setTimeout(()=>row.style.outline='',1200); }
+// ===================== RENDER: LOG SELECT =====================
+function renderLogSelect(){
+  const sel = document.getElementById('logTask');
+  sel.innerHTML = state.categories.map(cat => {
+    const opts = state.tasks.filter(t => t.category===cat)
+      .map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+    return `<optgroup label="${cat}">${opts}</optgroup>`;
+  }).join('');
+  updateLogLabel();
 }
 
-/* ============ رندر: جدول فعالیت‌ها ============ */
-function renderTable(){
-  const body = document.getElementById('taskBody');
-  body.innerHTML='';
-  const list = state.tasks.filter(t=> !activeCat || t.category===activeCat);
-  list.forEach(t=>{
-    const {volPct, timePct} = computeTaskTotals(t);
-    const comp = compositePct(volPct, timePct);
-    const tr = document.createElement('tr');
-    tr.dataset.id = t.id;
-    tr.innerHTML = `
-      <td class="name-cell"><input value="${escAttr(t.name)}" data-field="name"></td>
-      <td><span class="cat-dot" style="background:${getCss(CAT_CLASS[t.category])}"></span>
-        <select data-field="category">${state.categories.map(c=>`<option value="${escAttr(c)}" ${c===t.category?'selected':''}>${c}</option>`).join('')}</select>
-      </td>
-      <td><input value="${escAttr(t.unit||'')}" data-field="unit" style="width:64px"></td>
-      <td class="num"><input type="number" step="any" value="${t.qty_target??''}" data-field="qty_target" style="width:80px"></td>
-      <td class="num"><input type="number" step="any" value="${t.qty_estimated??''}" data-field="qty_estimated" style="width:80px"></td>
-      <td class="num"><input type="number" step="any" value="${t.hours_estimated??''}" data-field="hours_estimated" style="width:80px"></td>
-      <td class="num"><input type="number" value="${t.priority??''}" data-field="priority" style="width:56px"></td>
-      <td><input type="date" value="${t.start}" data-field="start"></td>
-      <td><input type="date" value="${t.finish}" data-field="finish"></td>
-      <td class="num">${pill(volPct,'--teal')}</td>
-      <td class="num">${pill(timePct,'--blue')}</td>
-      <td class="num">${pill(comp,'--gold')}</td>
-      <td><div class="row-actions"><button class="danger" data-act="del">حذف</button></div></td>
-    `;
-    body.appendChild(tr);
-    tr.querySelectorAll('[data-field]').forEach(inp=>{
-      inp.addEventListener('change', e=> onTaskFieldChange(t.id, e.target.dataset.field, e.target.value));
-    });
-    tr.querySelector('[data-act="del"]').addEventListener('click', ()=> deleteTask(t.id));
-  });
+function updateLogLabel(){
+  const sel = document.getElementById('logTask');
+  const t = state.tasks.find(x => x.id === sel.value);
+  document.getElementById('logQtyLabel').textContent = 'مقدار انجام‌شده' + (t?.unit ? ' ('+t.unit+')' : '');
 }
-function pill(pct, colorVar){
-  const c = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
-  return `<span class="pct-pill" style="background:${c}22;color:${c}">${fmtPct(pct)}</span>`;
-}
-function escAttr(s){ return String(s??'').replace(/"/g,'&quot;'); }
 
-function onTaskFieldChange(id, field, value){
-  const t = state.tasks.find(x=>x.id===id);
-  if(!t) return;
-  if(['qty_target','qty_estimated','hours_estimated','priority'].includes(field)){
-    t[field] = value===''? null : Number(value);
+function renderLogHistory(){
+  const wrap = document.getElementById('logHistory');
+  const entries = [];
+  state.tasks.forEach(t => (t.logs||[]).forEach((l,idx) => {
+    entries.push({...l, taskName: t.name, taskId: t.id, idx});
+  }));
+  entries.sort((a,b) => b.date.localeCompare(a.date));
+  wrap.innerHTML = entries.slice(0,15).map(e => `
+    <div class="log-item">
+      <span>${e.taskName} — ${e.qty ? '+'+e.qty+' ' : ''}${e.hours ? '+'+e.hours+' ساعت' : ''}</span>
+      <span class="meta">${toJalaali(e.date)}</span>
+    </div>
+  `).join('') || '<div class="hint">هنوز ثبتی وجود ندارد.</div>';
+}
+
+// ===================== RENDER ALL =====================
+function renderAll(){
+  assignColors();
+  renderSummary();
+  renderChips();
+  renderGantt();
+  renderTable();
+  renderLogSelect();
+  renderLogHistory();
+  document.getElementById('todayDisplay').textContent = 'امروز: ' + toJalaali(todayISO());
+}
+
+// ===================== TASK OPERATIONS =====================
+function addTask(){
+  const cat = activeCat || state.categories[0];
+  state.tasks.push({
+    id: uid(),
+    category: cat,
+    name: 'فعالیت جدید',
+    unit: 'ساعت',
+    qty_target: 1,
+    qty_estimated: 1,
+    hours_estimated: 1,
+    priority: 5,
+    start: todayISO(),
+    finish: todayISO(),
+    parentId: null,
+    dependsOn: [],
+    logs: []
+  });
+  persistAll();
+  renderAll();
+}
+
+function addSubtask(parentId){
+  const parent = state.tasks.find(t => t.id === parentId);
+  if(!parent) return;
+  const level = getLevel(parentId);
+  if(level >= 3){ alert('حداکثر ۳ سطح مجاز است.'); return; }
+  
+  state.tasks.push({
+    id: uid(),
+    category: parent.category,
+    name: 'زیرفعالیت جدید',
+    unit: parent.unit || 'ساعت',
+    qty_target: 1,
+    qty_estimated: 1,
+    hours_estimated: 1,
+    priority: parent.priority || 5,
+    start: parent.start || todayISO(),
+    finish: parent.finish || todayISO(),
+    parentId: parentId,
+    dependsOn: [],
+    logs: []
+  });
+  persistAll();
+  renderAll();
+}
+
+function deleteTask(id){
+  const children = getChildren(id);
+  if(children.length > 0){
+    if(!confirm(`این فعالیت ${children.length} زیرفعالیت دارد. با حذف آن، زیرفعالیت‌ها نیز حذف می‌شوند. ادامه می‌دهید؟`)) return;
+    const childIds = children.map(c => c.id);
+    state.tasks = state.tasks.filter(t => !childIds.includes(t.id) && t.id !== id);
   } else {
-    t[field] = value;
+    if(!confirm('این فعالیت حذف شود؟')) return;
+    state.tasks = state.tasks.filter(t => t.id !== id);
   }
   persistAll();
   renderAll();
 }
-function deleteTask(id){
-  if(!confirm('این فعالیت حذف شود؟')) return;
-  state.tasks = state.tasks.filter(t=>t.id!==id);
-  persistAll();
-  renderAll();
+
+// ===================== EDIT MODAL =====================
+function openEditModal(id){
+  const t = state.tasks.find(x => x.id === id);
+  if(!t) return;
+  editTargetId = id;
+  
+  document.getElementById('editModalTitle').textContent = 'ویرایش: ' + t.name;
+  
+  const depOptions = state.tasks
+    .filter(d => d.id !== id && !getAncestors(id).some(a => a.id === d.id))
+    .map(d => `<option value="${d.id}" ${(t.dependsOn||[]).includes(d.id) ? 'selected' : ''}>${d.name}</option>`)
+    .join('');
+  
+  document.getElementById('editModalBody').innerHTML = `
+    <div class="field">
+      <label>نام فعالیت</label>
+      <input type="text" id="editName" value="${t.name}">
+    </div>
+    <div class="field">
+      <label>دسته</label>
+      <select id="editCategory">${state.categories.map(c => `<option ${c===t.category?'selected':''}>${c}</option>`).join('')}</select>
+    </div>
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><label>واحد</label><input type="text" id="editUnit" value="${t.unit||''}"></div>
+      <div><label>اولویت (۱-۱۰)</label><input type="number" id="editPriority" value="${t.priority||5}" min="1" max="10"></div>
+    </div>
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+      <div><label>مقدار هدف</label><input type="number" step="any" id="editTarget" value="${t.qty_target||0}"></div>
+      <div><label>مقدار برآوردی</label><input type="number" step="any" id="editEstimated" value="${t.qty_estimated||0}"></div>
+      <div><label>ساعت برآوردی</label><input type="number" step="any" id="editHours" value="${t.hours_estimated||0}"></div>
+    </div>
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div><label>تاریخ شروع</label><input type="date" id="editStart" value="${t.start||''}"></div>
+      <div><label>تاریخ پایان</label><input type="date" id="editFinish" value="${t.finish||''}"></div>
+    </div>
+    <div class="field">
+      <label>وابستگی به (فعالیت‌های پیش‌نیاز)</label>
+      <select id="editDepends" multiple style="height:80px;">${depOptions}</select>
+      <div class="hint">کلید Ctrl را نگه دارید و چند گزینه انتخاب کنید</div>
+    </div>
+  `;
+  
+  document.getElementById('editModal').classList.add('show');
 }
-function addTask(){
-  const cat = activeCat || state.categories[0];
-  state.tasks.push({
-    id: uid(), category: cat, name: 'فعالیت جدید', unit:'ساعت',
-    qty_target: 1, qty_estimated: 1, hours_estimated: 1, priority: 5,
-    start: todayISO(), finish: todayISO(), notes:'', logs:[]
-  });
+
+function saveEditModal(){
+  const t = state.tasks.find(x => x.id === editTargetId);
+  if(!t) return;
+  
+  t.name = document.getElementById('editName').value.trim() || t.name;
+  t.category = document.getElementById('editCategory').value;
+  t.unit = document.getElementById('editUnit').value.trim() || t.unit;
+  t.priority = parseInt(document.getElementById('editPriority').value) || 5;
+  t.qty_target = parseFloat(document.getElementById('editTarget').value) || 0;
+  t.qty_estimated = parseFloat(document.getElementById('editEstimated').value) || 0;
+  t.hours_estimated = parseFloat(document.getElementById('editHours').value) || 0;
+  t.start = document.getElementById('editStart').value || t.start;
+  t.finish = document.getElementById('editFinish').value || t.finish;
+  
+  const depSelect = document.getElementById('editDepends');
+  t.dependsOn = Array.from(depSelect.selectedOptions).map(opt => opt.value);
+  
   persistAll();
+  closeEditModal();
   renderAll();
 }
 
-/* ============ ثبت پیشرفت روزانه ============ */
-function fillLogTaskSelect(){
-  const sel = document.getElementById('logTask');
-  sel.innerHTML = state.categories.map(cat=>{
-    const opts = state.tasks.filter(t=>t.category===cat)
-      .map(t=>`<option value="${t.id}">${escAttr(t.name)}</option>`).join('');
-    return `<optgroup label="${cat}">${opts}</optgroup>`;
-  }).join('');
-  sel.onchange = updateLogQtyLabel;
-  updateLogQtyLabel();
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('show');
+  editTargetId = null;
 }
-function updateLogQtyLabel(){
-  const sel = document.getElementById('logTask');
-  const t = state.tasks.find(x=>x.id===sel.value);
-  document.getElementById('logQtyLabel').textContent = 'مقدار انجام‌شده' + (t&&t.unit? ' ('+t.unit+')':'');
-}
+
+// ===================== LOG ENTRY =====================
 function addLogEntry(){
   const id = document.getElementById('logTask').value;
   const date = document.getElementById('logDate').value || todayISO();
   const qty = document.getElementById('logQty').value;
   const hours = document.getElementById('logHours').value;
-  if(qty==='' && hours===''){ alert('حداقل یکی از مقدار یا ساعت را وارد کن.'); return; }
-  const t = state.tasks.find(x=>x.id===id);
+  if(qty === '' && hours === ''){ alert('حداقل یکی از مقدار یا ساعت را وارد کنید.'); return; }
+  
+  const t = state.tasks.find(x => x.id === id);
   if(!t) return;
+  
   t.logs = t.logs || [];
-  t.logs.push({ date, qty: qty===''?0:Number(qty), hours: hours===''?0:Number(hours) });
-  document.getElementById('logQty').value='';
-  document.getElementById('logHours').value='';
+  t.logs.push({
+    date: date,
+    qty: qty === '' ? 0 : Number(qty),
+    hours: hours === '' ? 0 : Number(hours)
+  });
+  
+  document.getElementById('logQty').value = '';
+  document.getElementById('logHours').value = '';
   persistAll();
   renderAll();
 }
-function renderLogHistory(){
-  const wrap = document.getElementById('logHistory');
-  const entries = [];
-  state.tasks.forEach(t=> (t.logs||[]).forEach((l,idx)=> entries.push({...l, taskName:t.name, taskId:t.id, idx})));
-  entries.sort((a,b)=> b.date.localeCompare(a.date));
-  wrap.innerHTML = entries.slice(0,15).map(e=>`
-    <div class="log-item">
-      <span>${escAttr(e.taskName)} — ${e.qty?('+'+e.qty+' '):''}${e.hours?('+'+e.hours+' ساعت'):''}</span>
-      <span class="meta">${e.date}</span>
-    </div>`).join('') || '<div class="hint">هنوز ثبتی وجود ندارد.</div>';
-}
 
-/* ============ رندر کلی ============ */
-function renderAll(){
-  assignCategoryColors();
-  renderSummary();
-  renderChips();
-  renderGantt();
-  renderTable();
-  fillLogTaskSelect();
-  renderLogHistory();
-}
-
-/* ============ تنظیمات (مودال) ============ */
-function openSettings(){
-  document.getElementById('sbUrl').value = settings.sb_url||'';
-  document.getElementById('sbKey').value = settings.sb_key||'';
-  document.getElementById('sbId').value = settings.sb_id||'main';
-  document.getElementById('settingsModal').classList.add('show');
-}
-function closeSettings(){ document.getElementById('settingsModal').classList.remove('show'); }
-async function saveSettings(){
-  settings.sb_url = document.getElementById('sbUrl').value.trim();
-  settings.sb_key = document.getElementById('sbKey').value.trim();
-  settings.sb_id  = document.getElementById('sbId').value.trim() || 'main';
-  persistLocal();
-  if(settings.sb_url && settings.sb_key){
-    const ok = await initSupabase();
-    if(ok){ scheduleRemoteSave(); }
-  } else {
-    sbClient = null;
-    setSyncBadge();
-  }
-  closeSettings();
-  renderAll();
-}
-
-/* ============ پشتیبان‌گیری ============ */
+// ===================== BACKUP =====================
 function exportJSON(){
   const blob = new Blob([JSON.stringify(state, null, 1)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'yearplan-backup-'+todayISO()+'.json';
+  a.download = 'yearplan-'+todayISO()+'.json';
   a.click();
 }
+
 function importJSON(file){
   const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const parsed = JSON.parse(reader.result);
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
       if(!parsed.tasks || !parsed.categories) throw new Error('ساختار نامعتبر');
       state = parsed;
       persistAll();
       renderAll();
-    }catch(e){ alert('فایل معتبر نیست: '+e.message); }
+    } catch(err){ alert('فایل معتبر نیست: ' + err.message); }
   };
   reader.readAsText(file);
 }
+
 function resetToSeed(){
-  if(!confirm('همه تغییرات و ثبت‌های پیشرفت پاک و به حالت اولیه برگردد؟')) return;
+  if(!confirm('همه تغییرات پاک و به حالت اولیه برگردد؟')) return;
   state = loadSeed();
   persistAll();
   renderAll();
 }
 
-/* ============ رویدادها ============ */
-document.getElementById('weightSlider').addEventListener('input', e=>{
+// ===================== EVENTS =====================
+document.getElementById('weightSlider').addEventListener('input', e => {
   settings.weight_volume = Number(e.target.value);
-  persistLocal();
+  persistAll();
   renderSummary();
   renderGantt();
   renderTable();
 });
-document.getElementById('btnAddLog').addEventListener('click', addLogEntry);
-document.getElementById('btnAddTask').addEventListener('click', addTask);
-document.getElementById('btnSettings').addEventListener('click', openSettings);
-document.getElementById('btnCloseSettings').addEventListener('click', closeSettings);
-document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
-document.getElementById('btnExport').addEventListener('click', exportJSON);
-document.getElementById('btnImport').addEventListener('click', ()=> document.getElementById('fileImport').click());
-document.getElementById('fileImport').addEventListener('change', e=>{ if(e.target.files[0]) importJSON(e.target.files[0]); });
-document.getElementById('btnReset').addEventListener('click', resetToSeed);
-document.getElementById('settingsModal').addEventListener('click', e=>{ if(e.target.id==='settingsModal') closeSettings(); });
 
-/* ============ راه‌اندازی ============ */
-(async function init(){
-  document.getElementById('logDate').value = todayISO();
-  await bootstrapState();
-  renderAll();
-})();
+document.getElementById('btnAddLog').addEventListener('click', addLogEntry);
+document.getElementById('logTask').addEventListener('change', updateLogLabel);
+document.getElementById('btnAddTask').addEventListener('click', addTask);
+document.getElementById('btnAddSubtask').addEventListener('click', () => {
+  const first = state.tasks[0];
+  if(first) addSubtask(first.id);
+  else alert('ابتدا یک فعالیت اصلی بسازید.');
+});
+document.getElementById('fileImport').addEventListener('change', e => {
+  if(e.target.files[0]) importJSON(e.target.files[0]);
+});
+
+document.getElementById('logDate').value = todayISO();
+
+// ===================== INIT =====================
+loadState();
+renderAll();
+document.getElementById('todayDisplay').textContent = 'امروز: ' + toJalaali(todayISO());
+
+// Resize gantt on window resize
+window.addEventListener('resize', () => { renderGantt(); });
 </script>
 </body>
 </html>
